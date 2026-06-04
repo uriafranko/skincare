@@ -1,32 +1,39 @@
-import { getUser, updateUser } from "@caltext/db";
-import { calculateTDEE } from "@caltext/shared";
+import { getUser, updateUser } from "@skintext/db";
 import { tool } from "ai";
 import { z } from "zod";
 
+const listField = z.array(z.string()).optional();
+
+function stringifyList(value: string[]): string {
+  return JSON.stringify(value);
+}
+
 export const updateProfileTool = tool({
   description:
-    "Update the user's profile settings: calorie target, goal, activity level, weight, height, age, name, or timezone. Recalculates TDEE if body stats or goal change.",
+    "Update the user's skincare profile: skin type, sensitivity, concerns, goals, allergies, current products, routine preference, name, or timezone.",
   inputSchema: z.object({
     userId: z.string(),
-    dailyCalorieTarget: z.number().optional().describe("New daily calorie target in kcal"),
-    goal: z.enum(["lose", "maintain", "gain"]).optional(),
-    activity: z.enum(["sedentary", "light", "moderate", "active", "very_active"]).optional(),
-    weightKg: z.number().optional(),
-    heightCm: z.number().optional(),
-    age: z.number().optional(),
     name: z.string().optional(),
     timezone: z.string().optional(),
+    skinType: z.enum(["dry", "oily", "combination", "normal", "unsure"]).optional(),
+    sensitivity: z.enum(["low", "medium", "high", "unsure"]).optional(),
+    concerns: listField,
+    goals: listField,
+    allergies: listField,
+    currentProducts: listField,
+    routinePreference: z.enum(["simple", "standard", "detailed"]).optional(),
   }),
   execute: async ({
     userId,
-    dailyCalorieTarget,
-    goal,
-    activity,
-    weightKg,
-    heightCm,
-    age,
     name,
     timezone,
+    skinType,
+    sensitivity,
+    concerns,
+    goals,
+    allergies,
+    currentProducts,
+    routinePreference,
   }) => {
     const user = await getUser(userId);
     if (!user) return { updated: false, message: "User not found." };
@@ -42,43 +49,33 @@ export const updateProfileTool = tool({
       fields.timezone = timezone;
       changes.push(`timezone: ${timezone}`);
     }
-    if (goal) {
-      fields.goal = goal;
-      changes.push(`goal: ${goal}`);
+    if (skinType) {
+      fields.skinType = skinType;
+      changes.push(`skin type: ${skinType}`);
     }
-    if (activity) {
-      fields.activity = activity;
-      changes.push(`activity: ${activity}`);
+    if (sensitivity) {
+      fields.sensitivity = sensitivity;
+      changes.push(`sensitivity: ${sensitivity}`);
     }
-    if (weightKg) {
-      fields.weightKg = String(weightKg);
-      changes.push(`weight: ${weightKg}kg`);
+    if (concerns) {
+      fields.concerns = stringifyList(concerns);
+      changes.push(`concerns: ${concerns.join(", ") || "none"}`);
     }
-    if (heightCm) {
-      fields.heightCm = String(heightCm);
-      changes.push(`height: ${heightCm}cm`);
+    if (goals) {
+      fields.goals = stringifyList(goals);
+      changes.push(`goals: ${goals.join(", ") || "none"}`);
     }
-    if (age) {
-      fields.age = String(age);
-      changes.push(`age: ${age}`);
+    if (allergies) {
+      fields.allergies = stringifyList(allergies);
+      changes.push(`allergies/sensitivities: ${allergies.join(", ") || "none"}`);
     }
-
-    const shouldRecalculate =
-      (weightKg || heightCm || age || goal || activity) && !dailyCalorieTarget;
-    if (shouldRecalculate) {
-      const newTarget = calculateTDEE(
-        user.sex,
-        weightKg ?? user.weightKg,
-        heightCm ?? user.heightCm,
-        age ?? user.age,
-        activity ?? user.activity,
-        goal ?? user.goal,
-      );
-      fields.dailyCalorieTarget = String(newTarget);
-      changes.push(`recalculated target: ${newTarget} kcal`);
-    } else if (dailyCalorieTarget) {
-      fields.dailyCalorieTarget = String(dailyCalorieTarget);
-      changes.push(`target: ${dailyCalorieTarget} kcal`);
+    if (currentProducts) {
+      fields.currentProducts = stringifyList(currentProducts);
+      changes.push(`current products: ${currentProducts.join(", ") || "none"}`);
+    }
+    if (routinePreference) {
+      fields.routinePreference = routinePreference;
+      changes.push(`routine preference: ${routinePreference}`);
     }
 
     if (Object.keys(fields).length === 0) {

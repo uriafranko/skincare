@@ -1,20 +1,20 @@
 import {
+  ADHERENCE_MILESTONES,
   DAILY_SUMMARY_HOUR,
   isDayOfWeek,
-  MEAL_TIMES,
   msUntil,
   nextLocalTime,
-  STREAK_MILESTONES,
+  ROUTINE_TIMES,
   WEEKLY_RECAP_DAY,
   WEEKLY_RECAP_HOUR,
-} from "@caltext/shared";
+} from "@skintext/shared";
 import { sleep } from "workflow";
 import {
   generateDailySummary,
   generateReminder,
   generateWeeklyRecap,
-  loadDailyLog,
   loadReminderTimes,
+  loadRoutineLog,
   loadUser,
   sendMsg,
 } from "./steps/reminder-steps";
@@ -30,39 +30,35 @@ export async function reminderLoop(userId: string) {
     const locale = user.locale;
 
     const customTimes = await loadReminderTimes(userId);
-    const mealTimes = customTimes
+    const routineTimes = customTimes
       ? customTimes.map((t) => ({
           label: t.label,
           hour: t.hour,
           minute: t.minute,
-          emoji: "🍽️",
+          emoji: t.label === "morning" ? "☀️" : t.label === "evening" ? "🌙" : "🧴",
         }))
-      : [...MEAL_TIMES];
+      : [...ROUTINE_TIMES];
 
-    for (const meal of mealTimes) {
-      const target = nextLocalTime(meal.hour, meal.minute, tz);
+    for (const routine of routineTimes) {
+      const target = nextLocalTime(routine.hour, routine.minute, tz);
       const waitMs = msUntil(target);
       if (waitMs > 0) {
         await sleep(`${waitMs}ms`);
       }
 
-      const log = await loadDailyLog(userId, tz);
+      const log = await loadRoutineLog(userId, tz);
+      const alreadyCompleted = log.completedSlots.includes(
+        routine.label === "morning" || routine.label === "evening" ? routine.label : "custom",
+      );
 
-      const alreadyLogged = log.meals.some((m) => {
-        const mealHour = new Date(m.timestamp).getHours();
-        return Math.abs(mealHour - meal.hour) < 3;
-      });
-
-      if (log.mealCount === 0 || !alreadyLogged) {
+      if (!alreadyCompleted) {
         const reminder = await generateReminder(
           userId,
-          meal.label,
-          meal.emoji,
+          routine.label,
+          routine.emoji,
           locale,
           user.name,
-          log.calories,
-          user.dailyCalorieTarget,
-          log.mealCount,
+          log,
         );
         await sendMsg(userId, reminder);
       }
@@ -78,7 +74,9 @@ export async function reminderLoop(userId: string) {
     if (summaryResult) {
       await sendMsg(userId, summaryResult.text);
 
-      const milestoneMsg = STREAK_MILESTONES[summaryResult.streak.current];
+      const milestoneMsg = summaryResult.streakUpdated
+        ? ADHERENCE_MILESTONES[summaryResult.streak.current]
+        : undefined;
       if (milestoneMsg) {
         await sendMsg(userId, milestoneMsg);
       }

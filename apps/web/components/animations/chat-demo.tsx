@@ -6,7 +6,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type ChatDemoScenario = "smartReminders" | "snapOrText" | "dailySummaries";
-type MealMoment = "breakfast" | "lunch" | "dinner";
+type RoutineMoment = "morning" | "midday" | "evening";
 
 type ChatMessage = {
   id: number;
@@ -49,7 +49,7 @@ const KEYBOARD_HIDDEN_OFFSET = 4;
 const COMPOSER_INSET = 114;
 const CAMERA_PREVIEW_MS = 1800;
 const CAMERA_FLASH_MS = 350;
-const CAMERA_IMAGE_SRC = "https://cdn.caltext.ai/web/content/food-2.jpg";
+const CAMERA_IMAGE_SRC = "/screensaver.png";
 const CAMERA_DRIFT_CSS = `
 @keyframes cameraDriftX {
   0%   { transform: translateX(0px); }
@@ -121,59 +121,59 @@ function useClientNow(): Date | null {
   return now;
 }
 
-function getMealMoment(date: Date): MealMoment {
+function getRoutineMoment(date: Date): RoutineMoment {
   const hour = date.getHours();
 
   if (hour < 11) {
-    return "breakfast";
+    return "morning";
   }
 
   if (hour < 16) {
-    return "lunch";
+    return "midday";
   }
 
-  return "dinner";
+  return "evening";
 }
 
 function getReminderNotificationText(
-  mealMoment: MealMoment,
+  routineMoment: RoutineMoment,
   phoneT: ReturnType<typeof useTranslations<"PhoneMockup">>,
 ): string {
-  switch (mealMoment) {
-    case "breakfast":
-      return phoneT("lockBodyReminder.breakfast");
-    case "lunch":
-      return phoneT("lockBodyReminder.lunch");
-    case "dinner":
-      return phoneT("lockBodyReminder.dinner");
+  switch (routineMoment) {
+    case "morning":
+      return phoneT("lockBodyReminder.morning");
+    case "midday":
+      return phoneT("lockBodyReminder.midday");
+    case "evening":
+      return phoneT("lockBodyReminder.evening");
   }
 }
 
 function getSnapIntroText(
-  mealMoment: MealMoment,
+  routineMoment: RoutineMoment,
   featuresT: ReturnType<typeof useTranslations<"Features">>,
 ): string {
-  switch (mealMoment) {
-    case "breakfast":
-      return featuresT("chat.snapOrText.bot0.breakfast");
-    case "lunch":
-      return featuresT("chat.snapOrText.bot0.lunch");
-    case "dinner":
-      return featuresT("chat.snapOrText.bot0.dinner");
+  switch (routineMoment) {
+    case "morning":
+      return featuresT("chat.snapOrText.bot0.morning");
+    case "midday":
+      return featuresT("chat.snapOrText.bot0.midday");
+    case "evening":
+      return featuresT("chat.snapOrText.bot0.evening");
   }
 }
 
 function getReminderPromptText(
-  mealMoment: MealMoment,
+  routineMoment: RoutineMoment,
   featuresT: ReturnType<typeof useTranslations<"Features">>,
 ): string {
-  switch (mealMoment) {
-    case "breakfast":
-      return featuresT("chat.smartReminders.bot1.breakfast");
-    case "lunch":
-      return featuresT("chat.smartReminders.bot1.lunch");
-    case "dinner":
-      return featuresT("chat.smartReminders.bot1.dinner");
+  switch (routineMoment) {
+    case "morning":
+      return featuresT("chat.smartReminders.bot1.morning");
+    case "midday":
+      return featuresT("chat.smartReminders.bot1.midday");
+    case "evening":
+      return featuresT("chat.smartReminders.bot1.evening");
   }
 }
 
@@ -1540,18 +1540,18 @@ function buildScenarioData(
   currentDate: Date,
 ): ScenarioData {
   const readLabel = locale === "sv" ? "Läst 9:41" : "Read 9:41";
-  const mealMoment = getMealMoment(currentDate);
+  const routineMoment = getRoutineMoment(currentDate);
 
   switch (scenario) {
     case "snapOrText":
       return {
         label: featuresT("snapOrText.title"),
-        notificationText: getReminderNotificationText(mealMoment, phoneT),
+        notificationText: getReminderNotificationText(routineMoment, phoneT),
         messages: [
           {
             id: 1,
             sender: "assistant",
-            text: getSnapIntroText(mealMoment, featuresT),
+            text: getSnapIntroText(routineMoment, featuresT),
           },
           {
             id: 2,
@@ -1560,8 +1560,8 @@ function buildScenarioData(
             imageSrc: CAMERA_IMAGE_SRC,
             imageAlt:
               locale === "sv"
-                ? "Foto av en medelhavsskål med kikärtor, pitabröd och grönsaker"
-                : "Photo of a Mediterranean bowl with chickpeas, pita, and vegetables",
+                ? "Abstrakt bild som används som produkt- och hudvårdsfoto i demot"
+                : "Abstract image used as a skincare and product photo in the demo",
             statusLabel: readLabel,
           },
           {
@@ -1602,12 +1602,12 @@ function buildScenarioData(
     case "smartReminders":
       return {
         label: featuresT("smartReminders.title"),
-        notificationText: getReminderNotificationText(mealMoment, phoneT),
+        notificationText: getReminderNotificationText(routineMoment, phoneT),
         messages: [
           {
             id: 1,
             sender: "assistant",
-            text: getReminderPromptText(mealMoment, featuresT),
+            text: getReminderPromptText(routineMoment, featuresT),
           },
           {
             id: 2,
@@ -1626,7 +1626,7 @@ function buildScenarioData(
 
   return {
     label: featuresT("smartReminders.title"),
-    notificationText: getReminderNotificationText(mealMoment, phoneT),
+    notificationText: getReminderNotificationText(routineMoment, phoneT),
     messages: [],
   };
 }

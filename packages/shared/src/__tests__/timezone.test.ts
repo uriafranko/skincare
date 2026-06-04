@@ -1,5 +1,12 @@
 import { describe, expect, test } from "bun:test";
-import { isDayOfWeek, localDateString, localHour, msUntil, nextLocalTime } from "../timezone";
+import {
+  isDayOfWeek,
+  localDateString,
+  localDateTimeToDate,
+  localHour,
+  msUntil,
+  nextLocalTime,
+} from "../timezone";
 
 describe("localDateString", () => {
   test("returns YYYY-MM-DD in the given timezone", () => {
@@ -23,6 +30,17 @@ describe("localHour", () => {
     expect(localHour("UTC", date)).toBe(14);
     // Stockholm is UTC+2 in summer
     expect(localHour("Europe/Stockholm", date)).toBe(16);
+  });
+});
+
+describe("localDateTimeToDate", () => {
+  test("converts user-local date and time to UTC", () => {
+    const date = localDateTimeToDate("2026-06-05", 8, 0, "America/New_York");
+    expect(date?.toISOString()).toBe("2026-06-05T12:00:00.000Z");
+  });
+
+  test("rejects invalid local dates", () => {
+    expect(localDateTimeToDate("2026-02-30", 8, 0, "America/New_York")).toBeNull();
   });
 });
 

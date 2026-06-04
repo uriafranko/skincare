@@ -1,7 +1,7 @@
 {
   "regions": ["iad1", "fra1", "hnd1"],
   "installCommand": "",
-  "buildCommand": "cd ../.. && turbo build --filter=@caltext/api",
+  "buildCommand": "cd ../.. && turbo build --filter=@skintext/api",
   "outputDirectory": ".output",
   "ignoreCommand": "exit 0",
   "bunVersion": "1.x"

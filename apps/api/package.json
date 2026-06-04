@@ -1,5 +1,5 @@
 {
-  "name": "@caltext/api",
+  "name": "@skintext/api",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -11,9 +11,9 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.52",
-    "@caltext/ai": "*",
-    "@caltext/db": "*",
-    "@caltext/shared": "*",
+    "@skintext/ai": "*",
+    "@skintext/db": "*",
+    "@skintext/shared": "*",
     "ai": "^6.0.156",
     "evlog": "^2.11.1",
     "heic-convert": "^2.1.0",

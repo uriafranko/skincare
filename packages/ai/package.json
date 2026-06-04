@@ -1,5 +1,5 @@
 {
-  "name": "@caltext/ai",
+  "name": "@skintext/ai",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -19,8 +19,8 @@
   "dependencies": {
     "@ai-sdk/openai": "^3.0.52",
     "@ai-sdk/provider": "^3.0.8",
-    "@caltext/db": "*",
-    "@caltext/shared": "*",
+    "@skintext/db": "*",
+    "@skintext/shared": "*",
     "ai": "^6.0.156",
     "date-fns": "^4.1.0",
     "evlog": "^2.11.1",

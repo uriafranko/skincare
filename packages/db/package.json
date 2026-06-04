@@ -1,5 +1,5 @@
 {
-  "name": "@caltext/db",
+  "name": "@skintext/db",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -17,7 +17,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@caltext/shared": "*",
+    "@skintext/shared": "*",
     "@upstash/redis": "^1",
     "date-fns": "^4.1.0"
   },

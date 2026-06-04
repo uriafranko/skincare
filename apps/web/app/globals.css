@@ -3,7 +3,7 @@
 @theme {
   --font-heading: var(--font-jakarta);
   --font-body: var(--font-inter);
-  --font-logo: var(--font-logo-face);
+  --font-logo: var(--font-jakarta);
 
   --color-bg: #f6f4f1;
   --color-card: #edeae6;

@@ -1,33 +1,19 @@
 import { z } from "zod";
 
-export const mealItemSchema = z.object({
-  name: z.string(),
-  estimatedGrams: z.number(),
-  preparationMethod: z.string(),
-  confidence: z.enum(["high", "medium", "low"]),
-  notes: z.string().optional(),
-  nutrition: z.object({
-    matchedName: z.string(),
-    calories: z.number(),
-    protein: z.number(),
-    carbs: z.number(),
-    fat: z.number(),
-    fiber: z.number(),
-  }),
+export const routineSlotSchema = z.enum(["morning", "evening", "custom"]);
+
+export const routineStepSchema = z.object({
+  name: z.string().describe("Routine step name, e.g. cleanse, moisturize, sunscreen"),
+  category: z.string().optional().describe("Product or step category"),
+  productId: z.string().optional().describe("Saved product ID, if known"),
+  productName: z.string().optional().describe("Product name used for this step"),
+  notes: z.string().optional().describe("Short note about amount, order, or reaction"),
 });
 
-export type MealItemInput = z.infer<typeof mealItemSchema>;
-
-export function aggregateMealTotals(
-  items: {
-    nutrition: { calories: number; protein: number; carbs: number; fat: number; fiber: number };
-  }[],
-) {
-  return {
-    totalCalories: items.reduce((s, i) => s + i.nutrition.calories, 0),
-    totalProtein: items.reduce((s, i) => s + i.nutrition.protein, 0),
-    totalCarbs: items.reduce((s, i) => s + i.nutrition.carbs, 0),
-    totalFat: items.reduce((s, i) => s + i.nutrition.fat, 0),
-    totalFiber: items.reduce((s, i) => s + i.nutrition.fiber, 0),
-  };
-}
+export const productInputSchema = z.object({
+  name: z.string(),
+  brand: z.string().optional(),
+  category: z.string().optional(),
+  ingredients: z.array(z.string()).optional(),
+  notes: z.string().optional(),
+});

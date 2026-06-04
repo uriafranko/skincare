@@ -1,4 +1,4 @@
-import { encrypt } from "@caltext/shared";
+import { encrypt } from "@skintext/shared";
 import { createLogger, type RequestLogger } from "evlog";
 import { normalizeImageUrl } from "@/image";
 import { acquireSlot } from "@/redis-utils";

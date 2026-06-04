@@ -1,6 +1,6 @@
 import { openai } from "@ai-sdk/openai";
 import type { LanguageModelV3 } from "@ai-sdk/provider";
-import type { OnboardingState } from "@caltext/shared";
+import type { OnboardingState } from "@skintext/shared";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 
@@ -8,51 +8,65 @@ const defaultModel = openai("gpt-4.1-mini");
 
 const extractionSchema = z.object({
   name: z.string().nullable().describe("User's first name. Null if not mentioned."),
-  sex: z
-    .enum(["male", "female", "unspecified"])
+  skinType: z
+    .enum(["dry", "oily", "combination", "normal", "unsure"])
     .nullable()
-    .describe(
-      "male/female for Mifflin-St Jeor; unspecified if user skips, prefers not to say, or declines. Null if not mentioned.",
-    ),
-  age: z.number().nullable().describe("Age in years. Null if not mentioned."),
-  heightCm: z
-    .number()
+    .describe("Skin type if mentioned. Use unsure if they say they do not know."),
+  sensitivity: z
+    .enum(["low", "medium", "high", "unsure"])
     .nullable()
-    .describe("Height converted to cm. 5'6\"=167.6, 6ft=182.9, 1in=2.54cm. Null if not mentioned."),
-  weightKg: z
-    .number()
+    .describe("Sensitivity level if mentioned. Use unsure if they do not know."),
+  concerns: z.array(z.string()).nullable().describe("Skin concerns, e.g. dryness, acne, redness."),
+  goals: z.array(z.string()).nullable().describe("Skincare goals, e.g. simpler routine, glow."),
+  allergies: z
+    .array(z.string())
     .nullable()
-    .describe("Weight converted to kg. 1lb=0.4536kg, 1stone=6.35kg. Null if not mentioned."),
-  goal: z
-    .enum(["lose", "maintain", "gain"])
+    .describe("Known allergies, sensitivities, or ingredients to avoid."),
+  currentProducts: z.array(z.string()).nullable().describe("Products they currently use."),
+  routinePreference: z
+    .enum(["simple", "standard", "detailed"])
     .nullable()
-    .describe("Fitness goal. Null if not mentioned."),
-  activity: z
-    .enum(["sedentary", "light", "moderate", "active", "very_active"])
+    .describe("How involved they want the routine to be."),
+  morningReminder: z
+    .string()
     .nullable()
-    .describe("Activity level. Null if not mentioned."),
+    .describe("Preferred morning reminder time in HH:mm 24h local time, if mentioned."),
+  eveningReminder: z
+    .string()
+    .nullable()
+    .describe("Preferred evening reminder time in HH:mm 24h local time, if mentioned."),
   consented: z
     .boolean()
     .nullable()
-    .describe("True if user agreed to store health data, false if refused, null if not addressed."),
+    .describe(
+      "True if user agreed to store skincare data, false if refused, null if not addressed.",
+    ),
   detectedLocale: z
     .string()
     .nullable()
-    .describe(
-      "BCP-47 language code of the user's message, e.g. 'sv', 'en', 'fr', 'de'. Null only if truly ambiguous.",
-    ),
+    .describe("BCP-47 language code of the user's message, e.g. 'sv', 'en', 'fr'."),
   reply: z.string().describe("Your reply message to the user."),
 });
+
+function formatList(values?: string[]): string | null {
+  return values?.length ? values.join(", ") : null;
+}
 
 function describeState(state: OnboardingState): string {
   const parts: string[] = [];
   if (state.name) parts.push(`name: ${state.name}`);
-  if (state.sex) parts.push(`sex: ${state.sex}`);
-  if (state.age) parts.push(`age: ${state.age}`);
-  if (state.heightCm) parts.push(`height: ${state.heightCm}cm`);
-  if (state.weightKg) parts.push(`weight: ${state.weightKg}kg`);
-  if (state.goal) parts.push(`goal: ${state.goal}`);
-  if (state.activity) parts.push(`activity: ${state.activity}`);
+  if (state.skinType) parts.push(`skin type: ${state.skinType}`);
+  if (state.sensitivity) parts.push(`sensitivity: ${state.sensitivity}`);
+  if (formatList(state.concerns)) parts.push(`concerns: ${formatList(state.concerns)}`);
+  if (formatList(state.goals)) parts.push(`goals: ${formatList(state.goals)}`);
+  if (formatList(state.allergies))
+    parts.push(`allergies/sensitivities: ${formatList(state.allergies)}`);
+  if (formatList(state.currentProducts)) {
+    parts.push(`current products: ${formatList(state.currentProducts)}`);
+  }
+  if (state.routinePreference) parts.push(`routine preference: ${state.routinePreference}`);
+  if (state.morningReminder) parts.push(`morning reminder: ${state.morningReminder}`);
+  if (state.eveningReminder) parts.push(`evening reminder: ${state.eveningReminder}`);
   if (state.consented) parts.push("consent: given");
   return parts.length > 0 ? parts.join(", ") : "nothing yet";
 }
@@ -60,12 +74,11 @@ function describeState(state: OnboardingState): string {
 function describeMissing(state: OnboardingState): string {
   const missing: string[] = [];
   if (!state.name) missing.push("name");
-  if (!state.age) missing.push("age");
-  if (!state.heightCm) missing.push("height");
-  if (!state.weightKg) missing.push("weight");
-  if (!state.goal) missing.push("goal (lose/maintain/gain)");
-  if (!state.activity) missing.push("activity level (sedentary/light/moderate/active/very active)");
-  if (!state.consented) missing.push("consent to store health data");
+  if (!state.concerns?.length && !state.goals?.length) missing.push("main skin goals or concerns");
+  if (!state.skinType && !state.sensitivity) {
+    missing.push("skin type or sensitivity level (unsure is fine)");
+  }
+  if (!state.consented) missing.push("consent to store skincare data");
   return missing.join(", ");
 }
 
@@ -73,7 +86,7 @@ export interface OnboardingContext {
   isFirstMessage: boolean;
   timezone: string;
   locale: string;
-  dailyTarget?: number;
+  complete?: boolean;
 }
 
 export interface OnboardingResult {
@@ -98,34 +111,34 @@ export async function processOnboardingMessage(
   let situation: string;
 
   if (ctx.isFirstMessage) {
-    situation = `This is the user's FIRST message. Welcome them as Caltext, a calorie tracking buddy in iMessage.
+    situation = `This is the user's FIRST message. Welcome them as Skintext, a skincare routine assistant in iMessage.
 
-CONTENT (keep SHORT — about one phone screen, ~3-6 short sentences OR two bubbles max):
-- Lead with the payoff: they'll get a **personal daily calorie target** in about **~2 minutes**.
-- Ask for: **name**, **goal** (lose/maintain/gain), **height, weight, age** (any units; **rough estimates are fine**), **activity** (sedentary → very active).
-- **Sex is optional** for the standard formula: **male**, **female**, or say **skip** / prefer not to say → we use a **neutral estimate** (middle of the usual male/female range). Do NOT require sex.
-- After setup: they **text or photo** meals. Mention briefly: **meal-time nudges** in their timezone, **evening daily summary**, **weekly recap**. Optionally use 2-4 lines with **one emoji per line** for those perks (e.g. meal nudges, summary, recap) OR one prose sentence — not both styles at once.
-- Storage: we **save** what they share so targets and logs work; they can **delete anytime**.
-- End with a clear CTA: they can send **everything in one message or a few messages** — you'll ask for gaps.
+CONTENT (keep SHORT -- about one phone screen, 3-6 short sentences OR two bubbles max):
+- Lead with the payoff: Skintext helps build and track a practical skincare routine by text.
+- Ask for: name, main skin goals/concerns, skin type if known, sensitivity/allergies, current products if any, and preferred AM/PM reminder times.
+- Say "unsure" is fine for skin type or sensitivity.
+- Mention they can send skin photos or product-label photos for routine help, but you cannot diagnose from images.
+- Storage: we save what they share so routine reminders/logs work; they can delete anytime.
+- End with a clear CTA: they can send everything in one message or a few messages.
 
 TONE: friendly, iMessage-native, not a bulleted essay.`;
-  } else if (ctx.dailyTarget) {
-    situation = `The user is fully set up! Their daily calorie target is ${ctx.dailyTarget} kcal. Reply with ONLY:
-"✅ All set! Your daily target is ${ctx.dailyTarget} kcal.
-Snap or text your next meal to start logging. You'll get light meal reminders and an evening summary."
-No extra commentary or enthusiasm.`;
+  } else if (ctx.complete) {
+    situation = `The user is fully set up. Reply with ONLY:
+"✅ All set.
+Text done after your routine, or send a skin/product photo whenever you want help placing something."
+No extra commentary.`;
   } else {
     situation = `This is a follow-up message. The user already provided some info.
 Already collected: ${describeState(state)}.
 Still missing: ${describeMissing(state)}.
 
-In your reply: briefly acknowledge any new info they just provided, then ask only for what is still missing — **one or two asks at a time** if several fields are missing (do not dump the full checklist again). If only consent is missing, warmly ask for their OK to store health data (mention they can delete anytime). Keep it short and conversational.`;
+In your reply: briefly acknowledge any new info they just provided, then ask only for what is still missing -- one or two asks at a time if several fields are missing. If only consent is missing, ask for their OK to store skincare data and mention they can delete anytime. Keep it short and conversational.`;
   }
 
   const { output } = await generateText({
     model: model ?? defaultModel,
     output: Output.object({ schema: extractionSchema }),
-    prompt: `You are Caltext, a friendly calorie tracking assistant in iMessage. ${replyLang}
+    prompt: `You are Skintext, a friendly skincare routine assistant in iMessage. ${replyLang}
 ${conversationContext}
 USER MESSAGE: "${text}"
 
@@ -135,47 +148,39 @@ SITUATION: ${situation}
 
 EXTRACTION INSTRUCTIONS:
 - Extract values the user stated or confirmed in this message. Use null for anything not addressed.
-- CRITICAL: If your previous message asked the user to confirm something (e.g. consent) and the user replies affirmatively (yes, yeah, yep, ja, japp, oui, si, ok, sure, etc.), mark it as true.
-- sex: use "unspecified" if they skip, decline, prefer not to say, or say neutral — NOT null if they clearly declined sex.
-- For height: convert to cm (5'6" = 167.6cm, 6ft = 182.9cm)
-- For weight: convert to kg (1lb = 0.4536kg)
-- consented: true if they agreed to data storage (including a general "yes" when consent was asked about), null only if consent was never mentioned
-- detectedLocale: detect the BCP-47 language code from the user's message text
+- If your previous message asked the user to confirm something and the user replies affirmatively (yes, yeah, yep, ja, japp, oui, si, ok, sure, etc.), mark consented as true only when the confirmation is about data storage.
+- skinType: use "unsure" if they say they do not know.
+- sensitivity: use "unsure" if they say they do not know.
+- routinePreference: infer "simple" if they ask for minimal/basic, "detailed" if they want many steps, otherwise null unless stated.
+- morningReminder/eveningReminder: normalize explicit reminder times to HH:mm in 24h local time. Use null if no time is mentioned.
+- detectedLocale: detect the BCP-47 language code from the user's latest message text.
 
 REPLY INSTRUCTIONS:
-- Write a short, casual iMessage-style reply (1-3 emoji max unless using the optional one-emoji-per-line micro-list for perks in the first message only)
-- Do NOT repeat or echo back what the user just told you. Just move on to what's next.
-- Never repeat a greeting if the user already introduced themselves
-- Be direct like a friend texting, not formal
-- Do NOT wrap the reply in quotes
-- NEVER re-ask for information the user already confirmed`,
+- Write a short, casual iMessage-style reply.
+- Do NOT repeat or echo every detail back. Just move on to what's next.
+- Never repeat a greeting if the user already introduced themselves.
+- Be direct like a friend texting, not formal.
+- Never mention internal workflows, models, databases, memory retrieval, or "the system"; describe setup as Skintext doing it directly.
+- If the user corrects a setup detail or sounds frustrated, briefly acknowledge the issue from their perspective, use the corrected info, and avoid technical explanations.
+- Do NOT wrap the reply in quotes.
+- NEVER re-ask for information the user already confirmed.`,
   });
 
   if (!output) {
-    return { extracted: {}, reply: "Hey! Something went wrong -- try again? 🙏" };
+    return { extracted: {}, reply: "Hey, something went wrong -- try again?" };
   }
 
   const extracted: Partial<OnboardingState> = {};
   if (output.name) extracted.name = output.name;
-  if (output.sex) extracted.sex = output.sex;
-  if (output.age !== null && output.age !== undefined && output.age >= 5 && output.age <= 130)
-    extracted.age = output.age;
-  if (
-    output.heightCm !== null &&
-    output.heightCm !== undefined &&
-    output.heightCm >= 50 &&
-    output.heightCm <= 300
-  )
-    extracted.heightCm = Math.round(output.heightCm * 10) / 10;
-  if (
-    output.weightKg !== null &&
-    output.weightKg !== undefined &&
-    output.weightKg >= 15 &&
-    output.weightKg <= 500
-  )
-    extracted.weightKg = Math.round(output.weightKg * 10) / 10;
-  if (output.goal) extracted.goal = output.goal;
-  if (output.activity) extracted.activity = output.activity;
+  if (output.skinType) extracted.skinType = output.skinType;
+  if (output.sensitivity) extracted.sensitivity = output.sensitivity;
+  if (output.concerns?.length) extracted.concerns = output.concerns;
+  if (output.goals?.length) extracted.goals = output.goals;
+  if (output.allergies?.length) extracted.allergies = output.allergies;
+  if (output.currentProducts?.length) extracted.currentProducts = output.currentProducts;
+  if (output.routinePreference) extracted.routinePreference = output.routinePreference;
+  if (output.morningReminder) extracted.morningReminder = output.morningReminder;
+  if (output.eveningReminder) extracted.eveningReminder = output.eveningReminder;
   if (output.consented === true) extracted.consented = true;
   if (output.detectedLocale && !state.detectedLocale) {
     extracted.detectedLocale = output.detectedLocale;

@@ -1,66 +1,66 @@
 {
   "Metadata": {
-    "title": "caltext - Din kaloriräknare som lever i dina sms",
-    "description": "Skicka ett foto eller beskriv din måltid. AI sköter resten — kalorier, makros, streaks, allt i iMessage.",
-    "ogTitle": "caltext - Din kaloriräknare som lever i dina sms",
-    "ogDescription": "Skicka ett foto eller beskriv din måltid. AI sköter resten — kalorier, makros, streaks, allt i iMessage."
+    "title": "Skintext - Din hudvårdsrutin i iMessage",
+    "description": "Bygg, följ och justera din hudvårdsrutin via sms. Skicka produktetiketter, hudbilder eller snabba rutinuppdateringar i iMessage.",
+    "ogTitle": "Skintext - Din hudvårdsrutin i iMessage",
+    "ogDescription": "Bygg, följ och justera din hudvårdsrutin via sms. Skicka produktetiketter, hudbilder eller snabba rutinuppdateringar i iMessage."
   },
   "Nav": {
-    "logo": "caltext",
+    "logo": "skintext",
     "features": "Funktioner",
     "faqs": "Vanliga frågor",
     "getStarted": "Kom igång"
   },
   "Hero": {
-    "eyebrow": "Möt caltext",
-    "headline": "Din kaloriräknare som lever i dina\u00a0sms.",
-    "subtitle": "Skicka ett foto eller beskriv din måltid. AI sköter resten\u00a0\u2014 kalorier, makros, streaks, allt i iMessage.",
-    "trustLine": "Gratis provperiod \u00b7 Ingen app krävs",
-    "socialProof": "67 000+ räknar kalorier"
+    "eyebrow": "Möt Skintext",
+    "headline": "Hudvårdsrutiner från dina sms.",
+    "subtitle": "Skriv din rutin, skicka en produktetikett eller dela en hudbild. Skintext hjälper dig hålla rutinen enkel, konsekvent och lätt att justera i iMessage.",
+    "trustLine": "Gratis provperiod · Ingen app krävs",
+    "socialProof": "67 000+ bygger bättre rutiner"
   },
   "IMessageButton": {
     "label": "Kom igång i Meddelanden",
     "shortLabel": "Kom igång",
-    "smsBody": "Hej! Jag vill komma igång med caltext."
+    "smsBody": "Hej! Jag vill komma igång med Skintext."
   },
   "Features": {
     "heading": "Allt händer i dina sms",
     "subtitle": "Ingen app att ladda ner. Inga konton att skapa. Bara iMessage.",
     "snapOrText": {
-      "title": "Fota eller skriv",
-      "description": "Skicka en matbild och se kalorier, makros och enkla justeringar innan du loggar."
+      "title": "Foto eller text",
+      "description": "Skicka hudbild, produktetikett eller rutinhylla och få försiktig, praktisk rutinhjälp."
     },
     "dailySummaries": {
-      "title": "Dagliga sammanfattningar",
-      "description": "Se var du ligger på kalorier och makros så du vet vad du har kvar idag."
+      "title": "Rutinsammandrag",
+      "description": "Se vilka morgon- och kvällssteg som gjordes, vilka produkter du använde och eventuella reaktioner."
     },
     "smartReminders": {
       "title": "Smarta påminnelser",
-      "description": "Få påminnelser vid måltider så att det blir lätt att hålla koll på kalorier och makros."
+      "description": "Få lugna morgon- och kvällspåminnelser som anpassas efter din sparade rutin."
     },
     "chat": {
       "snapOrText": {
         "bot0": {
-          "breakfast": "God morgon. Skicka frukosten när du är redo så uppskattar jag kalorier och makros.",
-          "lunch": "Lunchdags. Skicka en bild så uppskattar jag kalorier och makros åt dig.",
-          "dinner": "Middagskoll. Skicka en bild så bryter jag ner kalorier och makros."
+          "morning": "God morgon. Skicka din morgonrutin eller en produktetikett så hjälper jag dig placera den.",
+          "midday": "Skicka en produktetikett eller hudbild när du vill ha en snabb rutinkoll.",
+          "evening": "Kvällskoll. Skicka vad du använder ikväll så hjälper jag dig hålla det enkelt."
         },
-        "user1": "Vad händer om jag skippar pitan?",
-        "bot1": "Det där ser ut som en medelhavsbowl. Jag hade loggat den på cirka 690 kcal.\n\n🫓 Pita 160 kcal\n🧆 Kikärtor 210 kcal\n🥒 Gurka, tomat och paprika 70 kcal\n🫒 Oliver 90 kcal\n🥣 Yoghurtsås 80 kcal\n🌿 Grönt, fikon och tillbehör 80 kcal\n\nUppskattade makros: 58g kolhydrater, 32g fett, 19g protein\n\nDu ligger på 1 420 / 2 100 kcal idag och har 680 kvar. Om du vill kan jag justera för ingen pita, mindre sås eller en mindre portion.",
-        "bot2": "Bra tänkt, utan pitan sparar du 160 kcal. Här är den uppdaterade versionen:",
-        "bot3": "🧆 Kikärtor 210 kcal\n🥒 Gurka, tomat och paprika 70 kcal\n🫒 Oliver 90 kcal\n🥣 Yoghurtsås 80 kcal\n🌿 Grönt, fikon och tillbehör 80 kcal\n\nTotalt: ~530 kcal\nMakros: 30g kolhydrater · 29g fett · 19g protein\n\nDå har du ungefär 840 kcal kvar för resten av dagen. Vill du att jag loggar den här versionen?"
+        "user1": "Kan jag använda det här serumet med min kräm?",
+        "bot1": "Bildtyp: produktetikett\nSynligt: återfuktande serum, texten går delvis att läsa\nPassar: troligen efter rengöring och före kräm\nAtt tänka på: patchtesta först om huden är känslig\nNästa steg: använd några kvällar i veckan innan du ökar.",
+        "bot2": "Jag kan spara den bland dina produkter och lägga till den i kvällsrutinen.",
+        "bot3": "✅ Kväll loggad\nSerum · Kräm\nReaktion: ingen noterad"
       },
       "dailySummaries": {
-        "bot1": "Snabb koll på idag:\n━━━━━━━━━━━━\n☀️ Protein-gröt 320 kcal\n🥗 Kycklingbowl 410 kcal\n🍫 Eftermiddagssnack 180 kcal\n🥘 Middag 510 kcal\n\nTotalt: 1 420 / 2 100 kcal\nProtein: 112g\n680 kcal kvar\n\nDu ligger riktigt bra till idag. Vill du att jag föreslår ett proteinrikt kvällssnack?"
+        "bot1": "Idag\nMorgon: klar\nKväll: inte loggad\nProdukter: mild rengöring, barriärkräm\nAnteckningar: lätt torrhet\n\nHåll rutinen stabil och lägg inte till en ny aktiv produkt ikväll."
       },
       "smartReminders": {
         "bot1": {
-          "breakfast": "God morgon. Du har gott om utrymme för frukost. Vill du skicka en bild eller bara skriva vad du äter?",
-          "lunch": "Hej, lunchkoll. Du har ungefär 1 180 kcal kvar idag. Vill du skicka en bild eller bara skriva vad du äter?",
-          "dinner": "Middagskoll. Du har fortfarande utrymme kvar idag. Vill du skicka en bild eller bara skriva vad du äter?"
+          "morning": "Morgonrutin. Svara klart när rengöring, kräm och solskydd är fixade.",
+          "midday": "Snabb hudkoll. Skicka en produktetikett om du vill ha hjälp att placera den.",
+          "evening": "Kvällsrutin. Svara klart, hoppar över eller skicka vad du använder ikväll."
         },
-        "user1": "Kycklingburritobowl med ris, bönor och guacamole",
-        "bot2": "Nice. Jag hade lagt den runt 760 kcal beroende på portionsstorleken.\n\nJag kan logga 760 direkt, eller göra det mer exakt om du skickar en bild."
+        "user1": "Klart. Rengöring och barriärkräm.",
+        "bot2": "✅ Kväll loggad\nRengöring · Barriärkräm\nReaktion: ingen noterad"
       }
     }
   },
@@ -68,77 +68,77 @@
     "heading": "Så fungerar det",
     "subtitle": "Tre steg. Inga nedladdningar. Inga inställningar.",
     "step1": {
-      "title": "Skriv till caltext",
-      "description": "Skicka ett meddelande för att komma igång. caltext lär sig dina mål, kroppsmått och preferenser i en snabb chatt."
+      "title": "Skriv till Skintext",
+      "description": "Skicka ett meddelande för att komma igång. Skintext lär sig dina hudmål, känsligheter, produkter och påminnelser i en snabb chatt."
     },
     "step2": {
-      "title": "Logga dina måltider",
-      "description": "Skriv vad du åt eller fota din mat. AI identifierar maten, slår upp näringsvärden och loggar det direkt."
+      "title": "Logga din rutin",
+      "description": "Skriv klart, lista vad du använde eller skicka en produktetikett. Skintext håller koll på morgon- och kvällshistorik."
     },
     "step3": {
-      "title": "Håll koll",
-      "description": "Få dagliga sammanfattningar, veckorapporter, streak-spårning och vänliga påminnelser vid måltider."
+      "title": "Justera varsamt",
+      "description": "Få rutinsammandrag, produktanteckningar, veckokoll och försiktiga rekommendationer när något behöver ändras."
     }
   },
   "Faq": {
     "heading": "Vanliga frågor",
-    "q1": "Hur räknar caltext mina kalorier?",
-    "a1": "Skriv vad du ätit eller fota din mat. caltext använder AI för att identifiera maten och portionerna, sedan slår den upp exakta näringsvärden från USDA-databasen. Den räknar kalorier, protein, kolhydrater, fett och fiber automatiskt.",
+    "q1": "Kan Skintext diagnostisera min hud?",
+    "a1": "Nej. Skintext kan beskriva synliga saker försiktigt, förklara produktetiketter och föreslå praktiska rutinsteg. Det ersätter inte vårdpersonal.",
     "q2": "Vad behöver jag för att komma igång?",
-    "a2": "Bara en iPhone med iMessage. Ingen app att ladda ner, inget konto att skapa. Skriv till caltext så är du igång på under 2 minuter.",
-    "q3": "Behöver jag väga min mat?",
-    "a3": "Inte alls. Ungefärliga uppskattningar fungerar utmärkt — beskriv portioner naturligt som \"en stor skål pasta\" eller \"två skivor pizza\". Foton fungerar ännu bättre eftersom AI kan uppskatta portionsstorlekar visuellt.",
+    "a2": "Bara en iPhone med iMessage. Ingen app att ladda ner, inget konto att skapa. Skriv till Skintext och sätt upp rutinen i en kort chatt.",
+    "q3": "Kan jag skicka produktetiketter?",
+    "a3": "Ja. Skicka en produktetikett, ingredienslista eller bild på dina produkter så kan Skintext hjälpa dig placera dem och flagga vanliga irritationsrisker.",
     "q4": "Hur fungerar den gratis provperioden?",
-    "a4": "Du får full tillgång till alla funktioner under provperioden. Logga måltider, få sammanfattningar, ställ in påminnelser — allt. Inget kreditkort krävs för att starta.",
+    "a4": "Du får full tillgång under provperioden. Följ rutiner, spara produkter, ställ in påminnelser och se sammanfattningar. Inget kreditkort krävs.",
     "q5": "Vilka språk stöds?",
-    "a5": "caltext upptäcker ditt språk från ditt telefonnummer och svarar därefter. Engelska och svenska stöds fullt ut, med fler språk på väg."
+    "a5": "Skintext upptäcker ditt språk från meddelandet och svarar därefter. Engelska och svenska stöds, med fler språk på väg."
   },
   "BottomCta": {
-    "heading": "Börja räkna kalorier idag",
-    "subtitle": "Öppna iMessage och skriv till caltext. Du räknar kalorier inom två minuter.",
+    "heading": "Starta din rutin idag",
+    "subtitle": "Öppna iMessage och skriv till Skintext. Rutinen sätts upp i en kort chatt.",
     "buttonHint": "Öppnar iMessage på din Mac eller iPhone",
     "qrLabel": "Skanna med din telefon"
   },
   "PhoneMockup": {
-    "header": "caltext",
+    "header": "skintext",
     "inputPlaceholder": "iMessage",
-    "lockTitle": "caltext",
-    "lockBody": "Lunch loggad. 470 kcal lades till idag.",
-    "lockBodyLogging": "Jag fick bilden. Låt mig uppskatta den.",
-    "lockBodySummary": "📊 Här kommer dagens summering.",
+    "lockTitle": "skintext",
+    "lockBody": "Kvällsrutin loggad.",
+    "lockBodyLogging": "Jag fick bilden. Jag kollar rutinpassningen.",
+    "lockBodySummary": "Här är dagens rutinsammanfattning.",
     "lockBodyReminder": {
-      "breakfast": "☀️ Frukostdags! Fota maten så fixar jag resten.",
-      "lunch": "🥗 Lunchdags! Fota maten så fixar jag resten.",
-      "dinner": "🍽️ Middagsdags! Fota maten så fixar jag resten."
+      "morning": "☀️ Morgonrutin. Svara klart när du är färdig.",
+      "midday": "🧴 Skicka en produktetikett om du vill placera den.",
+      "evening": "🌙 Kvällsrutin. Svara klart eller skicka vad du använder."
     },
-    "msg1": "Åt en kycklingsallad med avokado till lunch 🥗",
-    "msg2": "Bra lunch! 🥗🥑\n\n🍗 Grillad kyckling — 285 kcal\n🥑 Avokado — 160 kcal\n🥬 Blandad sallad — 25 kcal\n\nTotalt: 470 kcal\nIdag: 1 240 / 2 100 kcal\n\n860 kvar — du ligger bra till! 🔥",
-    "msg3": "Vad är min streak?",
-    "msg4": "12 dagar i rad! 🔥🔥🔥\nDitt längsta någonsin. Fortsätt så!"
+    "msg1": "Klart ikväll: rengöring och barriärkräm",
+    "msg2": "✅ Kväll loggad\nRengöring · Barriärkräm\nReaktion: ingen noterad",
+    "msg3": "Kan jag lägga till ett nytt serum?",
+    "msg4": "Ja, men introducera det långsamt. Patchtesta först, använd några kvällar i veckan och pausa om huden blir irriterad."
   },
   "Privacy": {
     "heading": "Integritetspolicy",
-    "lastUpdated": "Senast uppdaterad: april 2026",
-    "intro": "Cal Text (\"Caltext\", \"vi\", \"oss\") är engagerade i att skydda din integritet. Denna policy förklarar vilken data vi samlar in, hur vi använder den och dina rättigheter.",
+    "lastUpdated": "Senast uppdaterad: juni 2026",
+    "intro": "Skintext (\"Skintext\", \"vi\", \"oss\") är engagerade i att skydda din integritet. Denna policy förklarar vilken data vi samlar in, hur vi använder den och dina rättigheter.",
     "dataCollection": {
       "title": "Data vi samlar in",
-      "body": "När du använder Caltext samlar vi in:\n\n• Ditt telefonnummer (för att identifiera ditt konto och leverera meddelanden via iMessage)\n• Ditt namn, ålder, längd och vikt (för att beräkna ditt personliga kalorimål)\n• Kön, om du väljer att dela det — används endast för standardformeln för kalorier; om du hoppar över det använder vi en neutral uppskattning\n• Måltidsbeskrivningar och bilder du skickar till oss\n• Närings- och kaloridata som härleds från dina måltider\n• Din tidszon och land (detekteras från ditt telefonnummer för lokalisering)"
+      "body": "När du använder Skintext samlar vi in:\n\n• Ditt telefonnummer (för att identifiera ditt konto och leverera meddelanden via iMessage)\n• Ditt namn, hudmål, hudtyp om du delar den, känsligheter, allergier och nuvarande produkter\n• Rutinuppdateringar, produktbeskrivningar, produktetikettbilder och hudbilder du skickar till oss\n• Rutinloggar, sparade produkter, påminnelser, tidszon och land för lokalisering"
     },
     "dataUsage": {
       "title": "Hur vi använder din data",
-      "body": "Vi använder din data för att:\n\n• Tillhandahålla personlig kalori- och makrospårning\n• Generera dagliga sammanfattningar, veckorapporter och måltidspåminnelser\n• Förbättra noggrannheten i vår matidentifiering och näringsuppskattningar\n• Kommunicera med dig via iMessage"
+      "body": "Vi använder din data för att:\n\n• Tillhandahålla rutinhjälp och produktvägledning\n• Generera rutinsammandrag, veckokoll och påminnelser\n• Förklara produktetiketter och hjälpa till att placera produkter i en rutin\n• Kommunicera med dig via iMessage"
     },
     "dataStorage": {
       "title": "Datalagring och säkerhet",
-      "body": "Anslutningar till vår webbplats och våra tjänster använder TLS (HTTPS). Ditt telefonnummer krypteras vid lagring med AES. Meddelandehistorik, innehåll i måltidsloggar, onboardingdata under uppsättning och liknande lagras som krypterade applikationslager-blobbar. Dina profilfält (t.ex. namn och kalorimål) lagras i vår databas med strikt åtkomstkontroll. All data lagras på säkra, åtkomstkontrollerade servrar. Vi använder branschstandardiserade säkerhetsåtgärder för att skydda din information."
+      "body": "Anslutningar till vår webbplats och våra tjänster använder TLS (HTTPS). Ditt telefonnummer krypteras vid lagring med AES. Meddelandehistorik, rutinloggar, onboardingdata under uppsättning, sparade produkter och liknande lagras som krypterade applikationslager-blobbar. Profilfält lagras i vår databas med strikt åtkomstkontroll."
     },
     "thirdParty": {
       "title": "Tredjepartstjänster",
-      "body": "Vi använder följande tredjepartstjänster för att driva Caltext:\n\n• OpenAI — för matidentifiering och naturlig språkbehandling\n• USDA FoodData Central — för näringsdatasökning\n• Sendblue — för iMessage-leverans\n\nDessa tjänster behandlar data som är nödvändig för att tillhandahålla våra funktioner. Vi säljer inte din data till tredje part."
+      "body": "Vi använder följande tredjepartstjänster för att driva Skintext:\n\n• OpenAI — för bildanalys och naturlig språkbehandling\n• Sendblue — för iMessage-leverans\n\nDessa tjänster behandlar data som är nödvändig för att tillhandahålla våra funktioner. Vi säljer inte din data till tredje part."
     },
     "retention": {
       "title": "Datalagring",
-      "body": "Vi behåller dina måltidsloggar och profildata så länge ditt konto är aktivt. Du kan begära radering av din data när som helst genom att kontakta oss."
+      "body": "Vi behåller dina rutinloggar och profildata så länge ditt konto är aktivt. Du kan begära radering av din data när som helst."
     },
     "rights": {
       "title": "Dina rättigheter",
@@ -146,52 +146,52 @@
     },
     "contact": {
       "title": "Kontakt",
-      "body": "Om du har frågor om denna integritetspolicy, kontakta oss på privacy@caltext.ai."
+      "body": "Om du har frågor om denna integritetspolicy, kontakta oss på privacy@skintext.ai."
     }
   },
   "Terms": {
     "heading": "Användarvillkor",
-    "lastUpdated": "Senast uppdaterad: april 2026",
-    "intro": "Genom att använda Cal Text (\"Caltext\", \"Tjänsten\") godkänner du dessa villkor. Läs dem noggrant.",
+    "lastUpdated": "Senast uppdaterad: juni 2026",
+    "intro": "Genom att använda Skintext (\"Skintext\", \"Tjänsten\") godkänner du dessa villkor. Läs dem noggrant.",
     "eligibility": {
       "title": "Behörighet",
-      "body": "Du måste vara minst 16 år gammal och ha tillgång till en iPhone med iMessage för att använda Caltext."
+      "body": "Du måste vara minst 16 år gammal och ha tillgång till en iPhone med iMessage för att använda Skintext."
     },
     "service": {
       "title": "Tjänsten",
-      "body": "Caltext är en AI-driven kalori- och näringsspårningsassistent som fungerar via iMessage. Tjänsten inkluderar måltidsloggning, dagliga sammanfattningar, veckorapporter, streak-spårning och måltidspåminnelser."
+      "body": "Skintext är en AI-driven hudvårdsassistent som fungerar via iMessage. Tjänsten inkluderar rutinloggning, produktanteckningar, sammanfattningar, veckokoll och påminnelser."
     },
     "accuracy": {
-      "title": "Näringsnoggrannhet",
-      "body": "Caltext ger uppskattningar av kalorier och makronäringsämnen baserat på AI-analys och USDA FoodData Central-databasen. Dessa är uppskattningar och bör inte betraktas som exakta mätningar. Caltext är inte en medicinsk enhet och ger inte medicinsk eller dietrådgivning. Konsultera en vårdpersonal för specifika kostbehov."
+      "title": "Hudvårdsråd",
+      "body": "Skintext ger rutinhjälp och försiktig produktvägledning baserat på det du delar. Det diagnostiserar inte, skriver inte ut behandling och ersätter inte professionell vård. Kontakta vårdpersonal vid oroande, allvarliga, ihållande eller snabbt föränderliga symtom."
     },
     "account": {
       "title": "Ditt konto",
-      "body": "Ditt konto identifieras av ditt telefonnummer. Du ansvarar för all aktivitet kopplad till ditt telefonnummer. Dela inte åtkomst till ditt iMessage-konto med andra i syfte att använda Caltext."
+      "body": "Ditt konto identifieras av ditt telefonnummer. Du ansvarar för all aktivitet kopplad till ditt telefonnummer. Dela inte åtkomst till ditt iMessage-konto med andra i syfte att använda Skintext."
     },
     "ip": {
       "title": "Immaterialrätt",
-      "body": "Allt innehåll, alla funktioner och all funktionalitet i Caltext ägs av Caltext och skyddas av upphovsrätt och andra immaterialrättsliga lagar."
+      "body": "Allt innehåll, alla funktioner och all funktionalitet i Skintext ägs av Skintext och skyddas av upphovsrätt och andra immaterialrättsliga lagar."
     },
     "liability": {
       "title": "Ansvarsbegränsning",
-      "body": "Caltext tillhandahålls \"i befintligt skick\" utan garantier av något slag. Vi ansvarar inte för skador som uppstår genom din användning av tjänsten, inklusive men inte begränsat till hälsoresultat baserade på näringsuppskattningar från tjänsten."
+      "body": "Skintext tillhandahålls \"i befintligt skick\" utan garantier av något slag. Vi ansvarar inte för skador som uppstår genom din användning av tjänsten, inklusive resultat baserade på rutinhjälp från tjänsten."
     },
     "changes": {
       "title": "Ändringar av villkor",
-      "body": "Vi kan uppdatera dessa villkor från tid till annan. Fortsatt användning av Caltext efter ändringar innebär att du godkänner de nya villkoren."
+      "body": "Vi kan uppdatera dessa villkor från tid till annan. Fortsatt användning av Skintext efter ändringar innebär att du godkänner de nya villkoren."
     },
     "contact": {
       "title": "Kontakt",
-      "body": "Om du har frågor om dessa villkor, kontakta oss på support@caltext.ai."
+      "body": "Om du har frågor om dessa villkor, kontakta oss på support@skintext.ai."
     }
   },
   "Footer": {
-    "logo": "caltext",
-    "tagline": "Kalorirakning som lever i dina meddelanden.",
+    "logo": "skintext",
+    "tagline": "Hudvårdsrutiner som lever i dina meddelanden.",
     "privacy": "Integritet",
     "terms": "Villkor",
-    "copyright": "© {year} caltext",
+    "copyright": "© {year} skintext",
     "x": "X",
     "instagram": "Instagram",
     "tiktok": "TikTok"

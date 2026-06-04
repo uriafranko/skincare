@@ -1,6 +1,6 @@
-import { env } from "@caltext/shared";
+import { env } from "@skintext/shared";
 
-export { markRead, sendMessage, sendTyping } from "@caltext/shared";
+export { markRead, sendMessage, sendTyping } from "@skintext/shared";
 
 // ── Webhook parsing (API-specific) ──────────────────────
 

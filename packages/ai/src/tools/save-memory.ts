@@ -1,16 +1,16 @@
-import { saveMemory } from "@caltext/db";
+import { saveMemory } from "@skintext/db";
 import { tool } from "ai";
 import { z } from "zod";
 
 export const saveMemoryTool = tool({
   description:
-    "Save a user preference, fact, or dietary note for future reference. Use this when the user mentions dietary restrictions, allergies, food preferences, favorite meals, or any personal detail worth remembering.",
+    "Save a user preference, fact, or skincare note for future reference. Use this when the user mentions skin sensitivities, allergies, product preferences, routine habits, or any personal detail worth remembering.",
   inputSchema: z.object({
     userId: z.string(),
     key: z
       .string()
       .describe(
-        "Short descriptive label like 'diet', 'allergies', 'favorite_breakfast', 'coffee_order', 'preferred_units'",
+        "Short descriptive label like 'skin_type', 'sensitivities', 'preferred_cleanser', 'retinoid_tolerance', or 'preferred_routine'",
       ),
     value: z.string().describe("The fact to remember"),
   }),

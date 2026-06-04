@@ -1,18 +1,22 @@
 import { openai } from "@ai-sdk/openai";
 import type { LanguageModelV3 } from "@ai-sdk/provider";
 import { type ModelMessage, stepCountIs, type Tool, ToolLoopAgent } from "ai";
+import { createAnalyzeSkincareImageTool } from "./tools/analyze-skincare-image";
 import { deleteAccountTool } from "./tools/delete-account";
-import { deleteMealTool } from "./tools/delete-meal";
 import { exportDataTool } from "./tools/export-data";
-import { listFavoritesTool, logFavoriteTool, saveFavoriteTool } from "./tools/favorites";
-import { getDailyLogTool, getWeeklyLogTool } from "./tools/get-history";
 import { getUserProfile } from "./tools/get-profile";
-import { createIdentifyFoodTool } from "./tools/identify-food";
-import { logMeal } from "./tools/log-meal";
-import { getWaterLogTool, logWaterTool } from "./tools/log-water";
-import { getWeightHistoryTool, logWeightTool } from "./tools/log-weight";
-import { lookupNutrition } from "./tools/nutrition";
+import {
+  createScheduleOneOffReminderTool,
+  type ScheduleOneOffReminderWorkflow,
+} from "./tools/one-off-reminders";
+import { listProductsTool, logProductUseTool, saveProductTool } from "./tools/products";
 import { recallMemoryTool } from "./tools/recall-memory";
+import {
+  deleteRoutineEntryTool,
+  getTodayRoutineLogTool,
+  getWeeklyRoutineLogTool,
+  logRoutineStepTool,
+} from "./tools/routine";
 import { saveMemoryTool } from "./tools/save-memory";
 import { getRemindersTool, setRemindersTool } from "./tools/set-reminders";
 import { updateProfileTool } from "./tools/update-profile";
@@ -34,37 +38,41 @@ export interface AgentOptions extends AgentSecurityContext {
   hasImage?: boolean;
   imageUrl?: string;
   model?: LanguageModelV3;
+  scheduleOneOffReminderWorkflow?: ScheduleOneOffReminderWorkflow;
 }
 
-export function createCaltextAgent(systemPrompt: string, ctx: AgentOptions) {
+export function createSkintextAgent(systemPrompt: string, ctx: AgentOptions) {
   const model = ctx.model ?? openai(ctx.hasImage ? "gpt-4.1" : "gpt-4.1-mini");
+  const tools: Record<string, Tool> = {
+    analyzeSkincareImage: createAnalyzeSkincareImageTool(ctx.imageUrl),
+    logRoutineStep: withContext(logRoutineStepTool, ctx),
+    deleteRoutineEntry: withContext(deleteRoutineEntryTool, ctx),
+    getTodayRoutineLog: withContext(getTodayRoutineLogTool, ctx),
+    getWeeklyRoutineLog: withContext(getWeeklyRoutineLogTool, ctx),
+    saveProduct: withContext(saveProductTool, ctx),
+    listProducts: withContext(listProductsTool, ctx),
+    logProductUse: withContext(logProductUseTool, ctx),
+    getUserProfile: withContext(getUserProfile, ctx),
+    updateProfile: withContext(updateProfileTool, ctx),
+    setReminders: withContext(setRemindersTool, ctx),
+    getReminders: withContext(getRemindersTool, ctx),
+    exportData: withContext(exportDataTool, ctx),
+    deleteAccount: withContext(deleteAccountTool, ctx),
+    saveMemory: withContext(saveMemoryTool, ctx),
+    recallMemory: withContext(recallMemoryTool, ctx),
+  };
+
+  if (ctx.scheduleOneOffReminderWorkflow) {
+    tools.scheduleOneOffReminder = withContext(
+      createScheduleOneOffReminderTool(ctx.scheduleOneOffReminderWorkflow),
+      ctx,
+    );
+  }
 
   return new ToolLoopAgent({
     model,
     instructions: systemPrompt,
-    tools: {
-      identifyFood: createIdentifyFoodTool(ctx.imageUrl),
-      lookupNutrition,
-      logMeal: withContext(logMeal, ctx),
-      deleteMeal: withContext(deleteMealTool, ctx),
-      getDailyLog: withContext(getDailyLogTool, ctx),
-      getWeeklyLog: withContext(getWeeklyLogTool, ctx),
-      getUserProfile: withContext(getUserProfile, ctx),
-      updateProfile: withContext(updateProfileTool, ctx),
-      logWater: withContext(logWaterTool, ctx),
-      getWaterLog: withContext(getWaterLogTool, ctx),
-      logWeight: withContext(logWeightTool, ctx),
-      getWeightHistory: withContext(getWeightHistoryTool, ctx),
-      setReminders: withContext(setRemindersTool, ctx),
-      getReminders: withContext(getRemindersTool, ctx),
-      saveFavorite: withContext(saveFavoriteTool, ctx),
-      listFavorites: withContext(listFavoritesTool, ctx),
-      logFavorite: withContext(logFavoriteTool, ctx),
-      exportData: withContext(exportDataTool, ctx),
-      deleteAccount: withContext(deleteAccountTool, ctx),
-      saveMemory: withContext(saveMemoryTool, ctx),
-      recallMemory: withContext(recallMemoryTool, ctx),
-    },
+    tools,
     stopWhen: stepCountIs(8),
   });
 }
