@@ -1,10 +1,10 @@
-import type { StreakInfo } from "@caltext/shared";
+import type { AdherenceStreak } from "@skintext/shared";
 import { format, parseISO, subDays } from "date-fns";
 import { getRedis } from "./client";
 
-const streakKey = (userId: string) => `streak:${userId}`;
+const streakKey = (userId: string) => `routine_streak:${userId}`;
 
-export async function getStreak(userId: string): Promise<StreakInfo> {
+export async function getAdherenceStreak(userId: string): Promise<AdherenceStreak> {
   const redis = getRedis();
   const data = await redis.hgetall(streakKey(userId));
   if (!data || Object.keys(data).length === 0) {
@@ -18,23 +18,19 @@ export async function getStreak(userId: string): Promise<StreakInfo> {
   };
 }
 
-export async function updateStreak(userId: string, todayLocalDate: string): Promise<StreakInfo> {
+export async function updateAdherenceStreak(
+  userId: string,
+  todayLocalDate: string,
+): Promise<AdherenceStreak> {
   const redis = getRedis();
-  const streak = await getStreak(userId);
+  const streak = await getAdherenceStreak(userId);
 
   if (streak.lastLogDate === todayLocalDate) {
     return streak;
   }
 
   const yesterdayStr = format(subDays(parseISO(todayLocalDate), 1), "yyyy-MM-dd");
-
-  let newCurrent: number;
-  if (streak.lastLogDate === yesterdayStr) {
-    newCurrent = streak.current + 1;
-  } else {
-    newCurrent = 1;
-  }
-
+  const newCurrent = streak.lastLogDate === yesterdayStr ? streak.current + 1 : 1;
   const newLongest = Math.max(streak.longest, newCurrent);
 
   await redis.hset(streakKey(userId), {

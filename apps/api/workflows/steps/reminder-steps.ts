@@ -1,15 +1,23 @@
 import { openai } from "@ai-sdk/openai";
-import { buildDailySummaryPrompt, buildReminderPrompt, buildWeeklyRecapPrompt } from "@caltext/ai";
 import {
+  buildDailyRoutineSummaryPrompt,
+  buildRoutineReminderPrompt,
+  buildWeeklyRoutineRecapPrompt,
+} from "@skintext/ai";
+import {
+  getAdherenceStreak,
+  getAllProducts,
   getCustomReminderTimes,
-  getDailyLog,
-  getStreak,
+  getOneOffReminder,
+  getRoutineLogForDate,
   getUser,
-  getWeeklyLogs,
-  updateStreak,
-} from "@caltext/db";
-import type { StreakInfo, UserProfile } from "@caltext/shared";
-import { decrypt, localDateString, sendMessage } from "@caltext/shared";
+  getWeeklyRoutineLogs,
+  markOneOffReminderFailed as saveOneOffReminderFailed,
+  markOneOffReminderSent as saveOneOffReminderSent,
+  updateAdherenceStreak,
+} from "@skintext/db";
+import type { AdherenceStreak, DailyRoutineLog, UserProfile } from "@skintext/shared";
+import { decrypt, localDateString, sendMessage } from "@skintext/shared";
 import { generateText } from "ai";
 
 export async function loadUser(userId: string): Promise<UserProfile | null> {
@@ -22,10 +30,25 @@ export async function loadReminderTimes(userId: string) {
   return getCustomReminderTimes(userId);
 }
 
-export async function loadDailyLog(userId: string, timezone: string) {
+export async function loadOneOffReminder(userId: string, reminderId: string) {
+  "use step";
+  return getOneOffReminder(userId, reminderId);
+}
+
+export async function markOneOffReminderSent(userId: string, reminderId: string) {
+  "use step";
+  await saveOneOffReminderSent(userId, reminderId);
+}
+
+export async function markOneOffReminderFailed(userId: string, reminderId: string) {
+  "use step";
+  await saveOneOffReminderFailed(userId, reminderId);
+}
+
+export async function loadRoutineLog(userId: string, timezone: string) {
   "use step";
   const localDate = localDateString(timezone);
-  return getDailyLog(userId, localDate);
+  return getRoutineLogForDate(userId, localDate);
 }
 
 export async function sendMsg(userId: string, text: string) {
@@ -38,34 +61,34 @@ export async function sendMsg(userId: string, text: string) {
 
 export async function generateReminder(
   userId: string,
-  mealLabel: string,
-  mealEmoji: string,
+  routineLabel: string,
+  routineEmoji: string,
   locale: string,
   userName: string,
-  caloriesLoggedToday: number,
-  dailyTarget: number,
-  mealCountToday: number,
+  log: DailyRoutineLog,
 ): Promise<string> {
   "use step";
-  const remaining = Math.max(0, dailyTarget - caloriesLoggedToday);
-  const overBy = Math.max(0, caloriesLoggedToday - dailyTarget);
-  const streak = await getStreak(userId);
-  const streakHint =
-    streak.current > 0
-      ? `They have a ${streak.current}-day logging streak (longest ever: ${streak.longest}). You may mention it once if it fits the optional 4th line.`
-      : "No active streak (0 days) — do not mention streaks.";
+  const streak = await getAdherenceStreak(userId);
+  const products = await getAllProducts(userId);
+  const productHint =
+    products.length > 0
+      ? `Saved products: ${products
+          .slice(0, 5)
+          .map((p) => p.name)
+          .join(", ")}`
+      : "No saved products yet.";
 
   const result = await generateText({
     model: openai("gpt-4.1-mini"),
-    system: buildReminderPrompt(locale),
-    prompt: `Generate a ${mealLabel} reminder.
-Meal emoji to lead with: ${mealEmoji}
+    system: buildRoutineReminderPrompt(locale),
+    prompt: `Generate a ${routineLabel} skincare routine reminder.
+Routine emoji to lead with if useful: ${routineEmoji}
 User first name: ${userName}
-Today so far: ${Math.round(caloriesLoggedToday)} kcal logged of ${dailyTarget} kcal target.
-Kcal remaining (0 if over target): ${Math.round(remaining)}.
-If over target, they are ${Math.round(overBy)} kcal over — acknowledge neutrally.
-Meals logged today (count): ${mealCountToday}.
-${streakHint}`,
+Today completed slots: ${log.completedSlots.join(", ") || "none"}
+Entries logged today: ${log.entryCount}
+Products used today: ${log.productsUsed.join(", ") || "none"}
+Adherence streak: ${streak.current} days
+${productHint}`,
   });
   return result.text;
 }
@@ -73,37 +96,38 @@ ${streakHint}`,
 export async function generateDailySummary(
   userId: string,
   locale: string,
-): Promise<{ text: string; streak: StreakInfo } | null> {
+): Promise<{ text: string; streak: AdherenceStreak; streakUpdated: boolean } | null> {
   "use step";
   const user = await getUser(userId);
   if (!user) return null;
 
   const localDate = localDateString(user.timezone);
-  const log = await getDailyLog(userId, localDate);
-  if (log.mealCount === 0) return null;
+  const log = await getRoutineLogForDate(userId, localDate);
+  if (log.entryCount === 0) return null;
 
-  const updatedStreak = await updateStreak(userId, localDate);
-
-  const mealSummary = log.meals
-    .map((m) => {
-      const itemNames = m.items.map((i) => i.name).join(" + ");
-      return `- ${itemNames}: ${m.totalCalories} kcal`;
-    })
-    .join("\n");
+  const streakUpdated = log.completedSlots.length > 0;
+  const updatedStreak = streakUpdated
+    ? await updateAdherenceStreak(userId, localDate)
+    : await getAdherenceStreak(userId);
+  const am = log.completedSlots.includes("morning") ? "done" : "not logged";
+  const pm = log.completedSlots.includes("evening") ? "done" : "not logged";
 
   const result = await generateText({
     model: openai("gpt-4.1-mini"),
-    system: buildDailySummaryPrompt(locale),
-    prompt: `Generate daily summary for ${user.name}.
-Target: ${user.dailyCalorieTarget} kcal
-Meals today:
-${mealSummary}
-Totals: ${log.calories} kcal, ${Math.round(log.protein)}g protein, ${Math.round(log.carbs)}g carbs, ${Math.round(log.fat)}g fat, ${Math.round(log.fiber)}g fiber
-Streak: ${updatedStreak.current} days
-${log.calories <= user.dailyCalorieTarget ? `${user.dailyCalorieTarget - log.calories} kcal under target` : `${log.calories - user.dailyCalorieTarget} kcal over target`}`,
+    system: buildDailyRoutineSummaryPrompt(locale),
+    prompt: `Generate daily routine summary for ${user.name}.
+AM: ${am}
+PM: ${pm}
+Products used: ${log.productsUsed.join(", ") || "none logged"}
+Reactions/notes: ${log.reactions.join("; ") || "none"}
+Entries:
+${log.entries
+  .map((e) => `- ${e.slot}: ${e.steps.map((s) => s.productName ?? s.name).join(", ")}`)
+  .join("\n")}
+Streak: ${updatedStreak.current} days`,
   });
 
-  return { text: result.text, streak: updatedStreak };
+  return { text: result.text, streak: updatedStreak, streakUpdated };
 }
 
 export async function generateWeeklyRecap(userId: string, locale: string): Promise<string | null> {
@@ -112,38 +136,50 @@ export async function generateWeeklyRecap(userId: string, locale: string): Promi
   if (!user) return null;
 
   const localDate = localDateString(user.timezone);
-  const weeklyLogs = await getWeeklyLogs(userId, localDate);
-
+  const weeklyLogs = await getWeeklyRoutineLogs(userId, localDate);
   const dayLines = weeklyLogs
     .map(({ date, log }) => {
-      const ratio = Math.min(log.calories / user.dailyCalorieTarget, 1.5);
-      const filled = Math.round(ratio * 14);
-      const empty = Math.max(0, 14 - filled);
-      const bar = "█".repeat(Math.min(filled, 14)) + "░".repeat(empty);
-      const onTarget =
-        Math.abs(log.calories - user.dailyCalorieTarget) <= user.dailyCalorieTarget * 0.1;
       const dayName = new Date(date).toLocaleDateString("en-US", {
         weekday: "short",
       });
-      return `${dayName}  ${bar} ${log.calories} kcal${onTarget ? " ✓" : ""}`;
+      const am = log.completedSlots.includes("morning") ? "AM" : "--";
+      const pm = log.completedSlots.includes("evening") ? "PM" : "--";
+      return `${dayName}  ${am}/${pm}  ${log.entryCount} entries`;
     })
     .join("\n");
 
-  const avgCalories = Math.round(weeklyLogs.reduce((s, d) => s + d.log.calories, 0) / 7);
-  const avgProtein = Math.round(weeklyLogs.reduce((s, d) => s + d.log.protein, 0) / 7);
-  const daysOnTarget = weeklyLogs.filter(
-    ({ log }) => Math.abs(log.calories - user.dailyCalorieTarget) <= user.dailyCalorieTarget * 0.1,
-  ).length;
+  const doneSlots = weeklyLogs.reduce(
+    (sum, { log }) =>
+      sum +
+      Number(log.completedSlots.includes("morning")) +
+      Number(log.completedSlots.includes("evening")),
+    0,
+  );
+  const productCounts = new Map<string, number>();
+  const reactions = new Set<string>();
+  for (const { log } of weeklyLogs) {
+    for (const product of log.productsUsed) {
+      productCounts.set(product, (productCounts.get(product) ?? 0) + 1);
+    }
+    for (const reaction of log.reactions) {
+      reactions.add(reaction);
+    }
+  }
+  const topProducts = Array.from(productCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([name]) => name)
+    .join(", ");
 
   const result = await generateText({
     model: openai("gpt-4.1-mini"),
-    system: buildWeeklyRecapPrompt(locale),
+    system: buildWeeklyRoutineRecapPrompt(locale),
     prompt: `Generate weekly recap for ${user.name}.
-Target: ${user.dailyCalorieTarget} kcal/day
 Daily breakdown:
 ${dayLines}
-Average: ${avgCalories} kcal/day, ${avgProtein}g protein/day
-Days on target: ${daysOnTarget}/7`,
+Done slots: ${doneSlots}/14
+Products used: ${topProducts || "none logged"}
+Reactions: ${Array.from(reactions).join("; ") || "none"}`,
   });
 
   return result.text;

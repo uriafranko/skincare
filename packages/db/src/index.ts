@@ -1,32 +1,38 @@
 export { getRedis } from "./client";
-export {
-  deleteDailyLog,
-  getDailyLog,
-  getWeeklyLogs,
-  subtractDailyTotals,
-  updateDailyTotals,
-} from "./daily-log";
-export {
-  deleteAllFavorites,
-  deleteFavorite,
-  getAllFavorites,
-  getFavorite,
-  saveFavorite,
-} from "./favorites";
-export { deleteAllMealsForDate, deleteMeal, getMeal, getMealsForDate, saveMeal } from "./meals";
 export { deleteMemory, recallAllMemories, recallMemory, saveMemory } from "./memory";
 export { deleteAllMessages, getConversationMessages, saveConversationMessages } from "./messages";
 export { deleteOnboardingState, getOnboardingState, setOnboardingState } from "./onboarding";
 export {
+  deleteAllProducts,
+  deleteProduct,
+  getAllProducts,
+  getProduct,
+  saveProduct,
+} from "./products";
+export {
   type CustomReminderTime,
+  cancelOneOffReminder,
+  createOneOffReminder,
   deleteCustomReminderTimes,
   deleteReminderRunId,
   getCustomReminderTimes,
+  getOneOffReminder,
   getReminderRunId,
+  listOneOffReminders,
+  markOneOffReminderFailed,
+  markOneOffReminderSent,
   setCustomReminderTimes,
+  setOneOffReminderWorkflowRunId,
   setReminderRunId,
 } from "./reminders";
-export { getStreak, updateStreak } from "./streak";
+export {
+  deleteRoutineEntry,
+  getRoutineEntry,
+  getRoutineLogForDate,
+  getWeeklyRoutineLogs,
+  saveRoutineEntry,
+} from "./routine-log";
+export { getAdherenceStreak, updateAdherenceStreak } from "./streak";
 export {
   createPhoneMapping,
   createUser,
@@ -37,5 +43,3 @@ export {
   userExists,
   withdrawConsent,
 } from "./users";
-export { getWaterLog, logWater } from "./water";
-export { deleteAllWeightData, getWeightHistory, logWeight } from "./weight";

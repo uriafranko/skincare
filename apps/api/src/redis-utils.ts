@@ -1,4 +1,4 @@
-import { getRedis } from "@caltext/db";
+import { getRedis } from "@skintext/db";
 
 const LOCK_TTL = 60;
 const DEDUP_TTL = 300;

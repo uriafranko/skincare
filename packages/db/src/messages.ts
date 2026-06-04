@@ -1,4 +1,4 @@
-import { decrypt, encryptContent } from "@caltext/shared";
+import { decrypt, encryptContent } from "@skintext/shared";
 import { getRedis } from "./client";
 
 const messagesKey = (userId: string) => `messages:${userId}`;

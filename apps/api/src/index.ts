@@ -4,12 +4,12 @@ import { Hono } from "hono";
 import { handleIncoming } from "@/handler";
 import { markRead, parseInbound } from "@/sendblue";
 
-initLogger({ env: { service: "caltext" } });
+initLogger({ env: { service: "skintext" } });
 
 const app = new Hono<EvlogVariables>();
 app.use(evlog());
 
-app.get("/health", (c) => c.json({ status: "ok", service: "caltext" }));
+app.get("/health", (c) => c.json({ status: "ok", service: "skintext" }));
 
 app.post("/webhooks/sendblue", async (c) => {
   const log = c.get("log");

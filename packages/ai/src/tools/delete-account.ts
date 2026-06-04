@@ -1,4 +1,4 @@
-import { deleteAllUserData } from "@caltext/db";
+import { deleteAllUserData } from "@skintext/db";
 import { tool } from "ai";
 import { z } from "zod";
 
@@ -14,7 +14,7 @@ export const deleteAccountTool = tool({
       return {
         deleted: false,
         warning:
-          "This will permanently delete ALL your data including meal history, weight progress, favorites, and preferences. This cannot be undone. Reply 'yes, delete everything' to confirm.",
+          "This will permanently delete ALL your data including routine history, saved products, photos-derived notes, and preferences. This cannot be undone. Reply 'yes, delete everything' to confirm.",
       };
     }
 
