@@ -71,6 +71,7 @@ function resolveSplitOptions(options: ReplySplitOptions): ResolvedSplitOptions {
 
 function normalizeText(text: string): string {
   return text
+    .replace(/\u2014/g, "-")
     .replace(/\r\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();

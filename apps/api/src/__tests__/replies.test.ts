@@ -8,6 +8,12 @@ describe("reply bubble splitting", () => {
     ]);
   });
 
+  test("replaces em dashes before delivery", () => {
+    expect(splitReplyIntoBubbles("Cleanser \u2014 moisturizer \u2014 SPF.")).toEqual([
+      "Cleanser - moisturizer - SPF.",
+    ]);
+  });
+
   test("splits conversational replies at sentence boundaries", () => {
     const text =
       "Start with the cleanser tonight. Skip the exfoliant for two days. Add moisturizer while the redness settles.";
