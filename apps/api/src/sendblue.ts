@@ -11,11 +11,16 @@ export interface InboundMessage {
   messageId: string | undefined;
 }
 
-const SECRET_HEADERS = ["x-webhook-secret", "x-sendblue-signature", "sb-webhook-secret"];
+const SECRET_HEADERS = [
+  "sb-signing-secret",
+  "x-webhook-secret",
+  "x-sendblue-signature",
+  "sb-webhook-secret",
+];
 
 export function parseInbound(headers: Headers, body: unknown): InboundMessage | null {
   const secret = SECRET_HEADERS.reduce<string | null>((v, h) => v ?? headers.get(h), null);
-  if (secret && secret !== env.SENDBLUE_WEBHOOK_SECRET) return null;
+  if (!secret || secret !== env.SENDBLUE_WEBHOOK_SECRET) return null;
 
   const b = body as Record<string, unknown>;
   if (b.is_outbound || b.status !== "RECEIVED") return null;
