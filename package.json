@@ -12,6 +12,7 @@
     "lint": "biome check .",
     "lint:fix": "biome check --fix .",
     "format": "biome format --write .",
+    "sim": "bun --cwd packages/sim src/cli.ts",
     "test": "turbo test",
     "clean": "turbo clean"
   },

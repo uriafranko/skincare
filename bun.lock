@@ -106,6 +106,20 @@
         "typescript": "^6.0.2",
       },
     },
+    "packages/sim": {
+      "name": "@skintext/sim",
+      "version": "0.0.1",
+      "dependencies": {
+        "@skintext/ai": "*",
+        "@skintext/shared": "*",
+        "ai": "^6.0.156",
+        "zod": "^4.3.6",
+      },
+      "devDependencies": {
+        "@types/node": "^25",
+        "typescript": "^6.0.2",
+      },
+    },
   },
   "packages": {
     "@ai-sdk/gateway": ["@ai-sdk/gateway@3.0.124", "", { "dependencies": { "@ai-sdk/provider": "3.0.10", "@ai-sdk/provider-utils": "4.0.27", "@vercel/oidc": "3.2.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-h8CrmbSG+8X0C+M/E1M4oiDHYevqwbzAPN+uLRHS0eJaatF2MZ+juNtOHXNOjk7Bsk9mD2RjYMjJO9dFkb9I7Q=="],
@@ -513,6 +527,8 @@
     "@skintext/db": ["@skintext/db@workspace:packages/db"],
 
     "@skintext/shared": ["@skintext/shared@workspace:packages/shared"],
+
+    "@skintext/sim": ["@skintext/sim@workspace:packages/sim"],
 
     "@skintext/web": ["@skintext/web@workspace:apps/web"],
 
