@@ -11,7 +11,23 @@ mock.module("@skintext/db", () => ({
 }));
 
 mock.module("@skintext/shared", () => ({
+  env: {},
+  encryptContent: async (s: string) => `enc:${s}`,
+  decrypt: async (s: string) => s.replace(/^enc:/, ""),
   generateId: () => "reminder_test",
+  localDateTimeToDate: (date: string, hour: number, minute: number, timezone: string) => {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+    if (!match) return null;
+    const [, year, month, day] = match;
+    const offsetHours = timezone === "America/New_York" ? 4 : 0;
+    return new Date(
+      Date.UTC(Number(year), Number(month) - 1, Number(day), hour + offsetHours, minute),
+    );
+  },
+  getLocaleName: (locale: string) => {
+    const names: Record<string, string> = { en: "English", sv: "Swedish" };
+    return names[locale] ?? "English";
+  },
 }));
 
 const { scheduleOneOffReminder } = await import("../tools/one-off-reminders");
@@ -23,13 +39,18 @@ describe("scheduleOneOffReminder", () => {
     markOneOffReminderFailed.mockClear();
   });
 
-  test("rejects past timestamps before persistence", async () => {
+  test("rejects past local schedules before persistence", async () => {
     const scheduleWorkflow = mock(() => Promise.resolve("run_123"));
     const result = await scheduleOneOffReminder(
       {
         userId: "usr_test",
         timezone: "America/New_York",
-        sendAt: "2026-06-04T11:00:00.000Z",
+        schedule: {
+          type: "local_time",
+          date: "2026-06-04",
+          hour: 7,
+          minute: 0,
+        },
         kind: "custom",
         message: "Check in.",
       },
@@ -42,13 +63,17 @@ describe("scheduleOneOffReminder", () => {
     expect(scheduleWorkflow).not.toHaveBeenCalled();
   });
 
-  test("accepts future timestamps and starts a user-scoped workflow", async () => {
+  test("accepts relative future delays and starts a user-scoped workflow", async () => {
     const scheduleWorkflow = mock(() => Promise.resolve("run_123"));
     const result = await scheduleOneOffReminder(
       {
         userId: "usr_test",
         timezone: "America/New_York",
-        sendAt: "2026-06-05T12:00:00.000Z",
+        schedule: {
+          type: "relative",
+          amount: 1,
+          unit: "days",
+        },
         kind: "skin_checkin",
         message: " Check whether irritation improved. ",
       },
@@ -84,13 +109,40 @@ describe("scheduleOneOffReminder", () => {
     );
   });
 
+  test("accepts user-local date/time schedules", async () => {
+    const scheduleWorkflow = mock(() => Promise.resolve("run_456"));
+    const result = await scheduleOneOffReminder(
+      {
+        userId: "usr_test",
+        timezone: "America/New_York",
+        schedule: {
+          type: "local_time",
+          date: "2026-06-05",
+          hour: 8,
+          minute: 0,
+        },
+        kind: "custom",
+        message: "Morning check-in.",
+      },
+      scheduleWorkflow,
+      new Date("2026-06-04T12:00:00.000Z"),
+    );
+
+    expect(result.scheduled).toBe(true);
+    expect(result.sendAt).toBe("2026-06-05T12:00:00.000Z");
+  });
+
   test("marks reminders failed when workflow startup fails", async () => {
     const scheduleWorkflow = mock(() => Promise.reject(new Error("workflow unavailable")));
     const result = await scheduleOneOffReminder(
       {
         userId: "usr_test",
         timezone: "America/New_York",
-        sendAt: "2026-06-05T12:00:00.000Z",
+        schedule: {
+          type: "relative",
+          amount: 1,
+          unit: "days",
+        },
         kind: "custom",
         message: "Try again.",
       },

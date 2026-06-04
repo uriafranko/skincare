@@ -97,7 +97,6 @@ export async function handleMessage(
     streak: streak.current > 0 ? streak.current : null,
     products,
     imageUrl,
-    currentTimestamp: now.toISOString(),
   };
 
   const ai = createAILogger(log, { toolInputs: { maxLength: 200 } });

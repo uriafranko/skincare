@@ -21,8 +21,8 @@ export {
   listOneOffReminders,
   markOneOffReminderFailed,
   markOneOffReminderSent,
-  setOneOffReminderWorkflowRunId,
   setCustomReminderTimes,
+  setOneOffReminderWorkflowRunId,
   setReminderRunId,
 } from "./reminders";
 export {

@@ -63,6 +63,34 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("skincare routine assistant");
   });
 
+  test("includes user-facing boundary guidance", () => {
+    const prompt = buildSkintextSystemPrompt(makeContext());
+    expect(prompt).toContain("Never mention tool names");
+    expect(prompt).toContain("internal workflows");
+    expect(prompt).toContain("Describe actions as Skintext doing them directly");
+  });
+
+  test("includes mistake and frustration recovery guidance", () => {
+    const prompt = buildSkintextSystemPrompt(makeContext());
+    expect(prompt).toContain("Mistakes and frustration");
+    expect(prompt).toContain("briefly acknowledge the issue from their perspective");
+    expect(prompt).toContain("Do not explain technical causes");
+  });
+
+  test("includes natural memory use guidance", () => {
+    const prompt = buildSkintextSystemPrompt(makeContext());
+    expect(prompt).toContain("Natural memory use");
+    expect(prompt).toContain("Use saved preferences and facts naturally");
+    expect(prompt).toContain('Never say "I remember from memory"');
+  });
+
+  test("includes context priority guidance", () => {
+    const prompt = buildSkintextSystemPrompt(makeContext());
+    expect(prompt).toContain("Context priority");
+    expect(prompt).toContain("latest user message, attached photo");
+    expect(prompt).toContain("verified log data from getTodayRoutineLog wins");
+  });
+
   test("includes skincare profile context", () => {
     const prompt = buildSkintextSystemPrompt(makeContext());
     expect(prompt).toContain("Skin type: combination");
@@ -110,12 +138,12 @@ describe("buildSkintextSystemPrompt", () => {
   });
 
   test("routes one-off reminders separately from recurring reminders", () => {
-    const prompt = buildSkintextSystemPrompt(
-      makeContext({ currentTimestamp: "2026-06-04T12:00:00.000Z" }),
-    );
+    const prompt = buildSkintextSystemPrompt(makeContext());
     expect(prompt).toContain("Use scheduleOneOffReminder");
     expect(prompt).toContain("Use setReminders");
-    expect(prompt).toContain("Current timestamp: 2026-06-04T12:00:00.000Z");
+    expect(prompt).toContain("Today's date: 2026-06-04");
+    expect(prompt).toContain("pass a relative delay");
+    expect(prompt).not.toContain("Current timestamp:");
     expect(prompt).toContain("Do not use setReminders for one-off reminders");
   });
 });

@@ -160,6 +160,8 @@ REPLY INSTRUCTIONS:
 - Do NOT repeat or echo every detail back. Just move on to what's next.
 - Never repeat a greeting if the user already introduced themselves.
 - Be direct like a friend texting, not formal.
+- Never mention internal workflows, models, databases, memory retrieval, or "the system"; describe setup as Skintext doing it directly.
+- If the user corrects a setup detail or sounds frustrated, briefly acknowledge the issue from their perspective, use the corrected info, and avoid technical explanations.
 - Do NOT wrap the reply in quotes.
 - NEVER re-ask for information the user already confirmed.`,
   });

@@ -12,7 +12,7 @@ export async function oneOffReminderWorkflow(userId: string, reminderId: string)
   "use workflow";
 
   const reminder = await loadOneOffReminder(userId, reminderId);
-  if (!reminder || reminder.status !== "scheduled") return;
+  if (reminder?.status !== "scheduled") return;
 
   const waitMs = msUntil(new Date(reminder.sendAt));
   if (waitMs > 0) {
@@ -20,7 +20,7 @@ export async function oneOffReminderWorkflow(userId: string, reminderId: string)
   }
 
   const latest = await loadOneOffReminder(userId, reminderId);
-  if (!latest || latest.status !== "scheduled") return;
+  if (latest?.status !== "scheduled") return;
 
   const user = await loadUser(userId);
   if (!user) return;

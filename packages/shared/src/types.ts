@@ -139,7 +139,6 @@ export interface AgentContext {
   streak: number | null;
   products: ProductEntry[];
   imageUrl?: string;
-  currentTimestamp?: string;
 }
 
 export interface PhoneRegionInfo {

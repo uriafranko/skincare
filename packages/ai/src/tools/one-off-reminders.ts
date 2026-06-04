@@ -4,7 +4,7 @@ import {
   setOneOffReminderWorkflowRunId,
 } from "@skintext/db";
 import type { OneOffReminder, OneOffReminderKind } from "@skintext/shared";
-import { generateId } from "@skintext/shared";
+import { generateId, localDateTimeToDate } from "@skintext/shared";
 import { tool } from "ai";
 import { z } from "zod";
 
@@ -12,11 +12,27 @@ const MAX_HORIZON_DAYS = 180;
 const MAX_HORIZON_MS = MAX_HORIZON_DAYS * 24 * 60 * 60 * 1000;
 
 const reminderKindSchema = z.enum(["routine_followup", "skin_checkin", "custom"]);
+const relativeUnitSchema = z.enum(["minutes", "hours", "days", "weeks"]);
+
+export type RelativeReminderUnit = z.infer<typeof relativeUnitSchema>;
+
+export type OneOffReminderSchedule =
+  | {
+      type: "relative";
+      amount: number;
+      unit: RelativeReminderUnit;
+    }
+  | {
+      type: "local_time";
+      date: string;
+      hour: number;
+      minute: number;
+    };
 
 export interface ScheduleOneOffReminderInput {
   userId: string;
   timezone: string;
-  sendAt: string;
+  schedule: OneOffReminderSchedule;
   message: string;
   kind?: OneOffReminderKind;
 }
@@ -28,7 +44,7 @@ export interface ScheduleOneOffReminderWorkflowInput {
 
 export type ScheduleOneOffReminderWorkflow = (
   input: ScheduleOneOffReminderWorkflowInput,
-) => Promise<{ runId?: string } | string | void>;
+) => Promise<{ runId?: string } | string | undefined>;
 
 function workflowRunId(result: Awaited<ReturnType<ScheduleOneOffReminderWorkflow>>): string | null {
   if (!result) return null;
@@ -36,28 +52,46 @@ function workflowRunId(result: Awaited<ReturnType<ScheduleOneOffReminderWorkflow
   return result.runId ?? null;
 }
 
+function relativeDelayMs(amount: number, unit: RelativeReminderUnit): number {
+  const multipliers: Record<RelativeReminderUnit, number> = {
+    minutes: 60 * 1000,
+    hours: 60 * 60 * 1000,
+    days: 24 * 60 * 60 * 1000,
+    weeks: 7 * 24 * 60 * 60 * 1000,
+  };
+  return amount * multipliers[unit];
+}
+
+function computeSendAt(schedule: OneOffReminderSchedule, timezone: string, now: Date): Date | null {
+  if (schedule.type === "relative") {
+    return new Date(now.getTime() + relativeDelayMs(schedule.amount, schedule.unit));
+  }
+
+  return localDateTimeToDate(schedule.date, schedule.hour, schedule.minute, timezone);
+}
+
 export async function scheduleOneOffReminder(
   input: ScheduleOneOffReminderInput,
   scheduleWorkflow: ScheduleOneOffReminderWorkflow,
   now = new Date(),
 ) {
-  const sendAt = new Date(input.sendAt);
+  const sendAt = computeSendAt(input.schedule, input.timezone, now);
+  if (!sendAt) {
+    return { scheduled: false, error: "schedule must be a valid future time." };
+  }
+
   const sendAtMs = sendAt.getTime();
   const nowMs = now.getTime();
   const message = input.message.trim();
 
-  if (!Number.isFinite(sendAtMs)) {
-    return { scheduled: false, error: "sendAt must be a valid ISO timestamp." };
-  }
-
   if (sendAtMs <= nowMs) {
-    return { scheduled: false, error: "sendAt must be in the future." };
+    return { scheduled: false, error: "schedule must resolve to a future time." };
   }
 
   if (sendAtMs - nowMs > MAX_HORIZON_MS) {
     return {
       scheduled: false,
-      error: `sendAt must be within ${MAX_HORIZON_DAYS} days.`,
+      error: `schedule must be within ${MAX_HORIZON_DAYS} days.`,
     };
   }
 
@@ -106,19 +140,33 @@ export async function scheduleOneOffReminder(
   };
 }
 
-export function createScheduleOneOffReminderTool(
-  scheduleWorkflow: ScheduleOneOffReminderWorkflow,
-) {
+export function createScheduleOneOffReminderTool(scheduleWorkflow: ScheduleOneOffReminderWorkflow) {
   return tool({
     description:
-      "Schedule a one-off future iMessage reminder for the user, such as a skincare follow-up next week, in a few days, or in a few hours. Use absolute ISO timestamps only.",
+      "Schedule a one-off future iMessage reminder for the user, such as a skincare follow-up next week, in a few days, or in a few hours.",
     inputSchema: z.object({
       userId: z.string(),
       timezone: z.string(),
-      sendAt: z
-        .string()
+      schedule: z
+        .discriminatedUnion("type", [
+          z.object({
+            type: z.literal("relative"),
+            amount: z
+              .number()
+              .int()
+              .positive()
+              .max(MAX_HORIZON_DAYS * 24 * 60),
+            unit: relativeUnitSchema.describe("Use minutes, hours, days, or weeks."),
+          }),
+          z.object({
+            type: z.literal("local_time"),
+            date: z.string().describe("User-local calendar date in YYYY-MM-DD format."),
+            hour: z.number().int().min(0).max(23).describe("User-local hour in 24h format."),
+            minute: z.number().int().min(0).max(59).describe("User-local minute."),
+          }),
+        ])
         .describe(
-          "Absolute ISO-8601 timestamp for when to send the reminder. Convert relative user requests using the current timestamp and timezone.",
+          "Use relative for requests like 'in 3 hours' or 'next week'. Use local_time for explicit calendar dates/times.",
         ),
       kind: reminderKindSchema
         .optional()
@@ -127,14 +175,14 @@ export function createScheduleOneOffReminderTool(
         .string()
         .min(1)
         .max(500)
-        .describe("Short user-visible iMessage reminder text to send at sendAt."),
+        .describe("Short user-visible iMessage reminder text to send at the scheduled time."),
     }),
-    execute: async ({ userId, timezone, sendAt, kind, message }) => {
+    execute: async ({ userId, timezone, schedule, kind, message }) => {
       return scheduleOneOffReminder(
         {
           userId,
           timezone,
-          sendAt,
+          schedule,
           kind,
           message,
         },
