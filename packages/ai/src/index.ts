@@ -6,8 +6,8 @@ export {
   DEFAULT_COMPACTION_MODEL,
   DEFAULT_CONTEXT_WINDOW_TOKENS,
   DEFAULT_KEEP_RECENT_TOKENS,
-  estimateMessageTokens,
   estimateMessagesTokens,
+  estimateMessageTokens,
   getCompactionModelName,
   isCompactionSummaryMessage,
   type MessageCompactionOptions,
@@ -15,6 +15,7 @@ export {
   PRE_RUN_COMPACTION_THRESHOLD,
   RESCUE_COMPACTION_THRESHOLD,
 } from "./compaction";
+export { createCompactionGatewayModel, createDefaultGatewayModel } from "./models";
 export {
   type OnboardingContext,
   type OnboardingResult,

@@ -17,7 +17,6 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^3.0.52",
     "@ai-sdk/provider": "^3.0.8",
     "@skintext/db": "*",
     "@skintext/shared": "*",

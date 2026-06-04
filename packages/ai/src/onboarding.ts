@@ -1,10 +1,10 @@
-import { openai } from "@ai-sdk/openai";
 import type { LanguageModelV3 } from "@ai-sdk/provider";
 import type { OnboardingState } from "@skintext/shared";
 import { generateText, Output } from "ai";
 import { z } from "zod";
+import { createDefaultGatewayModel } from "./models";
 
-const defaultModel = openai("gpt-4.1-mini");
+const defaultModel = createDefaultGatewayModel();
 
 const extractionSchema = z.object({
   name: z.string().nullable().describe("User's first name. Null if not mentioned."),

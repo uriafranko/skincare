@@ -1,10 +1,10 @@
-import { openai } from "@ai-sdk/openai";
 import type { ModelMessage } from "@skintext/ai";
 import {
   buildSkintextSystemPrompt,
   compactMessagesIfNeeded,
+  createCompactionGatewayModel,
+  createDefaultGatewayModel,
   createSkintextAgent,
-  getCompactionModelName,
   PRE_RUN_COMPACTION_THRESHOLD,
 } from "@skintext/ai";
 import {
@@ -100,8 +100,8 @@ export async function handleMessage(
   };
 
   const ai = createAILogger(log, { toolInputs: { maxLength: 200 } });
-  const model = ai.wrap(openai(hasImage ? "gpt-4.1" : "gpt-4.1-mini"));
-  const compactionModel = ai.wrap(openai(getCompactionModelName()));
+  const model = ai.wrap(createDefaultGatewayModel());
+  const compactionModel = ai.wrap(createCompactionGatewayModel());
 
   const systemPrompt = buildSkintextSystemPrompt(ctx);
   const userMessage = buildUserMessage(text, hasImage);
@@ -166,10 +166,7 @@ export async function handleMessage(
 
   const toSave = stripImagesFromHistory(
     pruneMessages({
-      messages: [
-        ...baseMessages,
-        ...(result.response.messages as ModelMessage[]),
-      ],
+      messages: [...baseMessages, ...(result.response.messages as ModelMessage[])],
       toolCalls: "before-last-2-messages",
       emptyMessages: "remove",
     }),
