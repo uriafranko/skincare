@@ -2,6 +2,7 @@ import { acquireMessageSlot } from "@skintext/db";
 import { encrypt } from "@skintext/shared";
 import { createLogger, type RequestLogger } from "evlog";
 import { normalizeImageUrl } from "@/image";
+import { sendReplyBubbles } from "@/replies";
 import { routeMessage } from "@/router";
 import { sendMessage, sendTyping } from "@/sendblue";
 
@@ -39,16 +40,14 @@ export async function handleIncoming(
 
   try {
     log.set({ input: { text: text.slice(0, 80), hasImage: !!rawImageUrl } });
-    sendTyping(phone);
+    void sendTyping(phone).catch(() => undefined);
 
     const imageUrl = rawImageUrl ? await normalizeImageUrl(rawImageUrl, log) : undefined;
 
     const replies = await routeMessage(log, encryptedPhone, phone, text, imageUrl);
-    for (const reply of replies) {
-      await sendMessage(phone, reply);
-    }
+    const bubbles = await sendReplyBubbles(phone, replies);
 
-    log.set({ output: { replies: replies.length } });
+    log.set({ output: { replies: replies.length, bubbles } });
   } catch (error) {
     log.error(error as Error);
     try {
