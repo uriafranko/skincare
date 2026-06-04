@@ -2,6 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "regions": ["iad1", "fra1", "hnd1"],
   "installCommand": "cd ../.. && bun install --frozen-lockfile",
-  "buildCommand": "cd ../.. && turbo build --filter=@skintext/api",
+  "buildCommand": "cd ../.. && TURBO_PLATFORM_ENV_DISABLED=true turbo build --filter=@skintext/api",
   "bunVersion": "1.x"
 }
