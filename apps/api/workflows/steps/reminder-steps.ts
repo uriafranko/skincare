@@ -1,8 +1,8 @@
-import { openai } from "@ai-sdk/openai";
 import {
   buildDailyRoutineSummaryPrompt,
   buildRoutineReminderPrompt,
   buildWeeklyRoutineRecapPrompt,
+  createDefaultGatewayModel,
 } from "@skintext/ai";
 import {
   getAdherenceStreak,
@@ -79,7 +79,7 @@ export async function generateReminder(
       : "No saved products yet.";
 
   const result = await generateText({
-    model: openai("gpt-4.1-mini"),
+    model: createDefaultGatewayModel(),
     system: buildRoutineReminderPrompt(locale),
     prompt: `Generate a ${routineLabel} skincare routine reminder.
 Routine emoji to lead with if useful: ${routineEmoji}
@@ -113,7 +113,7 @@ export async function generateDailySummary(
   const pm = log.completedSlots.includes("evening") ? "done" : "not logged";
 
   const result = await generateText({
-    model: openai("gpt-4.1-mini"),
+    model: createDefaultGatewayModel(),
     system: buildDailyRoutineSummaryPrompt(locale),
     prompt: `Generate daily routine summary for ${user.name}.
 AM: ${am}
@@ -172,7 +172,7 @@ export async function generateWeeklyRecap(userId: string, locale: string): Promi
     .join(", ");
 
   const result = await generateText({
-    model: openai("gpt-4.1-mini"),
+    model: createDefaultGatewayModel(),
     system: buildWeeklyRoutineRecapPrompt(locale),
     prompt: `Generate weekly recap for ${user.name}.
 Daily breakdown:

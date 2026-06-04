@@ -1,7 +1,7 @@
-import { openai } from "@ai-sdk/openai";
 import { generateObject, tool } from "ai";
 import { log } from "evlog";
 import { z } from "zod";
+import { createDefaultGatewayModel } from "../models";
 
 export const skincareImageAnalysisSchema = z.object({
   imageType: z.enum(["skin_photo", "product_label", "routine_shelf", "other"]),
@@ -73,7 +73,7 @@ export function createAnalyzeSkincareImageTool(contextImageUrl?: string) {
         }
 
         const result = await generateObject({
-          model: openai("gpt-4.1-mini"),
+          model: createDefaultGatewayModel(),
           schema: skincareImageAnalysisSchema,
           messages: [
             {

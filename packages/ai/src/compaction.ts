@@ -1,13 +1,13 @@
-import { openai } from "@ai-sdk/openai";
 import type { LanguageModelV3 } from "@ai-sdk/provider";
 import { env } from "@skintext/shared";
 import { generateText, type ModelMessage } from "ai";
+import { createCompactionGatewayModel } from "./models";
 
 export const DEFAULT_CONTEXT_WINDOW_TOKENS = 1_047_576;
 export const PRE_RUN_COMPACTION_THRESHOLD = 0.7;
 export const RESCUE_COMPACTION_THRESHOLD = 0.8;
 export const DEFAULT_KEEP_RECENT_TOKENS = 20_000;
-export const DEFAULT_COMPACTION_MODEL = "gpt-4.1-mini";
+export const DEFAULT_COMPACTION_MODEL = "openai/gpt-5.4-nano";
 
 const SUMMARY_MARKER = "[Skintext conversation summary]";
 const ESTIMATED_IMAGE_TOKENS = 1_200;
@@ -49,7 +49,7 @@ export interface MessageCompactionResult {
 }
 
 export function getCompactionModelName(): string {
-  return env.COMPACTION_MODEL || DEFAULT_COMPACTION_MODEL;
+  return env.AI_GATEWAY_COMPACTION_MODEL || DEFAULT_COMPACTION_MODEL;
 }
 
 export function createCompactionSummaryMessage(summary: string): ModelMessage {
@@ -129,7 +129,7 @@ function findTailStart(messages: ModelMessage[], keepRecentTokens: number): numb
     }
   }
 
-  for (let i = candidate; i >= 0; i--) {
+  for (let i = candidate; i < messages.length; i++) {
     if (messages[i]?.role === "user") return i;
   }
 
@@ -216,7 +216,7 @@ async function compactMessages(
     };
   }
 
-  const model = options.model ?? openai(getCompactionModelName());
+  const model = options.model ?? createCompactionGatewayModel();
   const summary = await generateCompactionSummary(messagesToSummarize, previousSummary, model);
 
   return {

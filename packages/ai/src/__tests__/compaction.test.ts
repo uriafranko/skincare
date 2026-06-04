@@ -4,18 +4,34 @@ import type { ModelMessage } from "ai";
 const generateTextMock = mock(async (_options: { prompt?: string }) => ({
   text: "generated summary",
 }));
-const openaiMock = mock((modelId: string) => ({ provider: "openai", modelId }));
+const generateObjectMock = mock(async () => ({ object: {} }));
+const gatewayMock = mock((modelId: string) => ({ provider: "gateway", modelId }));
 
 mock.module("ai", () => ({
+  gateway: gatewayMock,
+  generateObject: generateObjectMock,
   generateText: generateTextMock,
-}));
-
-mock.module("@ai-sdk/openai", () => ({
-  openai: openaiMock,
+  tool: (definition: unknown) => definition,
 }));
 
 mock.module("@skintext/shared", () => ({
-  env: { COMPACTION_MODEL: "gpt-4.1-mini" },
+  env: { AI_GATEWAY_COMPACTION_MODEL: "openai/gpt-5.4-nano" },
+  decrypt: async (s: string) => s.replace(/^enc:/, ""),
+  encryptContent: async (s: string) => `enc:${s}`,
+  generateId: () => "reminder_test",
+  getLocaleName: (locale: string) => {
+    const names: Record<string, string> = { en: "English", sv: "Swedish" };
+    return names[locale] ?? "English";
+  },
+  localDateTimeToDate: (date: string, hour: number, minute: number, timezone: string) => {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+    if (!match) return null;
+    const [, year, month, day] = match;
+    const offsetHours = timezone === "America/New_York" ? 4 : 0;
+    return new Date(
+      Date.UTC(Number(year), Number(month) - 1, Number(day), hour + offsetHours, minute),
+    );
+  },
 }));
 
 const {
@@ -35,8 +51,9 @@ function assistant(content: string): ModelMessage {
 
 describe("conversation compaction", () => {
   beforeEach(() => {
+    generateObjectMock.mockClear();
     generateTextMock.mockClear();
-    openaiMock.mockClear();
+    gatewayMock.mockClear();
   });
 
   test("does not compact below threshold", async () => {
