@@ -1,7 +1,7 @@
+import { acquireMessageSlot } from "@skintext/db";
 import { encrypt } from "@skintext/shared";
 import { createLogger, type RequestLogger } from "evlog";
 import { normalizeImageUrl } from "@/image";
-import { acquireSlot } from "@/redis-utils";
 import { routeMessage } from "@/router";
 import { sendMessage, sendTyping } from "@/sendblue";
 
@@ -29,7 +29,7 @@ export async function handleIncoming(
   });
 
   const encryptedPhone = await cachedEncrypt(phone);
-  const slot = await acquireSlot(encryptedPhone, messageId);
+  const slot = await acquireMessageSlot(encryptedPhone, messageId);
 
   if (slot.status !== "acquired") {
     log.set({ skipped: slot.status });

@@ -1,26 +1,29 @@
 import { decrypt, encryptContent } from "@skintext/shared";
-import { getRedis } from "./client";
-
-const messagesKey = (userId: string) => `messages:${userId}`;
+import { eq, sql } from "drizzle-orm";
+import { getDb } from "./client";
+import { conversationMessages } from "./schema";
 
 export async function saveConversationMessages(userId: string, messages: unknown[]): Promise<void> {
-  const redis = getRedis();
   const json = JSON.stringify(messages);
   const encrypted = await encryptContent(json);
-  await redis.set(messagesKey(userId), encrypted);
+  await getDb()
+    .insert(conversationMessages)
+    .values({ userId, value: encrypted })
+    .onConflictDoUpdate({
+      target: conversationMessages.userId,
+      set: { value: encrypted, updatedAt: sql`now()` },
+    });
 }
 
 export async function getConversationMessages<T = unknown>(userId: string): Promise<T[]> {
-  const redis = getRedis();
-  const raw = await redis.get(messagesKey(userId));
-  if (!raw) return [];
-  if (Array.isArray(raw)) return raw as T[];
-  if (typeof raw !== "string") return [];
-  const decrypted = await decrypt(raw);
+  const row = await getDb().query.conversationMessages.findFirst({
+    where: eq(conversationMessages.userId, userId),
+  });
+  if (!row) return [];
+  const decrypted = await decrypt(row.value);
   return JSON.parse(decrypted) as T[];
 }
 
 export async function deleteAllMessages(userId: string): Promise<void> {
-  const redis = getRedis();
-  await redis.del(messagesKey(userId));
+  await getDb().delete(conversationMessages).where(eq(conversationMessages.userId, userId));
 }

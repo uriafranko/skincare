@@ -1,20 +1,20 @@
 import type { AdherenceStreak } from "@skintext/shared";
 import { format, parseISO, subDays } from "date-fns";
-import { getRedis } from "./client";
-
-const streakKey = (userId: string) => `routine_streak:${userId}`;
+import { eq, sql } from "drizzle-orm";
+import { getDb } from "./client";
+import { adherenceStreaks } from "./schema";
 
 export async function getAdherenceStreak(userId: string): Promise<AdherenceStreak> {
-  const redis = getRedis();
-  const data = await redis.hgetall(streakKey(userId));
-  if (!data || Object.keys(data).length === 0) {
+  const data = await getDb().query.adherenceStreaks.findFirst({
+    where: eq(adherenceStreaks.userId, userId),
+  });
+  if (!data) {
     return { current: 0, longest: 0, lastLogDate: "" };
   }
-  const d = data as Record<string, unknown>;
   return {
-    current: Number(d.current ?? 0),
-    longest: Number(d.longest ?? 0),
-    lastLogDate: d.lastLogDate ? String(d.lastLogDate) : "",
+    current: data.current,
+    longest: data.longest,
+    lastLogDate: data.lastLogDate,
   };
 }
 
@@ -22,7 +22,6 @@ export async function updateAdherenceStreak(
   userId: string,
   todayLocalDate: string,
 ): Promise<AdherenceStreak> {
-  const redis = getRedis();
   const streak = await getAdherenceStreak(userId);
 
   if (streak.lastLogDate === todayLocalDate) {
@@ -33,11 +32,23 @@ export async function updateAdherenceStreak(
   const newCurrent = streak.lastLogDate === yesterdayStr ? streak.current + 1 : 1;
   const newLongest = Math.max(streak.longest, newCurrent);
 
-  await redis.hset(streakKey(userId), {
-    current: String(newCurrent),
-    longest: String(newLongest),
-    lastLogDate: todayLocalDate,
-  });
+  await getDb()
+    .insert(adherenceStreaks)
+    .values({
+      userId,
+      current: newCurrent,
+      longest: newLongest,
+      lastLogDate: todayLocalDate,
+    })
+    .onConflictDoUpdate({
+      target: adherenceStreaks.userId,
+      set: {
+        current: newCurrent,
+        longest: newLongest,
+        lastLogDate: todayLocalDate,
+        updatedAt: sql`now()`,
+      },
+    });
 
   return { current: newCurrent, longest: newLongest, lastLogDate: todayLocalDate };
 }

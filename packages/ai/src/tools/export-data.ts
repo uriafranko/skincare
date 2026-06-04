@@ -2,10 +2,10 @@ import {
   getAdherenceStreak,
   getAllProducts,
   getConversationMessages,
-  getRedis,
   getRoutineLogForDate,
   getUser,
   recallAllMemories,
+  saveExportBlob,
 } from "@skintext/db";
 import { encryptContent, localDateString } from "@skintext/shared";
 import { tool } from "ai";
@@ -51,9 +51,8 @@ export const exportDataTool = tool({
       recentMessages: messages,
     };
 
-    const redis = getRedis();
     const blob = await encryptContent(JSON.stringify(exportData));
-    await redis.set(`export:${userId}`, blob, { ex: 86400 });
+    await saveExportBlob(userId, blob, 86400);
 
     const routineDays = Object.keys(routineLogs).length;
     const totalEntries = Object.values(routineLogs).reduce(

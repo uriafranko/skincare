@@ -1,11 +1,9 @@
 import type { DailyRoutineLog, RoutineLogEntry, RoutineSlot } from "@skintext/shared";
 import { decrypt, encryptContent } from "@skintext/shared";
 import { format, parseISO, subDays } from "date-fns";
-import { getRedis } from "./client";
-
-const routineEntryKey = (id: string) => `routine_entry:${id}`;
-const routineLogIndexKey = (userId: string, localDate: string) =>
-  `routine_logs:${userId}:${localDate}`;
+import { and, asc, eq, sql } from "drizzle-orm";
+import { getDb } from "./client";
+import { routineEntries } from "./schema";
 
 function safeParseArray(val: unknown): unknown[] {
   if (Array.isArray(val)) return val;
@@ -39,7 +37,6 @@ async function parseRoutineEntry(
 }
 
 export async function saveRoutineEntry(entry: RoutineLogEntry): Promise<void> {
-  const redis = getRedis();
   const [steps, reaction, notes, source] = await Promise.all([
     encryptContent(JSON.stringify(entry.steps)),
     encryptContent(entry.reaction ?? ""),
@@ -47,30 +44,43 @@ export async function saveRoutineEntry(entry: RoutineLogEntry): Promise<void> {
     encryptContent(entry.source),
   ]);
 
-  const pipeline = redis.pipeline();
-  pipeline.hset(routineEntryKey(entry.id), {
-    userId: entry.userId,
-    slot: entry.slot,
-    steps,
-    completed: String(entry.completed),
-    reaction,
-    notes,
-    source,
-    timestamp: entry.timestamp,
-    localDate: entry.localDate,
-  });
-  pipeline.zadd(routineLogIndexKey(entry.userId, entry.localDate), {
-    score: new Date(entry.timestamp).getTime(),
-    member: entry.id,
-  });
-  await pipeline.exec();
+  await getDb()
+    .insert(routineEntries)
+    .values({
+      id: entry.id,
+      userId: entry.userId,
+      slot: entry.slot,
+      steps,
+      completed: entry.completed,
+      reaction,
+      notes,
+      source,
+      timestamp: entry.timestamp,
+      localDate: entry.localDate,
+    })
+    .onConflictDoUpdate({
+      target: routineEntries.id,
+      set: {
+        userId: entry.userId,
+        slot: entry.slot,
+        steps,
+        completed: entry.completed,
+        reaction,
+        notes,
+        source,
+        timestamp: entry.timestamp,
+        localDate: entry.localDate,
+        updatedAt: sql`now()`,
+      },
+    });
 }
 
 export async function getRoutineEntry(entryId: string): Promise<RoutineLogEntry | null> {
-  const redis = getRedis();
-  const data = await redis.hgetall(routineEntryKey(entryId));
-  if (!data || Object.keys(data).length === 0) return null;
-  return parseRoutineEntry(entryId, data as Record<string, unknown>);
+  const data = await getDb().query.routineEntries.findFirst({
+    where: eq(routineEntries.id, entryId),
+  });
+  if (!data) return null;
+  return parseRoutineEntry(entryId, data);
 }
 
 export async function deleteRoutineEntry(
@@ -78,20 +88,26 @@ export async function deleteRoutineEntry(
   userId: string,
   localDate: string,
 ): Promise<void> {
-  const redis = getRedis();
-  const pipeline = redis.pipeline();
-  pipeline.del(routineEntryKey(entryId));
-  pipeline.zrem(routineLogIndexKey(userId, localDate), entryId);
-  await pipeline.exec();
+  await getDb()
+    .delete(routineEntries)
+    .where(
+      and(
+        eq(routineEntries.id, entryId),
+        eq(routineEntries.userId, userId),
+        eq(routineEntries.localDate, localDate),
+      ),
+    );
 }
 
 export async function getRoutineLogForDate(
   userId: string,
   localDate: string,
 ): Promise<DailyRoutineLog> {
-  const redis = getRedis();
-  const entryIds = await redis.zrange<string[]>(routineLogIndexKey(userId, localDate), 0, -1);
-  if (!entryIds || entryIds.length === 0) {
+  const rows = await getDb().query.routineEntries.findMany({
+    where: and(eq(routineEntries.userId, userId), eq(routineEntries.localDate, localDate)),
+    orderBy: asc(routineEntries.timestamp),
+  });
+  if (rows.length === 0) {
     return {
       entries: [],
       entryCount: 0,
@@ -101,19 +117,9 @@ export async function getRoutineLogForDate(
     };
   }
 
-  const pipeline = redis.pipeline();
-  for (const id of entryIds) {
-    pipeline.hgetall(routineEntryKey(id));
-  }
-  const results = await pipeline.exec();
-
   const entries: RoutineLogEntry[] = [];
-  for (let i = 0; i < entryIds.length; i++) {
-    const data = results[i];
-    if (!data || Object.keys(data).length === 0) continue;
-    entries.push(
-      await parseRoutineEntry(entryIds[i]!, data as Record<string, unknown>, userId, localDate),
-    );
+  for (const row of rows) {
+    entries.push(await parseRoutineEntry(row.id, row, userId, localDate));
   }
 
   const completedSlots = Array.from(new Set(entries.filter((e) => e.completed).map((e) => e.slot)));

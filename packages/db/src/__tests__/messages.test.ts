@@ -1,33 +1,21 @@
 import { describe, expect, mock, test } from "bun:test";
+import { createFakeDb } from "./fake-db";
+import { createSharedMock } from "./shared-mock";
 
-const store: Record<string, string> = {};
-
-const mockRedis = {
-  set: mock((key: string, value: string) => {
-    store[key] = value;
-    return Promise.resolve("OK");
-  }),
-  get: mock((key: string) => {
-    return Promise.resolve(store[key] ?? null);
-  }),
-  del: mock((key: string) => {
-    delete store[key];
-    return Promise.resolve(1);
-  }),
-};
+const fakeDb = createFakeDb();
 
 mock.module("../client", () => ({
-  getRedis: () => mockRedis,
+  getDb: () => fakeDb,
 }));
 
-mock.module("@skintext/shared", () => ({
-  env: {},
-  encryptContent: async (s: string) => `enc:${s}`,
-  decrypt: async (s: string) => {
-    if (!s.startsWith("enc:")) throw new Error("bad ciphertext");
-    return s.slice(4);
-  },
-}));
+mock.module("@skintext/shared", () =>
+  createSharedMock({
+    decrypt: async (s: string) => {
+      if (!s.startsWith("enc:")) throw new Error("bad ciphertext");
+      return s.slice(4);
+    },
+  }),
+);
 
 const { saveConversationMessages, getConversationMessages, deleteAllMessages } = await import(
   "../messages"

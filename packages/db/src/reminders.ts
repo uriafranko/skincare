@@ -1,10 +1,8 @@
 import type { OneOffReminder } from "@skintext/shared";
 import { decrypt, encryptContent } from "@skintext/shared";
-import { getRedis } from "./client";
-
-const reminderKey = (userId: string) => `reminder:${userId}`;
-const reminderTimesKey = (userId: string) => `reminder_times:${userId}`;
-const oneOffRemindersKey = (userId: string) => `one_off_reminders:${userId}`;
+import { and, asc, eq, sql } from "drizzle-orm";
+import { getDb } from "./client";
+import { customReminderTimes, oneOffReminders, reminderRunIds } from "./schema";
 
 export interface CustomReminderTime {
   label: string;
@@ -13,42 +11,51 @@ export interface CustomReminderTime {
 }
 
 export async function setReminderRunId(userId: string, runId: string): Promise<void> {
-  const redis = getRedis();
-  await redis.set(reminderKey(userId), runId);
+  await getDb()
+    .insert(reminderRunIds)
+    .values({ userId, runId })
+    .onConflictDoUpdate({
+      target: reminderRunIds.userId,
+      set: { runId, updatedAt: sql`now()` },
+    });
 }
 
 export async function getReminderRunId(userId: string): Promise<string | null> {
-  const redis = getRedis();
-  return await redis.get<string>(reminderKey(userId));
+  const row = await getDb().query.reminderRunIds.findFirst({
+    where: eq(reminderRunIds.userId, userId),
+  });
+  return row?.runId ?? null;
 }
 
 export async function deleteReminderRunId(userId: string): Promise<void> {
-  const redis = getRedis();
-  await redis.del(reminderKey(userId));
+  await getDb().delete(reminderRunIds).where(eq(reminderRunIds.userId, userId));
 }
 
 export async function setCustomReminderTimes(
   userId: string,
   times: CustomReminderTime[],
 ): Promise<void> {
-  const redis = getRedis();
   const enc = await encryptContent(JSON.stringify(times));
-  await redis.set(reminderTimesKey(userId), enc);
+  await getDb()
+    .insert(customReminderTimes)
+    .values({ userId, value: enc })
+    .onConflictDoUpdate({
+      target: customReminderTimes.userId,
+      set: { value: enc, updatedAt: sql`now()` },
+    });
 }
 
 export async function getCustomReminderTimes(userId: string): Promise<CustomReminderTime[] | null> {
-  const redis = getRedis();
-  const raw = await redis.get(reminderTimesKey(userId));
-  if (!raw) return null;
-  if (Array.isArray(raw)) return raw as CustomReminderTime[];
-  if (typeof raw !== "string") return null;
-  const decrypted = await decrypt(raw);
+  const row = await getDb().query.customReminderTimes.findFirst({
+    where: eq(customReminderTimes.userId, userId),
+  });
+  if (!row) return null;
+  const decrypted = await decrypt(row.value);
   return JSON.parse(decrypted) as CustomReminderTime[];
 }
 
 export async function deleteCustomReminderTimes(userId: string): Promise<void> {
-  const redis = getRedis();
-  await redis.del(reminderTimesKey(userId));
+  await getDb().delete(customReminderTimes).where(eq(customReminderTimes.userId, userId));
 }
 
 async function encodeOneOffReminder(reminder: OneOffReminder): Promise<string> {
@@ -60,35 +67,49 @@ async function decodeOneOffReminder(raw: string): Promise<OneOffReminder> {
 }
 
 export async function createOneOffReminder(reminder: OneOffReminder): Promise<void> {
-  const redis = getRedis();
-  await redis.hset(oneOffRemindersKey(reminder.userId), {
-    [reminder.id]: await encodeOneOffReminder(reminder),
-  });
+  const value = await encodeOneOffReminder(reminder);
+  await getDb()
+    .insert(oneOffReminders)
+    .values({
+      id: reminder.id,
+      userId: reminder.userId,
+      value,
+      sendAt: reminder.sendAt,
+    })
+    .onConflictDoUpdate({
+      target: oneOffReminders.id,
+      set: {
+        userId: reminder.userId,
+        value,
+        sendAt: reminder.sendAt,
+        updatedAt: sql`now()`,
+      },
+    });
 }
 
 export async function getOneOffReminder(
   userId: string,
   reminderId: string,
 ): Promise<OneOffReminder | null> {
-  const redis = getRedis();
-  const raw = await redis.hget<string>(oneOffRemindersKey(userId), reminderId);
-  if (!raw || typeof raw !== "string") return null;
-  return decodeOneOffReminder(raw);
+  const row = await getDb().query.oneOffReminders.findFirst({
+    where: and(eq(oneOffReminders.userId, userId), eq(oneOffReminders.id, reminderId)),
+  });
+  if (!row) return null;
+  return decodeOneOffReminder(row.value);
 }
 
 export async function listOneOffReminders(userId: string): Promise<OneOffReminder[]> {
-  const redis = getRedis();
-  const data = await redis.hgetall<Record<string, string>>(oneOffRemindersKey(userId));
-  if (!data) return [];
+  const rows = await getDb().query.oneOffReminders.findMany({
+    where: eq(oneOffReminders.userId, userId),
+    orderBy: asc(oneOffReminders.sendAt),
+  });
 
   const reminders: OneOffReminder[] = [];
-  for (const raw of Object.values(data)) {
-    if (typeof raw === "string") {
-      reminders.push(await decodeOneOffReminder(raw));
-    }
+  for (const row of rows) {
+    reminders.push(await decodeOneOffReminder(row.value));
   }
 
-  return reminders.sort((a, b) => a.sendAt.localeCompare(b.sendAt));
+  return reminders;
 }
 
 async function updateOneOffReminder(

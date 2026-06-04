@@ -1,14 +1,15 @@
+import { neon } from "@neondatabase/serverless";
 import { env } from "@skintext/shared";
-import { Redis } from "@upstash/redis";
+import { drizzle, type NeonHttpDatabase } from "drizzle-orm/neon-http";
+import * as schema from "./schema";
 
-let _redis: Redis | null = null;
+export type Db = NeonHttpDatabase<typeof schema>;
 
-export function getRedis(): Redis {
-  if (!_redis) {
-    _redis = new Redis({
-      url: env.UPSTASH_REDIS_REST_URL,
-      token: env.UPSTASH_REDIS_REST_TOKEN,
-    });
+let _db: Db | null = null;
+
+export function getDb(): Db {
+  if (!_db) {
+    _db = drizzle(neon(env.DATABASE_URL), { schema });
   }
-  return _redis;
+  return _db;
 }

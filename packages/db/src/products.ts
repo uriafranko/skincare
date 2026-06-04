@@ -1,8 +1,8 @@
 import type { ProductEntry } from "@skintext/shared";
 import { decrypt, encryptContent } from "@skintext/shared";
-import { getRedis } from "./client";
-
-const productsKey = (userId: string) => `products:${userId}`;
+import { and, asc, eq, sql } from "drizzle-orm";
+import { getDb } from "./client";
+import { products } from "./schema";
 
 async function encodeProduct(product: ProductEntry): Promise<string> {
   return encryptContent(JSON.stringify(product));
@@ -13,37 +13,48 @@ async function decodeProduct(raw: string): Promise<ProductEntry> {
 }
 
 export async function saveProduct(product: ProductEntry): Promise<void> {
-  const redis = getRedis();
-  await redis.hset(productsKey(product.userId), {
-    [product.id]: await encodeProduct(product),
-  });
+  const value = await encodeProduct(product);
+  await getDb()
+    .insert(products)
+    .values({ id: product.id, userId: product.userId, value, createdAt: product.createdAt })
+    .onConflictDoUpdate({
+      target: products.id,
+      set: {
+        userId: product.userId,
+        value,
+        createdAt: product.createdAt,
+        updatedAt: sql`now()`,
+      },
+    });
 }
 
 export async function getProduct(userId: string, productId: string): Promise<ProductEntry | null> {
-  const redis = getRedis();
-  const raw = await redis.hget<string>(productsKey(userId), productId);
-  if (!raw || typeof raw !== "string") return null;
-  return decodeProduct(raw);
+  const row = await getDb().query.products.findFirst({
+    where: and(eq(products.userId, userId), eq(products.id, productId)),
+  });
+  if (!row) return null;
+  return decodeProduct(row.value);
 }
 
 export async function getAllProducts(userId: string): Promise<ProductEntry[]> {
-  const redis = getRedis();
-  const data = await redis.hgetall<Record<string, string>>(productsKey(userId));
-  if (!data) return [];
+  const rows = await getDb().query.products.findMany({
+    where: eq(products.userId, userId),
+    orderBy: asc(products.createdAt),
+  });
 
-  const products: ProductEntry[] = [];
-  for (const raw of Object.values(data)) {
-    products.push(await decodeProduct(raw));
+  const entries: ProductEntry[] = [];
+  for (const row of rows) {
+    entries.push(await decodeProduct(row.value));
   }
-  return products.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  return entries;
 }
 
 export async function deleteProduct(userId: string, productId: string): Promise<void> {
-  const redis = getRedis();
-  await redis.hdel(productsKey(userId), productId);
+  await getDb()
+    .delete(products)
+    .where(and(eq(products.userId, userId), eq(products.id, productId)));
 }
 
 export async function deleteAllProducts(userId: string): Promise<void> {
-  const redis = getRedis();
-  await redis.del(productsKey(userId));
+  await getDb().delete(products).where(eq(products.userId, userId));
 }

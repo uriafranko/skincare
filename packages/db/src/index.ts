@@ -1,5 +1,7 @@
-export { getRedis } from "./client";
+export { getDb } from "./client";
+export { deleteExpiredExportBlobs, saveExportBlob } from "./exports";
 export { deleteMemory, recallAllMemories, recallMemory, saveMemory } from "./memory";
+export { acquireMessageSlot } from "./message-slots";
 export { deleteAllMessages, getConversationMessages, saveConversationMessages } from "./messages";
 export { deleteOnboardingState, getOnboardingState, setOnboardingState } from "./onboarding";
 export {
@@ -34,6 +36,7 @@ export {
 } from "./routine-log";
 export { getAdherenceStreak, updateAdherenceStreak } from "./streak";
 export {
+  createPendingUserForPhone,
   createPhoneMapping,
   createUser,
   deleteAllUserData,

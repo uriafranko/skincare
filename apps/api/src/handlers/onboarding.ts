@@ -151,23 +151,24 @@ export async function handleOnboarding(
     const reminderTimes = buildReminderTimes(merged);
     const currentProducts = merged.currentProducts ?? [];
 
+    await createUser(userId, encryptedPhone, {
+      name: merged.name!,
+      locale: merged.detectedLocale ?? locale,
+      timezone: merged.timezone!,
+      country,
+      skinType: merged.skinType ?? "unsure",
+      sensitivity: merged.sensitivity ?? "unsure",
+      concerns: merged.concerns ?? [],
+      goals: merged.goals ?? [],
+      allergies: merged.allergies ?? [],
+      currentProducts: merged.currentProducts ?? [],
+      routinePreference: merged.routinePreference ?? "simple",
+      onboardingComplete: true,
+      consentedAt: new Date().toISOString(),
+      consentVersion: CONSENT_VERSION,
+    });
+
     await Promise.all([
-      createUser(userId, encryptedPhone, {
-        name: merged.name!,
-        locale: merged.detectedLocale ?? locale,
-        timezone: merged.timezone!,
-        country,
-        skinType: merged.skinType ?? "unsure",
-        sensitivity: merged.sensitivity ?? "unsure",
-        concerns: merged.concerns ?? [],
-        goals: merged.goals ?? [],
-        allergies: merged.allergies ?? [],
-        currentProducts: merged.currentProducts ?? [],
-        routinePreference: merged.routinePreference ?? "simple",
-        onboardingComplete: true,
-        consentedAt: new Date().toISOString(),
-        consentVersion: CONSENT_VERSION,
-      }),
       ...saveInitialProducts(userId, currentProducts),
       reminderTimes.length > 0 ? setCustomReminderTimes(userId, reminderTimes) : Promise.resolve(),
       deleteOnboardingState(userId),

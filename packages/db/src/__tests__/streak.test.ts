@@ -1,17 +1,10 @@
 import { describe, expect, mock, test } from "bun:test";
+import { createFakeDb } from "./fake-db";
 
-const hashStore: Record<string, Record<string, string>> = {};
-
-const mockRedis = {
-  hgetall: mock((key: string) => Promise.resolve(hashStore[key] ?? null)),
-  hset: mock((key: string, value: Record<string, string>) => {
-    hashStore[key] = { ...(hashStore[key] ?? {}), ...value };
-    return Promise.resolve(1);
-  }),
-};
+const fakeDb = createFakeDb();
 
 mock.module("../client", () => ({
-  getRedis: () => mockRedis,
+  getDb: () => fakeDb,
 }));
 
 const { getAdherenceStreak, updateAdherenceStreak } = await import("../streak");

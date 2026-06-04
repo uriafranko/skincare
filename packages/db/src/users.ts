@@ -1,8 +1,7 @@
 import type { RoutinePreference, SensitivityLevel, SkinType, UserProfile } from "@skintext/shared";
-import { getRedis } from "./client";
-
-const userKey = (userId: string) => `user:${userId}`;
-const phoneIndexKey = (encryptedPhone: string) => `phone:${encryptedPhone}`;
+import { eq } from "drizzle-orm";
+import { getDb } from "./client";
+import { phoneMappings, users } from "./schema";
 
 function parseList(value: unknown): string[] {
   if (!value) return [];
@@ -24,20 +23,86 @@ function stringifyList(value: string[]): string {
 }
 
 export async function resolveUserId(encryptedPhone: string): Promise<string | null> {
-  const redis = getRedis();
-  return await redis.get<string>(phoneIndexKey(encryptedPhone));
+  const row = await getDb().query.phoneMappings.findFirst({
+    where: eq(phoneMappings.encryptedPhone, encryptedPhone),
+  });
+  return row?.userId ?? null;
 }
 
 export async function createPhoneMapping(encryptedPhone: string, userId: string): Promise<void> {
-  const redis = getRedis();
-  await redis.set(phoneIndexKey(encryptedPhone), userId);
+  await getDb().insert(phoneMappings).values({ encryptedPhone, userId }).onConflictDoUpdate({
+    target: phoneMappings.encryptedPhone,
+    set: { userId },
+  });
+}
+
+function pendingUserValues(
+  userId: string,
+  encryptedPhone: string,
+  profile: Pick<UserProfile, "locale" | "timezone" | "country">,
+): typeof users.$inferInsert {
+  return {
+    id: userId,
+    phone: encryptedPhone,
+    name: "",
+    locale: profile.locale,
+    timezone: profile.timezone,
+    country: profile.country,
+    skinType: "unsure",
+    sensitivity: "unsure",
+    concerns: stringifyList([]),
+    goals: stringifyList([]),
+    allergies: stringifyList([]),
+    currentProducts: stringifyList([]),
+    routinePreference: "simple",
+    onboardingComplete: false,
+    consentedAt: null,
+    consentVersion: null,
+    createdAt: new Date().toISOString(),
+  };
+}
+
+export async function createPendingUserForPhone(
+  userId: string,
+  encryptedPhone: string,
+  profile: Pick<UserProfile, "locale" | "timezone" | "country">,
+): Promise<string> {
+  const db = getDb();
+  const [inserted] = await db
+    .insert(users)
+    .values(pendingUserValues(userId, encryptedPhone, profile))
+    .onConflictDoNothing()
+    .returning({ id: users.id });
+
+  const resolvedUserId =
+    inserted?.id ??
+    (
+      await db.query.users.findFirst({
+        columns: { id: true },
+        where: eq(users.phone, encryptedPhone),
+      })
+    )?.id;
+
+  if (!resolvedUserId) {
+    throw new Error("Unable to create or resolve pending user for phone.");
+  }
+
+  await db
+    .insert(phoneMappings)
+    .values({ encryptedPhone, userId: resolvedUserId })
+    .onConflictDoUpdate({
+      target: phoneMappings.encryptedPhone,
+      set: { userId: resolvedUserId },
+    });
+
+  return resolvedUserId;
 }
 
 export async function getUser(userId: string): Promise<UserProfile | null> {
-  const redis = getRedis();
-  const data = await redis.hgetall(userKey(userId));
-  if (!data || Object.keys(data).length === 0) return null;
-  const d = data as Record<string, unknown>;
+  const d = await getDb().query.users.findFirst({
+    where: eq(users.id, userId),
+  });
+  if (!d) return null;
   return {
     id: userId,
     phone: String(d.phone ?? ""),
@@ -64,87 +129,129 @@ export async function createUser(
   encryptedPhone: string,
   profile: Omit<UserProfile, "id" | "phone" | "createdAt">,
 ): Promise<void> {
-  const redis = getRedis();
-  await redis.hset(userKey(userId), {
-    phone: encryptedPhone,
-    name: profile.name,
-    locale: profile.locale,
-    timezone: profile.timezone,
-    country: profile.country,
-    skinType: profile.skinType,
-    sensitivity: profile.sensitivity,
-    concerns: stringifyList(profile.concerns),
-    goals: stringifyList(profile.goals),
-    allergies: stringifyList(profile.allergies),
-    currentProducts: stringifyList(profile.currentProducts),
-    routinePreference: profile.routinePreference,
-    onboardingComplete: String(profile.onboardingComplete),
-    consentedAt: profile.consentedAt ?? "",
-    consentVersion: profile.consentVersion ?? "",
-    createdAt: new Date().toISOString(),
-  });
+  const createdAt = new Date().toISOString();
+  await getDb()
+    .insert(users)
+    .values({
+      id: userId,
+      phone: encryptedPhone,
+      name: profile.name,
+      locale: profile.locale,
+      timezone: profile.timezone,
+      country: profile.country,
+      skinType: profile.skinType,
+      sensitivity: profile.sensitivity,
+      concerns: stringifyList(profile.concerns),
+      goals: stringifyList(profile.goals),
+      allergies: stringifyList(profile.allergies),
+      currentProducts: stringifyList(profile.currentProducts),
+      routinePreference: profile.routinePreference,
+      onboardingComplete: profile.onboardingComplete,
+      consentedAt: profile.consentedAt,
+      consentVersion: profile.consentVersion,
+      createdAt,
+    })
+    .onConflictDoUpdate({
+      target: users.id,
+      set: {
+        phone: encryptedPhone,
+        name: profile.name,
+        locale: profile.locale,
+        timezone: profile.timezone,
+        country: profile.country,
+        skinType: profile.skinType,
+        sensitivity: profile.sensitivity,
+        concerns: stringifyList(profile.concerns),
+        goals: stringifyList(profile.goals),
+        allergies: stringifyList(profile.allergies),
+        currentProducts: stringifyList(profile.currentProducts),
+        routinePreference: profile.routinePreference,
+        onboardingComplete: profile.onboardingComplete,
+        consentedAt: profile.consentedAt,
+        consentVersion: profile.consentVersion,
+      },
+    });
+  await createPhoneMapping(encryptedPhone, userId);
 }
 
 export async function updateUser(
   userId: string,
   fields: Partial<Record<string, string>>,
 ): Promise<void> {
-  const redis = getRedis();
-  await redis.hset(userKey(userId), fields);
+  const updates: Partial<typeof users.$inferInsert> = {};
+
+  for (const [key, value] of Object.entries(fields)) {
+    switch (key) {
+      case "phone":
+        updates.phone = value;
+        break;
+      case "name":
+        updates.name = value;
+        break;
+      case "locale":
+        updates.locale = value;
+        break;
+      case "timezone":
+        updates.timezone = value;
+        break;
+      case "country":
+        updates.country = value;
+        break;
+      case "skinType":
+        updates.skinType = value;
+        break;
+      case "sensitivity":
+        updates.sensitivity = value;
+        break;
+      case "concerns":
+        updates.concerns = value;
+        break;
+      case "goals":
+        updates.goals = value;
+        break;
+      case "allergies":
+        updates.allergies = value;
+        break;
+      case "currentProducts":
+        updates.currentProducts = value;
+        break;
+      case "routinePreference":
+        updates.routinePreference = value;
+        break;
+      case "onboardingComplete":
+        updates.onboardingComplete = value === "true";
+        break;
+      case "consentedAt":
+        updates.consentedAt = value || null;
+        break;
+      case "consentVersion":
+        updates.consentVersion = value || null;
+        break;
+      case "createdAt":
+        updates.createdAt = value;
+        break;
+    }
+  }
+
+  if (Object.keys(updates).length === 0) return;
+  await getDb().update(users).set(updates).where(eq(users.id, userId));
 }
 
 export async function userExists(userId: string): Promise<boolean> {
-  const redis = getRedis();
-  return (await redis.exists(userKey(userId))) === 1;
+  const row = await getDb().query.users.findFirst({
+    columns: { id: true },
+    where: eq(users.id, userId),
+  });
+  return !!row;
 }
 
 export async function withdrawConsent(userId: string): Promise<void> {
-  const redis = getRedis();
-  await redis.hset(userKey(userId), { consentedAt: "", consentVersion: "" });
+  await getDb()
+    .update(users)
+    .set({ consentedAt: null, consentVersion: null })
+    .where(eq(users.id, userId));
 }
 
 export async function deleteAllUserData(userId: string): Promise<void> {
-  const redis = getRedis();
-
-  const user = await getUser(userId);
-  const keysToDelete: string[] = [
-    userKey(userId),
-    `routine_streak:${userId}`,
-    `memory:${userId}`,
-    `messages:${userId}`,
-    `products:${userId}`,
-    `reminder:${userId}`,
-    `reminder_times:${userId}`,
-    `one_off_reminders:${userId}`,
-    `onboarding:${userId}`,
-    `export:${userId}`,
-  ];
-
-  if (user?.phone) {
-    keysToDelete.push(phoneIndexKey(user.phone));
-  }
-
-  let cursor = "0";
-  do {
-    const [nextCursor, keys] = (await redis.scan(Number(cursor), {
-      match: `routine_logs:${userId}:*`,
-      count: 100,
-    })) as unknown as [string, string[]];
-    cursor = nextCursor;
-    for (const key of keys) {
-      const entryIds = await redis.zrange<string[]>(key, 0, -1);
-      for (const entryId of entryIds ?? []) {
-        keysToDelete.push(`routine_entry:${entryId}`);
-      }
-      keysToDelete.push(key);
-    }
-  } while (cursor !== "0");
-
-  if (keysToDelete.length > 0) {
-    const pipeline = redis.pipeline();
-    for (const key of keysToDelete) {
-      pipeline.del(key);
-    }
-    await pipeline.exec();
-  }
+  await getDb().delete(users).where(eq(users.id, userId));
 }

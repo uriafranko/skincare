@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { createSharedMock } from "./shared-mock";
 
 let waitMs = 0;
 let reminderQueue: unknown[] = [];
@@ -15,9 +16,7 @@ mock.module("workflow", () => ({
   sleep,
 }));
 
-mock.module("@skintext/shared", () => ({
-  msUntil: () => waitMs,
-}));
+mock.module("@skintext/shared", () => createSharedMock({ msUntil: () => waitMs }));
 
 mock.module("../steps/reminder-steps", () => ({
   loadOneOffReminder,
