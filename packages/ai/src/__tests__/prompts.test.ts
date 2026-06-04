@@ -84,6 +84,14 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain('Never say "I remember from memory"');
   });
 
+  test("includes grounded personalization guidance", () => {
+    const prompt = buildSkintextSystemPrompt(makeContext());
+    expect(prompt).toContain("Use the user's first name occasionally");
+    expect(prompt).toContain("Compliment choices and care, not appearance");
+    expect(prompt).toContain("Avoid romantic, intense, dependency-building, or generic flattery");
+    expect(prompt).toContain("Make the user feel seen");
+  });
+
   test("includes context priority guidance", () => {
     const prompt = buildSkintextSystemPrompt(makeContext());
     expect(prompt).toContain("Context priority");
@@ -158,6 +166,8 @@ describe("scheduled prompts", () => {
     const prompt = buildDailyRoutineSummaryPrompt("sv");
     expect(prompt).toContain("Swedish");
     expect(prompt).toContain("morning and evening routines");
+    expect(prompt).toContain("user's first name");
+    expect(prompt).toContain("grounded encouragement");
     expect(prompt).toContain("Do not use labeled sections");
   });
 
@@ -166,11 +176,15 @@ describe("scheduled prompts", () => {
     expect(prompt).toContain("English");
     expect(prompt).toContain("done/skip");
     expect(prompt).toContain("product/skin photo");
+    expect(prompt).toContain("user's first name");
+    expect(prompt).toContain("tiny grounded encouragement");
   });
 
   test("weekly recap is adherence focused", () => {
     const prompt = buildWeeklyRoutineRecapPrompt("en");
     expect(prompt).toContain("morning/evening routine slots");
     expect(prompt).toContain("conversational");
+    expect(prompt).toContain("user's first name");
+    expect(prompt).toContain("grounded encouragement");
   });
 });

@@ -49,7 +49,7 @@ const extractionSchema = z.object({
 const CONSENT_ONLY_REPLY = "OK if I save this so reminders/logs work? You can delete it anytime.";
 
 const ENGLISH_GREETING_SETUP_REPLY =
-  "Hey, I'm Skintext. I build simple routines and reminders by text. Send your name, main skin concern, skin type/sensitivity if known, anything you avoid, and current products. Unsure is fine. OK if I save this so reminders/logs work? You can delete anytime.";
+  "Hey, I'm Skintext. I'll help build a simple routine that fits you. Tell me your name, main skin goal, skin type/sensitivity if known, anything you avoid, and current products. Unsure is fine. OK if I save this so reminders/logs work? You can delete anytime.";
 
 function formatList(values?: string[]): string | null {
   return values?.length ? values.join(", ") : null;
@@ -142,6 +142,8 @@ export async function processOnboardingMessage(
 CONTENT (keep SHORT -- 2-3 short sentences, one bubble when possible):
 - Lead with the payoff in plain language: Skintext helps build a practical routine and keeps reminders/logs by text.
 - First interpret the user's message and extract it. Do not ask for anything they already gave.
+- If they give a first name, use it once in a natural spot.
+- When they share useful setup details, add one tiny, specific positive acknowledgment like "Nice, that's a clear starting point" or "Good call keeping it simple." Compliment their choices or clarity, not their appearance.
 - Any skin concern counts as the goal/concern. Dry cheeks, breakouts, acne, redness, texture, irritation, and similar phrases are enough.
 - Current products and reminder times are useful but optional. Do not block consent or completion on them.
 - If this message contains name + any skin goal/concern + skin type/sensitivity and only consent is missing, reply ONLY: "${CONSENT_ONLY_REPLY}"
@@ -155,15 +157,17 @@ CONTENT (keep SHORT -- 2-3 short sentences, one bubble when possible):
 
 TONE: warm, direct, iMessage-native. No bullets, no form language, no sales copy.`;
   } else if (ctx.complete) {
-    situation = `The user is fully set up. Reply with ONLY:
-"All set. Text done after your routine, or send a skin/product photo anytime you want help placing something."
-No extra commentary.`;
+    situation = `The user is fully set up. Reply with one compact confirmation in the user's language.
+Start with the natural equivalent of "All set" and use their first name if known.
+Add one brief, grounded compliment about their setup choices or clarity, not their appearance.
+Then include this next step in natural wording: text done after their routine, or send a skin/product photo anytime they want help placing something.
+Keep it to 1-2 short sentences.`;
   } else {
     situation = `This is a follow-up message. The user already provided some info.
 Already collected: ${describeState(state)}.
 Still missing: ${describeMissing(state)}.
 
-In your reply: briefly acknowledge any new info they just provided, then ask only for what is still missing -- one or two asks at a time if several fields are missing. Any concern counts as a goal/concern, so do not ask what they want to improve if they mention dryness, breakouts, acne, redness, texture, or similar concerns. If only consent is missing, ask exactly: "${CONSENT_ONLY_REPLY}" Keep it short and conversational.`;
+In your reply: briefly acknowledge any new info they just provided, then ask only for what is still missing -- one or two asks at a time if several fields are missing. If you know their first name, use it only when it feels natural, not in every reply. Add one small, specific positive acknowledgment when they share useful skincare context, like "Good call avoiding fragrance" or "Nice, that helps." Any concern counts as a goal/concern, so do not ask what they want to improve if they mention dryness, breakouts, acne, redness, texture, or similar concerns. If only consent is missing, ask exactly: "${CONSENT_ONLY_REPLY}" Keep it short and conversational.`;
   }
 
   const { output } = await generateText({
@@ -193,6 +197,8 @@ REPLY INSTRUCTIONS:
 - Do NOT repeat or echo every detail back. Just move on to what's next.
 - Never repeat a greeting if the user already introduced themselves.
 - Be direct like a friend texting, not formal.
+- Make the user feel seen through one relevant detail or grounded compliment, not generic hype.
+- Never use romantic, intense, dependency-building, or appearance-based flattery.
 - Avoid listy setup language like "please provide", "required fields", or "the following".
 - Use plain ASCII punctuation. Avoid curly quotes, curly apostrophes, and em dashes.
 - Use normal contractions with straight apostrophes, like "don't" and "can't".

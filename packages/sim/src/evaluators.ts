@@ -29,6 +29,15 @@ function includesForbiddenTerm(text: string, terms: string[]): string | null {
   return terms.find((term) => lower.includes(term.toLowerCase())) ?? null;
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function assistantMentionsName(transcript: TranscriptMessage[], name: string): boolean {
+  const namePattern = new RegExp(`\\b${escapeRegExp(name)}\\b`, "i");
+  return assistantMessages(transcript).some((message) => namePattern.test(message.content));
+}
+
 function mentionsNameAsk(text: string): boolean {
   return /\b(name|call you)\b/i.test(text);
 }
@@ -122,6 +131,18 @@ export function evaluateOnboardingSimulation(
       pass: longest <= expectations.maxAssistantChars,
       severity: "warning",
       message: `Longest assistant message was ${longest}/${expectations.maxAssistantChars} chars.`,
+    });
+  }
+
+  if (expectations.addressUserByName) {
+    const name = finalState?.name;
+    pushCheck(checks, {
+      id: "personalized_name",
+      pass: !!name && assistantMentionsName(transcript, name),
+      severity: "warning",
+      message: name
+        ? `Assistant should address ${name} by name at least once.`
+        : "Assistant should address the user by name once a name is captured.",
     });
   }
 

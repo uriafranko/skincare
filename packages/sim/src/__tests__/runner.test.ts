@@ -26,6 +26,9 @@ describe("local simulator", () => {
     expect(result.finalState?.name).toBe("Noor");
     expect(result.finalState?.consented).toBe(true);
     expect(result.evaluation.pass).toBe(true);
+    expect(result.evaluation.checks.find((check) => check.id === "personalized_name")?.pass).toBe(
+      true,
+    );
   });
 
   test("keeps fragmented onboarding facts stable in stub mode", async () => {
@@ -49,6 +52,11 @@ describe("local simulator", () => {
     expect(result.finalState?.skinType).toBe("unsure");
     expect(result.finalState?.morningReminder).toBe("07:30");
     expect(result.finalState?.eveningReminder).toBe("22:00");
+    const finalAssistant = result.transcript
+      .filter((message) => message.role === "assistant")
+      .at(-1);
+    expect(finalAssistant?.content).toContain("Leo");
+    expect(finalAssistant?.content).toContain("Good call keeping it simple");
   });
 
   test("keeps greeting-only setup compact and optional about reminders", async () => {

@@ -18,6 +18,7 @@ export interface SimulationExpectations {
   maxAssistantChars?: number;
   requiredFields?: string[];
   forbiddenAssistantTerms?: string[];
+  addressUserByName?: boolean;
 }
 
 export interface ScriptedPersonaConfig {

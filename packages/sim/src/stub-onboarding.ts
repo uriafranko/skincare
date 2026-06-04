@@ -11,7 +11,7 @@ import {
 } from "./onboarding-state";
 
 const GREETING_SETUP_REPLY =
-  "Hey, I'm Skintext. I build simple routines and reminders by text. Send your name, main skin concern, skin type/sensitivity if known, anything you avoid, and current products. Unsure is fine. OK if I save this so reminders/logs work? You can delete anytime.";
+  "Hey, I'm Skintext. I'll help build a simple routine that fits you. Tell me your name, main skin goal, skin type/sensitivity if known, anything you avoid, and current products. Unsure is fine. OK if I save this so reminders/logs work? You can delete anytime.";
 
 const CONSENT_ONLY_REPLY = "OK if I save this so reminders/logs work? You can delete it anytime.";
 
@@ -142,6 +142,13 @@ function extractConsent(lower: string, previousBotReply?: string): boolean | und
   return undefined;
 }
 
+function buildCompleteReply(state: OnboardingState): string {
+  const name = state.name ? `, ${state.name}` : "";
+  const compliment =
+    state.routinePreference === "simple" ? "Good call keeping it simple." : "Nice clear setup.";
+  return `All set${name}. ${compliment} Text done after your routine, or send a skin/product photo anytime you want help placing something.`;
+}
+
 export function extractStubOnboarding(
   text: string,
   state: OnboardingState,
@@ -185,7 +192,7 @@ export function extractStubOnboarding(
 
 export function buildStubReply(state: OnboardingState, isFirstMessage: boolean): string {
   if (isLocalOnboardingComplete(state)) {
-    return "All set. Text done after your routine, or send a skin/product photo anytime you want help placing something.";
+    return buildCompleteReply(state);
   }
 
   const missing = getMissingOnboardingFields(state);
@@ -193,12 +200,12 @@ export function buildStubReply(state: OnboardingState, isFirstMessage: boolean):
     return GREETING_SETUP_REPLY;
   }
 
-  if (missing.includes("name")) return "What should I call you?";
+  if (missing.includes("name")) return "What should I call you? I want this to feel personal.";
   if (missing.includes("skin_goals")) {
-    return "What are you mainly trying to improve right now?";
+    return "Nice, that helps. What are you mainly trying to improve right now?";
   }
   if (missing.includes("skin_profile")) {
-    return "What's your skin type or sensitivity like? Unsure is completely fine.";
+    return "Good to know. What's your skin type or sensitivity like? Unsure is completely fine.";
   }
   if (missing.includes("consent")) {
     return CONSENT_ONLY_REPLY;
