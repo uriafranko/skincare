@@ -39,6 +39,17 @@ describe("reply bubble splitting", () => {
     ]);
   });
 
+  test("breaks onboarding-style replies with a short opener into natural bubbles", () => {
+    const text =
+      "No worries \u{1f60a} Send me your skin goals/concerns, your skin type if you know it (or \u201cunsure\u201d), and whether you\u2019re okay with me storing your skincare info so reminders and logs work. You can delete it anytime.";
+
+    expect(splitReplyIntoBubbles(text)).toEqual([
+      "No worries \u{1f60a}",
+      "Send me your skin goals/concerns, your skin type if you know it (or \u201cunsure\u201d), and whether you\u2019re okay with me storing your skincare info so reminders and logs work.",
+      "You can delete it anytime.",
+    ]);
+  });
+
   test("does not split structured status replies for style", () => {
     const text = "Today\nAM: done\nPM: not logged\nProducts: cleanser\nNotes: none";
 

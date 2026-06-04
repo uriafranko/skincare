@@ -1,5 +1,5 @@
-const DEFAULT_MIN_CHARS = 220;
-const DEFAULT_MAX_CHARS = 420;
+const DEFAULT_MIN_CHARS = 120;
+const DEFAULT_MAX_CHARS = 180;
 const DEFAULT_HARD_MAX_CHARS = 1400;
 const DEFAULT_MAX_CHUNKS = 4;
 const NATURAL_DELAY_MIN_MS = 800;
@@ -25,6 +25,23 @@ interface ResolvedSplitOptions {
   hardMaxChars: number;
   maxChunks: number;
 }
+
+const LEADING_OPENERS = [
+  "No worries",
+  "Got it",
+  "Okay",
+  "Ok",
+  "Sounds good",
+  "Perfect",
+  "Thanks",
+  "Thank you",
+  "Sure",
+  "Absolutely",
+  "Yep",
+  "Yeah",
+  "All set",
+  "Done",
+];
 
 let sendblueModule: Promise<typeof import("./sendblue")> | null = null;
 
@@ -78,6 +95,38 @@ function isStructuredReply(text: string): boolean {
 function sentenceSegments(text: string): string[] {
   const matches = text.match(/[^.!?。！？]+[.!?。！？]+(?:["')\]]+)?|[^.!?。！？]+$/g);
   return (matches ?? [text]).map((part) => part.trim()).filter(Boolean);
+}
+
+function splitLeadingOpener(
+  text: string,
+  options: ResolvedSplitOptions,
+): { opener: string; rest: string } | null {
+  if (text.length <= options.maxChars) return null;
+
+  const lower = text.toLowerCase();
+  for (const opener of LEADING_OPENERS) {
+    if (!lower.startsWith(opener.toLowerCase())) continue;
+
+    const afterOpener = text.slice(opener.length);
+    const match = /^([^A-Za-z0-9]*)([\s\S]+)$/.exec(afterOpener);
+    if (!match) continue;
+
+    const separator = match[1] ?? "";
+    const rest = (match[2] ?? "").trim();
+    const openerText = `${opener}${separator}`.trim();
+    const hasVisibleSeparator = /[^\s]/.test(separator);
+    const restStartsSentence = /^[A-Z]/.test(rest);
+
+    if (
+      openerText.length <= 35 &&
+      rest.length >= options.minChars &&
+      (hasVisibleSeparator || restStartsSentence)
+    ) {
+      return { opener: openerText, rest };
+    }
+  }
+
+  return null;
 }
 
 function splitLongSegment(segment: string, maxChars: number): string[] {
@@ -195,6 +244,15 @@ export function splitReplyIntoBubbles(
   if (normalized.length <= options.minChars) return [normalized];
   if (isStructuredReply(normalized) && normalized.length <= options.hardMaxChars) {
     return [normalized];
+  }
+
+  const leadingOpener = splitLeadingOpener(normalized, options);
+  if (leadingOpener) {
+    return coalesceChunks(
+      [leadingOpener.opener, ...splitReplyIntoBubbles(leadingOpener.rest, splitOptions)],
+      options.maxChunks,
+      options.hardMaxChars,
+    );
   }
 
   const { joiner, segments } = chooseSegments(normalized);
