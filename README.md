@@ -49,6 +49,17 @@ bun --cwd packages/db run db:migrate
 bun run dev
 ```
 
+### Local simulation
+
+Run local scripted simulations without Sendblue webhooks:
+
+```bash
+bun run sim --scenario all
+```
+
+Use `bun run sim play` to manually text the onboarding runtime in the terminal. See
+`docs/local-simulator.md` for live/stub modes and iteration workflow.
+
 ### 5. Deploy to Vercel
 
 ```bash

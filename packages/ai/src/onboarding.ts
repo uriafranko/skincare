@@ -2,9 +2,6 @@ import type { LanguageModelV3 } from "@ai-sdk/provider";
 import type { OnboardingState } from "@skintext/shared";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { createDefaultGatewayModel } from "./models";
-
-const defaultModel = createDefaultGatewayModel();
 
 const extractionSchema = z.object({
   name: z.string().nullable().describe("User's first name. Null if not mentioned."),
@@ -100,6 +97,7 @@ export async function processOnboardingMessage(
   ctx: OnboardingContext,
   model?: LanguageModelV3,
 ): Promise<OnboardingResult> {
+  const resolvedModel = model ?? (await import("./models")).createDefaultGatewayModel();
   const replyLang = state.detectedLocale
     ? `Reply in ${state.detectedLocale} (the user's language).`
     : "Reply in the same language the user writes in. Detect their language from the message.";
@@ -136,7 +134,7 @@ In your reply: briefly acknowledge any new info they just provided, then ask onl
   }
 
   const { output } = await generateText({
-    model: model ?? defaultModel,
+    model: resolvedModel,
     output: Output.object({ schema: extractionSchema }),
     prompt: `You are Skintext, a friendly skincare routine assistant in iMessage. ${replyLang}
 ${conversationContext}

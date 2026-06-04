@@ -1,0 +1,217 @@
+import type {
+  OnboardingState,
+  RoutinePreference,
+  SensitivityLevel,
+  SkinType,
+} from "@skintext/shared";
+import {
+  getMissingOnboardingFields,
+  isLocalOnboardingComplete,
+  mergeOnboardingState,
+} from "./onboarding-state";
+
+const concernKeywords = [
+  "acne",
+  "breakout",
+  "breakouts",
+  "redness",
+  "dryness",
+  "dry cheeks",
+  "oily",
+  "pores",
+  "texture",
+  "pigmentation",
+  "dark spots",
+  "wrinkles",
+];
+
+const goalKeywords = ["glow", "simple routine", "simpler routine", "clear skin", "even tone"];
+const productKeywords = [
+  "cleanser",
+  "moisturizer",
+  "moisturiser",
+  "spf",
+  "sunscreen",
+  "serum",
+  "retinol",
+  "cerave",
+  "tretinoin",
+];
+
+function titleCaseName(value: string): string {
+  const [first] = value.trim().split(/\s+/);
+  if (!first) return value;
+  return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+}
+
+function extractName(text: string): string | undefined {
+  const match =
+    /\b(?:i am|i'm|im|my name is|name is|call me|jag heter)\s+([a-z][a-z'-]*)/i.exec(text) ??
+    /^([A-Z][a-z'-]{1,20})\b/.exec(text.trim());
+  if (!match?.[1]) return undefined;
+
+  const name = titleCaseName(match[1]);
+  if (/^(Yes|Yeah|Yep|Ok|Okay|Sure|Fine|Hi|Hey|Hello|Thanks)$/.test(name)) return undefined;
+  return name;
+}
+
+function extractSkinType(lower: string): SkinType | undefined {
+  if (/\bnot sure\b|\bunsure\b|\bdon't know\b/.test(lower)) return "unsure";
+  if (/\bcombination\b/.test(lower)) return "combination";
+  if (/\boily\b/.test(lower)) return "oily";
+  if (/\bdry\b/.test(lower)) return "dry";
+  if (/\bnormal\b/.test(lower)) return "normal";
+  return undefined;
+}
+
+function extractSensitivity(lower: string): SensitivityLevel | undefined {
+  if (/\bhigh sensitivity\b|\bvery sensitive\b|\beasily irritated\b/.test(lower)) return "high";
+  if (/\bmedium sensitivity\b|\bsomewhat sensitive\b/.test(lower)) return "medium";
+  if (/\blow sensitivity\b|\bnot sensitive\b/.test(lower)) return "low";
+  if (/\bsensitivity.*(?:not sure|unsure)\b/.test(lower)) return "unsure";
+  return undefined;
+}
+
+function extractRoutinePreference(lower: string): RoutinePreference | undefined {
+  if (/\bsimple\b|\bbasic\b|\bminimal\b/.test(lower)) return "simple";
+  if (/\bdetailed\b|\badvanced\b/.test(lower)) return "detailed";
+  if (/\bstandard\b/.test(lower)) return "standard";
+  return undefined;
+}
+
+function collectKeywords(lower: string, keywords: string[]): string[] {
+  return keywords.filter((keyword) => lower.includes(keyword));
+}
+
+function extractAllergies(lower: string): string[] {
+  const allergies: string[] = [];
+  if (/\bfragrance\b/.test(lower)) allergies.push("fragrance");
+  if (/\ballerg(?:y|ic|ies)\b/.test(lower)) allergies.push("reported allergy");
+  return allergies;
+}
+
+function normalizeTime(hour: number, minute: number, meridiem?: string): string {
+  let normalizedHour = hour;
+  if (meridiem?.toLowerCase() === "pm" && normalizedHour < 12) normalizedHour += 12;
+  if (meridiem?.toLowerCase() === "am" && normalizedHour === 12) normalizedHour = 0;
+  return `${String(normalizedHour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
+
+function extractReminderTimes(
+  text: string,
+): Pick<OnboardingState, "morningReminder" | "eveningReminder"> {
+  const matches = Array.from(text.matchAll(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b/gi)).map(
+    (match) => {
+      const hour = Number(match[1]);
+      const minute = match[2] ? Number(match[2]) : 0;
+      const meridiem = match[3];
+      if (hour > 23 || minute > 59) return null;
+      return {
+        rawHour: hour,
+        value: normalizeTime(hour, minute, meridiem),
+        meridiem: meridiem?.toLowerCase(),
+      };
+    },
+  );
+
+  const valid = matches.filter((match): match is NonNullable<typeof match> => !!match);
+  const out: Pick<OnboardingState, "morningReminder" | "eveningReminder"> = {};
+
+  for (const match of valid) {
+    if (!out.morningReminder && (match.meridiem === "am" || match.rawHour < 12)) {
+      out.morningReminder = match.value;
+      continue;
+    }
+    if (!out.eveningReminder) out.eveningReminder = match.value;
+  }
+
+  return out;
+}
+
+function extractConsent(lower: string, previousBotReply?: string): boolean | undefined {
+  const mentionsStorage = /\b(save|store|consent|data)\b/.test(lower);
+  const affirmative = /\b(yes|yep|yeah|ok|okay|sure|agree|fine|consent)\b/.test(lower);
+  const previousAskedConsent = /\b(save|store|consent|data)\b/i.test(previousBotReply ?? "");
+  if ((mentionsStorage && affirmative) || (previousAskedConsent && affirmative)) return true;
+  return undefined;
+}
+
+export function extractStubOnboarding(
+  text: string,
+  state: OnboardingState,
+): Partial<OnboardingState> {
+  const lower = text.toLowerCase();
+  const extracted: Partial<OnboardingState> = {};
+
+  if (!state.name) {
+    const name = extractName(text);
+    if (name) extracted.name = name;
+  }
+
+  const skinType = extractSkinType(lower);
+  if (skinType) extracted.skinType = skinType;
+
+  const sensitivity = extractSensitivity(lower);
+  if (sensitivity) extracted.sensitivity = sensitivity;
+
+  const concerns = collectKeywords(lower, concernKeywords);
+  if (concerns.length) extracted.concerns = concerns;
+
+  const goals = collectKeywords(lower, goalKeywords);
+  if (goals.length) extracted.goals = goals;
+
+  const allergies = extractAllergies(lower);
+  if (allergies.length) extracted.allergies = allergies;
+
+  const currentProducts = collectKeywords(lower, productKeywords);
+  if (currentProducts.length) extracted.currentProducts = currentProducts;
+
+  const routinePreference = extractRoutinePreference(lower);
+  if (routinePreference) extracted.routinePreference = routinePreference;
+
+  Object.assign(extracted, extractReminderTimes(text));
+
+  const consented = extractConsent(lower, state.lastBotReply);
+  if (consented) extracted.consented = true;
+
+  return extracted;
+}
+
+export function buildStubReply(state: OnboardingState, isFirstMessage: boolean): string {
+  if (isLocalOnboardingComplete(state)) {
+    return "All set. Text done after your routine, or send a skin/product photo whenever you want help placing something.";
+  }
+
+  const missing = getMissingOnboardingFields(state);
+  if (isFirstMessage && missing.length > 1) {
+    return "Hey, I'm Skintext. Send your name, main skin goals, skin type if you know it, sensitivity/allergies, current products, and AM/PM reminder times. Unsure is fine.";
+  }
+
+  if (missing.includes("name")) return "What should I call you?";
+  if (missing.includes("skin_goals")) {
+    return "What are your main skin goals or concerns right now?";
+  }
+  if (missing.includes("skin_profile")) {
+    return "What's your skin type or sensitivity level? Unsure is completely fine.";
+  }
+  if (missing.includes("consent")) {
+    return "Last thing: OK if I save what you share so reminders and routine logs work? You can delete it anytime.";
+  }
+
+  return "Got it. What else should I know for setup?";
+}
+
+export function advanceStubOnboarding(
+  text: string,
+  state: OnboardingState,
+  isFirstMessage: boolean,
+): { state: OnboardingState; reply: string; complete: boolean } {
+  const extracted = extractStubOnboarding(text, state);
+  const merged = mergeOnboardingState(state, extracted);
+  const reply = buildStubReply(merged, isFirstMessage);
+  return {
+    state: { ...merged, lastBotReply: reply },
+    reply,
+    complete: isLocalOnboardingComplete(merged),
+  };
+}
