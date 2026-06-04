@@ -1,5 +1,4 @@
-import { openai } from "@ai-sdk/openai";
-import { processOnboardingMessage } from "@skintext/ai";
+import { createDefaultGatewayModel, processOnboardingMessage } from "@skintext/ai";
 import {
   createUser,
   deleteOnboardingState,
@@ -100,7 +99,7 @@ export async function handleOnboarding(
   }
 
   const ai = createAILogger(log);
-  const model = ai.wrap(openai("gpt-4.1-mini"));
+  const model = ai.wrap(createDefaultGatewayModel());
 
   log.set({ onboarding: { isFirstMessage, stateFields: Object.keys(state).length } });
 

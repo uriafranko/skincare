@@ -4,11 +4,13 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".output/**", ".next/**"],
+      "outputs": ["dist/**", ".output/**", ".next/**", ".vercel/output/**"],
       "env": [
-        "OPENAI_API_KEY",
         "DATABASE_URL",
         "ENCRYPTION_KEY",
+        "AI_GATEWAY_API_KEY",
+        "AI_GATEWAY_DEFAULT_MODEL",
+        "AI_GATEWAY_COMPACTION_MODEL",
         "SENDBLUE_API_KEY",
         "SENDBLUE_API_SECRET",
         "SENDBLUE_FROM_NUMBER",

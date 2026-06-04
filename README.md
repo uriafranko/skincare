@@ -7,7 +7,7 @@ iMessage skincare routine assistant powered by AI.
 - **Runtime**: Bun + Turborepo monorepo
 - **API**: Hono on Nitro
 - **iMessage**: Sendblue adapter
-- **AI**: AI SDK v6 + GPT-4.1
+- **AI**: AI SDK v6 + Vercel AI Gateway
 - **Database**: Neon Postgres + Drizzle ORM
 - **Workflows**: Vercel Workflow SDK for durable reminders
 
@@ -32,8 +32,10 @@ Fill in the required keys:
 | `SENDBLUE_API_KEY` / `SENDBLUE_API_SECRET` | [sendblue.co](https://sendblue.co) |
 | `SENDBLUE_FROM_NUMBER` | Your Sendblue phone number |
 | `DATABASE_URL` | [neon.tech](https://neon.tech) pooled Postgres connection string |
-| `OPENAI_API_KEY` | [platform.openai.com](https://platform.openai.com) |
 | `ENCRYPTION_KEY` | 64-char hex key from `openssl rand -hex 32` |
+| `AI_GATEWAY_API_KEY` | [vercel.com/ai-gateway](https://vercel.com/ai-gateway) |
+| `AI_GATEWAY_DEFAULT_MODEL` | Default: `openai/gpt-5.4-mini` |
+| `AI_GATEWAY_COMPACTION_MODEL` | Default: `openai/gpt-5.4-nano` |
 
 ### 3. Apply database migrations
 
@@ -84,7 +86,7 @@ skintext/
 2. Sendblue forwards the message via webhook.
 3. New users go through conversational onboarding for skin goals, sensitivities, products, reminders, and consent.
 4. Returning users interact with the AI assistant.
-5. Photos are analyzed with GPT-4.1 vision for skin-photo, product-label, and routine-shelf support.
+5. Photos are analyzed with the configured Gateway model for skin-photo, product-label, and routine-shelf support.
 6. Text updates log routine steps, products, reactions, and skips.
 7. Morning and evening reminders are timezone-aware.
 8. End-of-day summaries report AM/PM completion, products used, and noted reactions.

@@ -48,8 +48,11 @@
       "!**/node_modules",
       "!**/.next",
       "!**/.output",
+      "!**/.vercel",
       "!**/dist",
       "!**/.turbo",
+      "!**/.swc",
+      "!**/*.tsbuildinfo",
       "!**/bun.lock",
       "!**/*.css"
     ]

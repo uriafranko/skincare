@@ -3,10 +3,8 @@ import { eq, sql } from "drizzle-orm";
 import { getDb } from "./client";
 import { conversationMessages } from "./schema";
 
-const MAX_CONVERSATION_MESSAGES = 40;
-
 export async function saveConversationMessages(userId: string, messages: unknown[]): Promise<void> {
-  const json = JSON.stringify(messages.slice(-MAX_CONVERSATION_MESSAGES));
+  const json = JSON.stringify(messages);
   const encrypted = await encryptContent(json);
   await getDb()
     .insert(conversationMessages)

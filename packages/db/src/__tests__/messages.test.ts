@@ -65,6 +65,19 @@ describe("conversation messages", () => {
     expect(loaded).toHaveLength(4);
   });
 
+  test("preserves more than 40 messages", async () => {
+    const messages = Array.from({ length: 45 }, (_, i) => ({
+      role: i % 2 === 0 ? "user" : "assistant",
+      content: `message ${i}`,
+    }));
+
+    await saveConversationMessages("usr_long", messages);
+    const loaded = await getConversationMessages("usr_long");
+
+    expect(loaded).toEqual(messages);
+    expect(loaded).toHaveLength(45);
+  });
+
   test("returns empty array for unknown user", async () => {
     const messages = await getConversationMessages("usr_unknown");
     expect(messages).toEqual([]);
