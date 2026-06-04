@@ -8,9 +8,9 @@ describe("reply bubble splitting", () => {
     ]);
   });
 
-  test("replaces em dashes before delivery", () => {
-    expect(splitReplyIntoBubbles("Cleanser \u2014 moisturizer \u2014 SPF.")).toEqual([
-      "Cleanser - moisturizer - SPF.",
+  test("replaces smart punctuation before delivery", () => {
+    expect(splitReplyIntoBubbles("\u201cCleanser\u201d \u2014 it\u2019s useful.")).toEqual([
+      '"Cleanser" - it\'s useful.',
     ]);
   });
 
@@ -51,8 +51,23 @@ describe("reply bubble splitting", () => {
 
     expect(splitReplyIntoBubbles(text)).toEqual([
       "No worries \u{1f60a}",
-      "Send me your skin goals/concerns, your skin type if you know it (or \u201cunsure\u201d), and whether you\u2019re okay with me storing your skincare info so reminders and logs work.",
+      'Send me your skin goals/concerns, your skin type if you know it (or "unsure"), and whether you\'re okay with me storing your skincare info so reminders and logs work.',
       "You can delete it anytime.",
+    ]);
+  });
+
+  test("splits natural photo guidance into readable bubbles", () => {
+    const text =
+      "I can only go by the photo, but your skin looks a little shiny around the forehead and cheek. Keep it simple tonight with cleanser and moisturizer. Use sunscreen in the morning.";
+
+    expect(
+      splitReplyIntoBubbles(text, {
+        minChars: 40,
+        maxChars: 90,
+      }),
+    ).toEqual([
+      "I can only go by the photo, but your skin looks a little shiny around the forehead and cheek.",
+      "Keep it simple tonight with cleanser and moisturizer. Use sunscreen in the morning.",
     ]);
   });
 

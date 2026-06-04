@@ -103,6 +103,11 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("analyzeSkincareImage");
     expect(prompt).toContain("Do not diagnose");
     expect(prompt).toContain("recommend professional care");
+    expect(prompt).toContain("Write like a person texting");
+    expect(prompt).toContain("Do not use labeled sections");
+    expect(prompt).toContain("Do not introduce advice with templated phrases");
+    expect(prompt).toContain("Prefer complete sentences over colon-led fragments");
+    expect(prompt).toContain("Do not include absent symptoms or absent injuries");
   });
 
   test("includes routine and product tools", () => {
@@ -152,8 +157,8 @@ describe("scheduled prompts", () => {
   test("daily summary includes locale and routine status", () => {
     const prompt = buildDailyRoutineSummaryPrompt("sv");
     expect(prompt).toContain("Swedish");
-    expect(prompt).toContain("AM:");
-    expect(prompt).toContain("PM:");
+    expect(prompt).toContain("morning and evening routines");
+    expect(prompt).toContain("Do not use labeled sections");
   });
 
   test("reminder prompt asks for done/skip or photo", () => {
@@ -165,7 +170,7 @@ describe("scheduled prompts", () => {
 
   test("weekly recap is adherence focused", () => {
     const prompt = buildWeeklyRoutineRecapPrompt("en");
-    expect(prompt).toContain("Done: [x]/14 AM/PM slots");
-    expect(prompt).toContain("Reactions");
+    expect(prompt).toContain("morning/evening routine slots");
+    expect(prompt).toContain("conversational");
   });
 });

@@ -24,6 +24,24 @@ export const skincareImageAnalysisSchema = z.object({
 
 export type SkincareImageAnalysis = z.infer<typeof skincareImageAnalysisSchema>;
 
+const ABSENT_SKIN_SYMPTOM_PATTERN =
+  /\b(?:no|without)\b[^.]*\b(?:burns?|infection|lesions?|open areas?|pus|rash|redness|swelling|wounds?)\b/i;
+
+export function sanitizeSkincareImageAnalysis(
+  analysis: SkincareImageAnalysis,
+): SkincareImageAnalysis {
+  if (analysis.imageType !== "skin_photo") return analysis;
+
+  const observations = analysis.observations.filter(
+    (observation) => !ABSENT_SKIN_SYMPTOM_PATTERN.test(observation),
+  );
+
+  return {
+    ...analysis,
+    observations: observations.length > 0 ? observations : analysis.observations,
+  };
+}
+
 export const SKINCARE_IMAGE_ANALYSIS_PROMPT = `Analyze the user's skincare-related image.
 
 Classify the image as:
@@ -38,10 +56,11 @@ Rules:
 - Do not recommend prescription-only treatment.
 - If the image shows severe swelling, burns, pus, spreading redness, eye-area symptoms, intense pain, or a rapidly changing lesion, recommend professional care.
 - For skin photos, describe visible features only in cautious language such as "visible redness" or "appears dry/flaky".
+- Describe what is visible, not absent symptoms or absent injuries. Mention urgent signs only when they are visible or clearly relevant.
 - For products, read visible label or ingredient text when possible and explain likely routine fit and watchouts.
 - For routine shelves, identify product types, possible duplicates, likely missing basics, and simple AM/PM placement.
 
-Return concise structured JSON.`;
+Return concise structured JSON. Keep observations and watchouts short.`;
 
 export function createAnalyzeSkincareImageTool(contextImageUrl?: string) {
   return tool({
@@ -86,7 +105,7 @@ export function createAnalyzeSkincareImageTool(contextImageUrl?: string) {
           ],
         });
 
-        const obj = result.object;
+        const obj = sanitizeSkincareImageAnalysis(result.object);
         log.info({
           tool: "analyzeSkincareImage",
           imageType: obj.imageType,
