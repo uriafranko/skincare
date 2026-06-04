@@ -5,8 +5,9 @@ dist/
 .turbo/
 .env
 .env.local
+.vercel/
+apps/*/.vercel/
 *.tsbuildinfo
-bun.lock
 .DS_Store
 .workflow-data/
 .swc

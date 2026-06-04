@@ -15,6 +15,7 @@ mock.module("@skintext/shared", () => ({
   encryptContent: async (s: string) => `enc:${s}`,
   decrypt: async (s: string) => s.replace(/^enc:/, ""),
   generateId: () => "reminder_test",
+  localDateString: () => "2026-06-04",
   localDateTimeToDate: (date: string, hour: number, minute: number, timezone: string) => {
     const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
     if (!match) return null;

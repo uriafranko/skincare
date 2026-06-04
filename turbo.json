@@ -4,7 +4,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".output/**", ".next/**"],
+      "outputs": ["dist/**", ".output/**", ".next/**", ".vercel/output/**"],
       "env": [
         "OPENAI_API_KEY",
         "REDIS_URL",
@@ -15,6 +15,7 @@
         "SENDBLUE_API_SECRET",
         "SENDBLUE_FROM_NUMBER",
         "SENDBLUE_WEBHOOK_SECRET",
+        "COMPACTION_MODEL",
         "NEXT_PUBLIC_PHONE_NUMBER"
       ]
     },

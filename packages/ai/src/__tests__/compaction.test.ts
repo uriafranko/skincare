@@ -23,6 +23,7 @@ mock.module("@skintext/shared", () => ({
     const names: Record<string, string> = { en: "English", sv: "Swedish" };
     return names[locale] ?? "English";
   },
+  localDateString: () => "2026-06-04",
   localDateTimeToDate: (date: string, hour: number, minute: number, timezone: string) => {
     const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
     if (!match) return null;
