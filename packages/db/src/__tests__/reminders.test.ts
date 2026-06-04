@@ -1,35 +1,14 @@
 import { describe, expect, mock, test } from "bun:test";
+import { createFakeDb } from "./fake-db";
+import { createSharedMock } from "./shared-mock";
 
-const stringStore: Record<string, string> = {};
-const hashStore: Record<string, Record<string, string>> = {};
-
-const mockRedis = {
-  set: mock((key: string, value: string) => {
-    stringStore[key] = value;
-    return Promise.resolve("OK");
-  }),
-  get: mock((key: string) => Promise.resolve(stringStore[key] ?? null)),
-  del: mock((key: string) => {
-    delete stringStore[key];
-    delete hashStore[key];
-    return Promise.resolve(1);
-  }),
-  hset: mock((key: string, value: Record<string, string>) => {
-    hashStore[key] = { ...(hashStore[key] ?? {}), ...value };
-    return Promise.resolve(1);
-  }),
-  hget: mock((key: string, field: string) => Promise.resolve(hashStore[key]?.[field] ?? null)),
-  hgetall: mock((key: string) => Promise.resolve(hashStore[key] ?? null)),
-};
+const fakeDb = createFakeDb();
 
 mock.module("../client", () => ({
-  getRedis: () => mockRedis,
+  getDb: () => fakeDb,
 }));
 
-mock.module("@skintext/shared", () => ({
-  encryptContent: async (s: string) => `enc:${s}`,
-  decrypt: async (s: string) => s.replace(/^enc:/, ""),
-}));
+mock.module("@skintext/shared", () => createSharedMock());
 
 const {
   cancelOneOffReminder,

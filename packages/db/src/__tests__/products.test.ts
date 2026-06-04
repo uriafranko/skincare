@@ -1,32 +1,14 @@
 import { describe, expect, mock, test } from "bun:test";
+import { createFakeDb } from "./fake-db";
+import { createSharedMock } from "./shared-mock";
 
-const hashStore: Record<string, Record<string, string>> = {};
-
-const mockRedis = {
-  hset: mock((key: string, value: Record<string, string>) => {
-    hashStore[key] = { ...(hashStore[key] ?? {}), ...value };
-    return Promise.resolve(1);
-  }),
-  hget: mock((key: string, field: string) => Promise.resolve(hashStore[key]?.[field] ?? null)),
-  hgetall: mock((key: string) => Promise.resolve(hashStore[key] ?? null)),
-  hdel: mock((key: string, field: string) => {
-    if (hashStore[key]) delete hashStore[key][field];
-    return Promise.resolve(1);
-  }),
-  del: mock((key: string) => {
-    delete hashStore[key];
-    return Promise.resolve(1);
-  }),
-};
+const fakeDb = createFakeDb();
 
 mock.module("../client", () => ({
-  getRedis: () => mockRedis,
+  getDb: () => fakeDb,
 }));
 
-mock.module("@skintext/shared", () => ({
-  encryptContent: async (s: string) => `enc:${s}`,
-  decrypt: async (s: string) => s.replace(/^enc:/, ""),
-}));
+mock.module("@skintext/shared", () => createSharedMock());
 
 const { deleteProduct, getAllProducts, getProduct, saveProduct } = await import("../products");
 

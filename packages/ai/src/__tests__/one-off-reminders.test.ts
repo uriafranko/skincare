@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { createSharedMock } from "./shared-mock";
 
 const createOneOffReminder = mock(() => Promise.resolve());
 const setOneOffReminderWorkflowRunId = mock(() => Promise.resolve());
@@ -10,25 +11,24 @@ mock.module("@skintext/db", () => ({
   markOneOffReminderFailed,
 }));
 
-mock.module("@skintext/shared", () => ({
-  env: {},
-  encryptContent: async (s: string) => `enc:${s}`,
-  decrypt: async (s: string) => s.replace(/^enc:/, ""),
-  generateId: () => "reminder_test",
-  localDateTimeToDate: (date: string, hour: number, minute: number, timezone: string) => {
-    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
-    if (!match) return null;
-    const [, year, month, day] = match;
-    const offsetHours = timezone === "America/New_York" ? 4 : 0;
-    return new Date(
-      Date.UTC(Number(year), Number(month) - 1, Number(day), hour + offsetHours, minute),
-    );
-  },
-  getLocaleName: (locale: string) => {
-    const names: Record<string, string> = { en: "English", sv: "Swedish" };
-    return names[locale] ?? "English";
-  },
-}));
+mock.module("@skintext/shared", () =>
+  createSharedMock({
+    generateId: () => "reminder_test",
+    localDateTimeToDate: (date: string, hour: number, minute: number, timezone: string) => {
+      const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+      if (!match) return null;
+      const [, year, month, day] = match;
+      const offsetHours = timezone === "America/New_York" ? 4 : 0;
+      return new Date(
+        Date.UTC(Number(year), Number(month) - 1, Number(day), hour + offsetHours, minute),
+      );
+    },
+    getLocaleName: (locale: string) => {
+      const names: Record<string, string> = { en: "English", sv: "Swedish" };
+      return names[locale] ?? "English";
+    },
+  }),
+);
 
 const { scheduleOneOffReminder } = await import("../tools/one-off-reminders");
 

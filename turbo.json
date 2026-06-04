@@ -7,9 +7,7 @@
       "outputs": ["dist/**", ".output/**", ".next/**"],
       "env": [
         "OPENAI_API_KEY",
-        "REDIS_URL",
-        "UPSTASH_REDIS_REST_URL",
-        "UPSTASH_REDIS_REST_TOKEN",
+        "DATABASE_URL",
         "ENCRYPTION_KEY",
         "SENDBLUE_API_KEY",
         "SENDBLUE_API_SECRET",

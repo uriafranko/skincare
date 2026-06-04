@@ -13,16 +13,22 @@
   },
   "scripts": {
     "build": "tsup",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
     "typecheck": "tsc --noEmit",
     "test": "bun test"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "@skintext/shared": "*",
-    "@upstash/redis": "^1",
-    "date-fns": "^4.1.0"
+    "date-fns": "^4.1.0",
+    "drizzle-orm": "^0.45.2"
   },
   "devDependencies": {
     "@types/node": "^25",
+    "drizzle-kit": "^0.31.10",
     "typescript": "^6.0.2"
   }
 }

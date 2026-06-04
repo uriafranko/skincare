@@ -1,4 +1,4 @@
-import { createPhoneMapping, getUser, resolveUserId } from "@skintext/db";
+import { createPendingUserForPhone, getUser, resolveUserId } from "@skintext/db";
 import { detectRegion, generateId } from "@skintext/shared";
 import type { RequestLogger } from "evlog";
 import { handleMessage } from "@/handlers/message";
@@ -12,10 +12,15 @@ export async function routeMessage(
   imageUrl?: string,
 ): Promise<string[]> {
   let userId = await resolveUserId(encryptedPhone);
+  let region = null;
 
   if (!userId) {
-    userId = generateId();
-    await createPhoneMapping(encryptedPhone, userId);
+    region = detectRegion(rawPhone);
+    userId = await createPendingUserForPhone(generateId(), encryptedPhone, {
+      locale: region.locale,
+      timezone: region.timezone,
+      country: region.country,
+    });
     log.set({ newUser: true });
   }
 
@@ -25,7 +30,6 @@ export async function routeMessage(
 
   if (!user?.onboardingComplete) {
     log.set({ route: "onboarding" });
-    const region = !user ? detectRegion(rawPhone) : null;
     return handleOnboarding(
       log,
       userId,

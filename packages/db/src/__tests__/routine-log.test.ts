@@ -1,67 +1,14 @@
 import { describe, expect, mock, test } from "bun:test";
+import { createFakeDb } from "./fake-db";
+import { createSharedMock } from "./shared-mock";
 
-const hashStore: Record<string, Record<string, unknown>> = {};
-const zsetStore: Record<string, { score: number; member: string }[]> = {};
-
-const mockRedis = {
-  hset: mock((key: string, value: Record<string, unknown>) => {
-    hashStore[key] = { ...(hashStore[key] ?? {}), ...value };
-    return Promise.resolve(1);
-  }),
-  hgetall: mock((key: string) => Promise.resolve(hashStore[key] ?? null)),
-  del: mock((key: string) => {
-    delete hashStore[key];
-    delete zsetStore[key];
-    return Promise.resolve(1);
-  }),
-  zadd: mock((key: string, entry: { score: number; member: string }) => {
-    if (!zsetStore[key]) zsetStore[key] = [];
-    zsetStore[key].push(entry);
-    zsetStore[key].sort((a, b) => a.score - b.score);
-    return Promise.resolve(1);
-  }),
-  zrange: mock((key: string) => Promise.resolve((zsetStore[key] ?? []).map((e) => e.member))),
-  zrem: mock((key: string, member: string) => {
-    zsetStore[key] = (zsetStore[key] ?? []).filter((e) => e.member !== member);
-    return Promise.resolve(1);
-  }),
-  pipeline: () => {
-    const ops: (() => Promise<unknown>)[] = [];
-    const p = {
-      hset(key: string, value: Record<string, unknown>) {
-        ops.push(() => mockRedis.hset(key, value));
-        return p;
-      },
-      hgetall(key: string) {
-        ops.push(() => mockRedis.hgetall(key));
-        return p;
-      },
-      del(key: string) {
-        ops.push(() => mockRedis.del(key));
-        return p;
-      },
-      zadd(key: string, entry: { score: number; member: string }) {
-        ops.push(() => mockRedis.zadd(key, entry));
-        return p;
-      },
-      zrem(key: string, member: string) {
-        ops.push(() => mockRedis.zrem(key, member));
-        return p;
-      },
-      exec: () => Promise.all(ops.map((fn) => fn())),
-    };
-    return p;
-  },
-};
+const fakeDb = createFakeDb();
 
 mock.module("../client", () => ({
-  getRedis: () => mockRedis,
+  getDb: () => fakeDb,
 }));
 
-mock.module("@skintext/shared", () => ({
-  encryptContent: async (s: string) => `enc:${s}`,
-  decrypt: async (s: string) => s.replace(/^enc:/, ""),
-}));
+mock.module("@skintext/shared", () => createSharedMock());
 
 const {
   deleteRoutineEntry,

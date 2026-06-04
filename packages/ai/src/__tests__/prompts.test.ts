@@ -1,14 +1,14 @@
 import { describe, expect, mock, test } from "bun:test";
+import { createSharedMock } from "./shared-mock";
 
-mock.module("@skintext/shared", () => ({
-  env: {},
-  encryptContent: async (s: string) => `enc:${s}`,
-  decrypt: async (s: string) => s.replace(/^enc:/, ""),
-  getLocaleName: (locale: string) => {
-    const names: Record<string, string> = { en: "English", sv: "Swedish" };
-    return names[locale] ?? "English";
-  },
-}));
+mock.module("@skintext/shared", () =>
+  createSharedMock({
+    getLocaleName: (locale: string) => {
+      const names: Record<string, string> = { en: "English", sv: "Swedish" };
+      return names[locale] ?? "English";
+    },
+  }),
+);
 
 const {
   buildDailyRoutineSummaryPrompt,

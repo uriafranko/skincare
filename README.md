@@ -8,7 +8,7 @@ iMessage skincare routine assistant powered by AI.
 - **API**: Hono on Nitro
 - **iMessage**: Sendblue adapter
 - **AI**: AI SDK v6 + GPT-4.1
-- **Database**: Upstash Redis
+- **Database**: Neon Postgres + Drizzle ORM
 - **Workflows**: Vercel Workflow SDK for durable reminders
 
 ## Setup
@@ -31,23 +31,29 @@ Fill in the required keys:
 |---|---|
 | `SENDBLUE_API_KEY` / `SENDBLUE_API_SECRET` | [sendblue.co](https://sendblue.co) |
 | `SENDBLUE_FROM_NUMBER` | Your Sendblue phone number |
-| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | [console.upstash.com](https://console.upstash.com) |
-| `REDIS_URL` | Same Upstash Redis in `redis://` format |
+| `DATABASE_URL` | [neon.tech](https://neon.tech) pooled Postgres connection string |
 | `OPENAI_API_KEY` | [platform.openai.com](https://platform.openai.com) |
+| `ENCRYPTION_KEY` | 64-char hex key from `openssl rand -hex 32` |
 
-### 3. Run locally
+### 3. Apply database migrations
+
+```bash
+bun --cwd packages/db run db:migrate
+```
+
+### 4. Run locally
 
 ```bash
 bun run dev
 ```
 
-### 4. Deploy to Vercel
+### 5. Deploy to Vercel
 
 ```bash
 vercel deploy
 ```
 
-### 5. Set Sendblue webhook
+### 6. Set Sendblue webhook
 
 Point your Sendblue incoming message webhook to:
 
@@ -68,7 +74,7 @@ skintext/
         reminder-loop.ts  # Routine reminders and summaries
   packages/
     ai/                   # AI agent, prompts, and tools
-    db/                   # Upstash Redis data layer
+    db/                   # Neon Postgres + Drizzle data layer
     shared/               # Types, locale, timezone utilities
 ```
 
