@@ -1,6 +1,7 @@
 import { openai } from "@ai-sdk/openai";
 import type { LanguageModelV3 } from "@ai-sdk/provider";
 import { type ModelMessage, stepCountIs, type Tool, ToolLoopAgent } from "ai";
+import { createRescueCompactionPrepareStep, getCompactionModelName } from "./compaction";
 import { createAnalyzeSkincareImageTool } from "./tools/analyze-skincare-image";
 import { deleteAccountTool } from "./tools/delete-account";
 import { exportDataTool } from "./tools/export-data";
@@ -38,6 +39,7 @@ export interface AgentOptions extends AgentSecurityContext {
   hasImage?: boolean;
   imageUrl?: string;
   model?: LanguageModelV3;
+  compactionModel?: LanguageModelV3;
   scheduleOneOffReminderWorkflow?: ScheduleOneOffReminderWorkflow;
 }
 
@@ -74,6 +76,10 @@ export function createSkintextAgent(systemPrompt: string, ctx: AgentOptions) {
     instructions: systemPrompt,
     tools,
     stopWhen: stepCountIs(8),
+    prepareStep: createRescueCompactionPrepareStep({
+      model: ctx.compactionModel ?? openai(getCompactionModelName()),
+      systemPrompt,
+    }),
   });
 }
 

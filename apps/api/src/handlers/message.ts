@@ -1,6 +1,12 @@
 import { openai } from "@ai-sdk/openai";
 import type { ModelMessage } from "@skintext/ai";
-import { buildSkintextSystemPrompt, createSkintextAgent } from "@skintext/ai";
+import {
+  buildSkintextSystemPrompt,
+  compactMessagesIfNeeded,
+  createSkintextAgent,
+  getCompactionModelName,
+  PRE_RUN_COMPACTION_THRESHOLD,
+} from "@skintext/ai";
 import {
   getAdherenceStreak,
   getAllProducts,
@@ -95,6 +101,7 @@ export async function handleMessage(
 
   const ai = createAILogger(log, { toolInputs: { maxLength: 200 } });
   const model = ai.wrap(openai(hasImage ? "gpt-4.1" : "gpt-4.1-mini"));
+  const compactionModel = ai.wrap(openai(getCompactionModelName()));
 
   const systemPrompt = buildSkintextSystemPrompt(ctx);
   const userMessage = buildUserMessage(text, hasImage);
@@ -104,6 +111,7 @@ export async function handleMessage(
     hasImage,
     imageUrl,
     model,
+    compactionModel,
     scheduleOneOffReminderWorkflow: async ({ userId, reminderId }) => {
       const run = await start(oneOffReminderWorkflow, [userId, reminderId]);
       return run.runId;
@@ -111,8 +119,44 @@ export async function handleMessage(
   });
 
   const allMessages: ModelMessage[] = [...conversationHistory, userMessage];
+  const preRunCompaction = await compactMessagesIfNeeded(allMessages, {
+    model: compactionModel,
+    systemPrompt,
+    threshold: PRE_RUN_COMPACTION_THRESHOLD,
+  });
+
+  if (preRunCompaction.error) {
+    const error =
+      preRunCompaction.error instanceof Error
+        ? preRunCompaction.error.message
+        : String(preRunCompaction.error);
+    log.set({
+      compaction: {
+        phase: "pre-run",
+        compacted: false,
+        tokensBefore: preRunCompaction.tokensBefore,
+        thresholdTokens: preRunCompaction.thresholdTokens,
+        error,
+      },
+    });
+  } else {
+    log.set({
+      compaction: {
+        phase: "pre-run",
+        compacted: preRunCompaction.compacted,
+        tokensBefore: preRunCompaction.tokensBefore,
+        thresholdTokens: preRunCompaction.thresholdTokens,
+      },
+    });
+  }
+
+  const baseMessages = stripImagesFromHistory(preRunCompaction.messages);
+  if (preRunCompaction.compacted) {
+    await saveConversationMessages(userId, baseMessages);
+  }
+
   const messages = pruneMessages({
-    messages: allMessages,
+    messages: baseMessages,
     toolCalls: "before-last-2-messages",
     reasoning: "before-last-message",
     emptyMessages: "remove",
@@ -123,8 +167,7 @@ export async function handleMessage(
   const toSave = stripImagesFromHistory(
     pruneMessages({
       messages: [
-        ...conversationHistory,
-        userMessage,
+        ...baseMessages,
         ...(result.response.messages as ModelMessage[]),
       ],
       toolCalls: "before-last-2-messages",

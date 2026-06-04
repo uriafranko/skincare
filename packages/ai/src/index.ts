@@ -1,5 +1,21 @@
 export { type AgentSecurityContext, createSkintextAgent, type ModelMessage } from "./agent";
 export {
+  compactMessagesIfNeeded,
+  createCompactionSummaryMessage,
+  createRescueCompactionPrepareStep,
+  DEFAULT_COMPACTION_MODEL,
+  DEFAULT_CONTEXT_WINDOW_TOKENS,
+  DEFAULT_KEEP_RECENT_TOKENS,
+  estimateMessageTokens,
+  estimateMessagesTokens,
+  getCompactionModelName,
+  isCompactionSummaryMessage,
+  type MessageCompactionOptions,
+  type MessageCompactionResult,
+  PRE_RUN_COMPACTION_THRESHOLD,
+  RESCUE_COMPACTION_THRESHOLD,
+} from "./compaction";
+export {
   type OnboardingContext,
   type OnboardingResult,
   processOnboardingMessage,
