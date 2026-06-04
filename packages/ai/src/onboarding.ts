@@ -2,6 +2,7 @@ import type { LanguageModelV3 } from "@ai-sdk/provider";
 import type { OnboardingState } from "@skintext/shared";
 import { generateText, Output } from "ai";
 import { z } from "zod";
+import { normalizeAssistantText } from "./text";
 
 const extractionSchema = z.object({
   name: z.string().nullable().describe("User's first name. Null if not mentioned."),
@@ -45,8 +46,28 @@ const extractionSchema = z.object({
   reply: z.string().describe("Your reply message to the user."),
 });
 
+const CONSENT_ONLY_REPLY = "OK if I save this so reminders/logs work? You can delete it anytime.";
+
+const ENGLISH_GREETING_SETUP_REPLY =
+  "Hey, I'm Skintext. I build simple routines and reminders by text. Send your name, main skin concern, skin type/sensitivity if known, anything you avoid, and current products. Unsure is fine. OK if I save this so reminders/logs work? You can delete anytime.";
+
 function formatList(values?: string[]): string | null {
   return values?.length ? values.join(", ") : null;
+}
+
+function isEnglishGreetingOnly(text: string, locale: string): boolean {
+  if (locale && !locale.toLowerCase().startsWith("en")) return false;
+  return /^(?:hi|hey|hello|yo)[\s!.]*$/i.test(text.trim());
+}
+
+function hasSetupBasics(state: OnboardingState, extracted: Partial<OnboardingState>): boolean {
+  const concerns = [...(state.concerns ?? []), ...(extracted.concerns ?? [])];
+  const goals = [...(state.goals ?? []), ...(extracted.goals ?? [])];
+  return (
+    !!(extracted.name ?? state.name) &&
+    (concerns.length > 0 || goals.length > 0) &&
+    !!(extracted.skinType ?? state.skinType ?? extracted.sensitivity ?? state.sensitivity)
+  );
 }
 
 function describeState(state: OnboardingState): string {
@@ -97,6 +118,13 @@ export async function processOnboardingMessage(
   ctx: OnboardingContext,
   model?: LanguageModelV3,
 ): Promise<OnboardingResult> {
+  if (ctx.isFirstMessage && isEnglishGreetingOnly(text, ctx.locale)) {
+    return {
+      extracted: { detectedLocale: "en" },
+      reply: ENGLISH_GREETING_SETUP_REPLY,
+    };
+  }
+
   const resolvedModel = model ?? (await import("./models")).createDefaultGatewayModel();
   const replyLang = state.detectedLocale
     ? `Reply in ${state.detectedLocale} (the user's language).`
@@ -111,26 +139,31 @@ export async function processOnboardingMessage(
   if (ctx.isFirstMessage) {
     situation = `This is the user's FIRST message. Welcome them as Skintext, a skincare routine assistant in iMessage.
 
-CONTENT (keep SHORT -- about one phone screen, 3-6 short sentences OR two bubbles max):
-- Lead with the payoff: Skintext helps build and track a practical skincare routine by text.
-- Ask for: name, main skin goals/concerns, skin type if known, sensitivity/allergies, current products if any, and preferred AM/PM reminder times.
-- Say "unsure" is fine for skin type or sensitivity.
-- Mention they can send skin photos or product-label photos for routine help, but you cannot diagnose from images.
-- Storage: we save what they share so routine reminders/logs work; they can delete anytime.
-- End with a clear CTA: they can send everything in one message or a few messages.
+CONTENT (keep SHORT -- 2-3 short sentences, one bubble when possible):
+- Lead with the payoff in plain language: Skintext helps build a practical routine and keeps reminders/logs by text.
+- First interpret the user's message and extract it. Do not ask for anything they already gave.
+- Any skin concern counts as the goal/concern. Dry cheeks, breakouts, acne, redness, texture, irritation, and similar phrases are enough.
+- Current products and reminder times are useful but optional. Do not block consent or completion on them.
+- If this message contains name + any skin goal/concern + skin type/sensitivity and only consent is missing, reply ONLY: "${CONSENT_ONLY_REPLY}"
+- If they only sent a greeting, ask for the setup essentials in one natural sentence: name, main skin goal/concern, skin type or sensitivity if known, anything they avoid, and current products.
+- Say "unsure" is fine.
+- Include storage consent as part of the first ask: "${CONSENT_ONLY_REPLY}"
+- Reminder times are optional. Save them if the user gives them, but do not make them sound required.
+- Do not mention photos or product-label photos in the first setup ask unless the user sent or mentioned a photo.
+- End with a low-friction CTA: "Send it however is easiest."
+- Do not add "Send it however is easiest" to a consent-only reply.
 
-TONE: friendly, iMessage-native, not a bulleted essay.`;
+TONE: warm, direct, iMessage-native. No bullets, no form language, no sales copy.`;
   } else if (ctx.complete) {
     situation = `The user is fully set up. Reply with ONLY:
-"✅ All set.
-Text done after your routine, or send a skin/product photo whenever you want help placing something."
+"All set. Text done after your routine, or send a skin/product photo anytime you want help placing something."
 No extra commentary.`;
   } else {
     situation = `This is a follow-up message. The user already provided some info.
 Already collected: ${describeState(state)}.
 Still missing: ${describeMissing(state)}.
 
-In your reply: briefly acknowledge any new info they just provided, then ask only for what is still missing -- one or two asks at a time if several fields are missing. If only consent is missing, ask for their OK to store skincare data and mention they can delete anytime. Keep it short and conversational.`;
+In your reply: briefly acknowledge any new info they just provided, then ask only for what is still missing -- one or two asks at a time if several fields are missing. Any concern counts as a goal/concern, so do not ask what they want to improve if they mention dryness, breakouts, acne, redness, texture, or similar concerns. If only consent is missing, ask exactly: "${CONSENT_ONLY_REPLY}" Keep it short and conversational.`;
   }
 
   const { output } = await generateText({
@@ -155,9 +188,14 @@ EXTRACTION INSTRUCTIONS:
 
 REPLY INSTRUCTIONS:
 - Write a short, casual iMessage-style reply.
+- Prefer one bubble. Use a second bubble only when the reply has two distinct thoughts.
+- Avoid paragraph breaks in onboarding unless the reply is over 240 characters.
 - Do NOT repeat or echo every detail back. Just move on to what's next.
 - Never repeat a greeting if the user already introduced themselves.
 - Be direct like a friend texting, not formal.
+- Avoid listy setup language like "please provide", "required fields", or "the following".
+- Use plain ASCII punctuation. Avoid curly quotes, curly apostrophes, and em dashes.
+- Use normal contractions with straight apostrophes, like "don't" and "can't".
 - Never mention internal workflows, models, databases, memory retrieval, or "the system"; describe setup as Skintext doing it directly.
 - If the user corrects a setup detail or sounds frustrated, briefly acknowledge the issue from their perspective, use the corrected info, and avoid technical explanations.
 - Do NOT wrap the reply in quotes.
@@ -184,5 +222,10 @@ REPLY INSTRUCTIONS:
     extracted.detectedLocale = output.detectedLocale;
   }
 
-  return { extracted, reply: output.reply };
+  const reply =
+    !state.consented && !extracted.consented && hasSetupBasics(state, extracted)
+      ? CONSENT_ONLY_REPLY
+      : normalizeAssistantText(output.reply);
+
+  return { extracted, reply };
 }

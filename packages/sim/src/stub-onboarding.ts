@@ -10,6 +10,11 @@ import {
   mergeOnboardingState,
 } from "./onboarding-state";
 
+const GREETING_SETUP_REPLY =
+  "Hey, I'm Skintext. I build simple routines and reminders by text. Send your name, main skin concern, skin type/sensitivity if known, anything you avoid, and current products. Unsure is fine. OK if I save this so reminders/logs work? You can delete anytime.";
+
+const CONSENT_ONLY_REPLY = "OK if I save this so reminders/logs work? You can delete it anytime.";
+
 const concernKeywords = [
   "acne",
   "breakout",
@@ -130,7 +135,8 @@ function extractReminderTimes(
 
 function extractConsent(lower: string, previousBotReply?: string): boolean | undefined {
   const mentionsStorage = /\b(save|store|consent|data)\b/.test(lower);
-  const affirmative = /\b(yes|yep|yeah|ok|okay|sure|agree|fine|consent)\b/.test(lower);
+  const saysSure = /\bsure\b/.test(lower) && !/\bnot\s+sure\b/.test(lower);
+  const affirmative = /\b(yes|yep|yeah|ok|okay|agree|fine|consent)\b/.test(lower) || saysSure;
   const previousAskedConsent = /\b(save|store|consent|data)\b/i.test(previousBotReply ?? "");
   if ((mentionsStorage && affirmative) || (previousAskedConsent && affirmative)) return true;
   return undefined;
@@ -179,23 +185,23 @@ export function extractStubOnboarding(
 
 export function buildStubReply(state: OnboardingState, isFirstMessage: boolean): string {
   if (isLocalOnboardingComplete(state)) {
-    return "All set. Text done after your routine, or send a skin/product photo whenever you want help placing something.";
+    return "All set. Text done after your routine, or send a skin/product photo anytime you want help placing something.";
   }
 
   const missing = getMissingOnboardingFields(state);
   if (isFirstMessage && missing.length > 1) {
-    return "Hey, I'm Skintext. Send your name, main skin goals, skin type if you know it, sensitivity/allergies, current products, and AM/PM reminder times. Unsure is fine.";
+    return GREETING_SETUP_REPLY;
   }
 
   if (missing.includes("name")) return "What should I call you?";
   if (missing.includes("skin_goals")) {
-    return "What are your main skin goals or concerns right now?";
+    return "What are you mainly trying to improve right now?";
   }
   if (missing.includes("skin_profile")) {
-    return "What's your skin type or sensitivity level? Unsure is completely fine.";
+    return "What's your skin type or sensitivity like? Unsure is completely fine.";
   }
   if (missing.includes("consent")) {
-    return "Last thing: OK if I save what you share so reminders and routine logs work? You can delete it anytime.";
+    return CONSENT_ONLY_REPLY;
   }
 
   return "Got it. What else should I know for setup?";

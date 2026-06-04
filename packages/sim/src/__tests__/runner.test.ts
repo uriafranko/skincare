@@ -51,6 +51,23 @@ describe("local simulator", () => {
     expect(result.finalState?.eveningReminder).toBe("22:00");
   });
 
+  test("keeps greeting-only setup compact and optional about reminders", async () => {
+    const scenario = getScenario("onboarding-friction");
+    const runtime = createOnboardingRuntime({
+      mode: "stub",
+      locale: scenario.locale,
+      timezone: scenario.timezone,
+    });
+
+    const result = await runSimulation(scenario, runtime, createScriptedPersona(["hey"]), {
+      maxTurns: 1,
+    });
+    const reply = result.transcript.find((message) => message.role === "assistant")?.content ?? "";
+
+    expect(reply).not.toContain("AM/PM reminder times");
+    expect(reply.length).toBeLessThanOrEqual(260);
+  });
+
   test("flags assistant boundary leaks", async () => {
     const scenario = getScenario("onboarding-basic");
     const runtime: SimulationRuntime = {

@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { skincareImageAnalysisSchema } from "../tools/analyze-skincare-image";
+import {
+  sanitizeSkincareImageAnalysis,
+  skincareImageAnalysisSchema,
+} from "../tools/analyze-skincare-image";
 
 describe("skincare image schema", () => {
   test("accepts skin photo analysis", () => {
@@ -42,5 +45,20 @@ describe("skincare image schema", () => {
       safetyNotes: [],
     });
     expect(parsed.success).toBe(false);
+  });
+
+  test("removes absent-symptom checklist observations from skin photos", () => {
+    const sanitized = sanitizeSkincareImageAnalysis({
+      imageType: "skin_photo",
+      observations: ["visible shine on the forehead", "no obvious open wounds or marked swelling"],
+      visibleText: null,
+      likelyRoutineFit: ["basic routine support"],
+      watchouts: [],
+      recommendedNextStep: "Keep the routine simple.",
+      confidence: "medium",
+      safetyNotes: [],
+    });
+
+    expect(sanitized.observations).toEqual(["visible shine on the forehead"]);
   });
 });
