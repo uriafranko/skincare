@@ -1,18 +1,83 @@
 import { openai } from "@ai-sdk/openai";
-import { processOnboardingMessage } from "@caltext/ai";
+import { processOnboardingMessage } from "@skintext/ai";
 import {
   createUser,
   deleteOnboardingState,
   getOnboardingState,
+  saveProduct,
+  setCustomReminderTimes,
   setOnboardingState,
   setReminderRunId,
-} from "@caltext/db";
-import type { OnboardingState } from "@caltext/shared";
-import { CONSENT_VERSION, calculateTDEE, isOnboardingComplete } from "@caltext/shared";
+} from "@skintext/db";
+import type { OnboardingState } from "@skintext/shared";
+import { CONSENT_VERSION, generateId, isOnboardingComplete, ROUTINE_TIMES } from "@skintext/shared";
 import type { RequestLogger } from "evlog";
 import { createAILogger } from "evlog/ai";
 import { start } from "workflow/api";
 import { reminderLoop } from "../../workflows/reminder-loop";
+
+function mergeList(existing?: string[], incoming?: string[]): string[] {
+  return Array.from(
+    new Set(
+      [...(existing ?? []), ...(incoming ?? [])].map((value) => value.trim()).filter(Boolean),
+    ),
+  );
+}
+
+function mergeOnboardingState(
+  state: OnboardingState,
+  extracted: Partial<OnboardingState>,
+): OnboardingState {
+  return {
+    ...state,
+    ...extracted,
+    concerns: mergeList(state.concerns, extracted.concerns),
+    goals: mergeList(state.goals, extracted.goals),
+    allergies: mergeList(state.allergies, extracted.allergies),
+    currentProducts: mergeList(state.currentProducts, extracted.currentProducts),
+  };
+}
+
+function parseReminderTime(label: string, time?: string) {
+  if (!time) return null;
+  const match = /^(\d{1,2}):(\d{2})$/.exec(time);
+  if (!match) return null;
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+  return { label, hour, minute };
+}
+
+function buildReminderTimes(state: OnboardingState) {
+  const morning = parseReminderTime("morning", state.morningReminder);
+  const evening = parseReminderTime("evening", state.eveningReminder);
+
+  if (!morning && !evening) return [];
+
+  return ROUTINE_TIMES.map((routine) => {
+    const custom =
+      routine.label === "morning" ? morning : routine.label === "evening" ? evening : null;
+
+    return {
+      label: routine.label,
+      hour: custom?.hour ?? routine.hour,
+      minute: custom?.minute ?? routine.minute,
+    };
+  });
+}
+
+function saveInitialProducts(userId: string, products: string[]) {
+  const createdAt = new Date().toISOString();
+  return products.map((name) =>
+    saveProduct({
+      id: generateId("prod"),
+      userId,
+      name,
+      source: "text",
+      createdAt,
+    }),
+  );
+}
 
 export async function handleOnboarding(
   log: RequestLogger,
@@ -52,6 +117,7 @@ export async function handleOnboarding(
 
   log.set({ onboarding: { extractedFields: Object.keys(extracted) } });
 
+  const merged = mergeOnboardingState(state, extracted);
   const diff: Partial<OnboardingState> = {};
   if (!raw?.timezone && timezone) diff.timezone = timezone;
   for (const [k, v] of Object.entries(extracted)) {
@@ -59,25 +125,17 @@ export async function handleOnboarding(
       (diff as Record<string, unknown>)[k] = v;
     }
   }
+  if (extracted.concerns) diff.concerns = merged.concerns;
+  if (extracted.goals) diff.goals = merged.goals;
+  if (extracted.allergies) diff.allergies = merged.allergies;
+  if (extracted.currentProducts) diff.currentProducts = merged.currentProducts;
 
   diff.lastBotReply = reply;
 
   await setOnboardingState(userId, diff);
 
-  const merged: OnboardingState = { ...state, ...extracted };
-
   if (isOnboardingComplete(merged)) {
-    const sex = merged.sex ?? "unspecified";
-    const target = calculateTDEE(
-      sex,
-      merged.weightKg!,
-      merged.heightCm!,
-      merged.age!,
-      merged.activity!,
-      merged.goal!,
-    );
-
-    log.set({ onboarding: { complete: true, dailyTarget: target } });
+    log.set({ onboarding: { complete: true } });
 
     const { reply: welcomeReply } = await processOnboardingMessage(
       text,
@@ -86,10 +144,13 @@ export async function handleOnboarding(
         isFirstMessage: false,
         timezone,
         locale,
-        dailyTarget: target,
+        complete: true,
       },
       model,
     );
+
+    const reminderTimes = buildReminderTimes(merged);
+    const currentProducts = merged.currentProducts ?? [];
 
     await Promise.all([
       createUser(userId, encryptedPhone, {
@@ -97,17 +158,19 @@ export async function handleOnboarding(
         locale: merged.detectedLocale ?? locale,
         timezone: merged.timezone!,
         country,
-        dailyCalorieTarget: target,
-        goal: merged.goal!,
-        activity: merged.activity!,
-        sex,
-        age: merged.age!,
-        heightCm: merged.heightCm!,
-        weightKg: merged.weightKg!,
+        skinType: merged.skinType ?? "unsure",
+        sensitivity: merged.sensitivity ?? "unsure",
+        concerns: merged.concerns ?? [],
+        goals: merged.goals ?? [],
+        allergies: merged.allergies ?? [],
+        currentProducts: merged.currentProducts ?? [],
+        routinePreference: merged.routinePreference ?? "simple",
         onboardingComplete: true,
         consentedAt: new Date().toISOString(),
         consentVersion: CONSENT_VERSION,
       }),
+      ...saveInitialProducts(userId, currentProducts),
+      reminderTimes.length > 0 ? setCustomReminderTimes(userId, reminderTimes) : Promise.resolve(),
       deleteOnboardingState(userId),
     ]);
 

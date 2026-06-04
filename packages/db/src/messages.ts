@@ -1,13 +1,11 @@
-import { decrypt, encryptContent } from "@caltext/shared";
+import { decrypt, encryptContent } from "@skintext/shared";
 import { getRedis } from "./client";
 
 const messagesKey = (userId: string) => `messages:${userId}`;
 
-const MAX_CONVERSATION_MESSAGES = 40;
-
 export async function saveConversationMessages(userId: string, messages: unknown[]): Promise<void> {
   const redis = getRedis();
-  const json = JSON.stringify(messages.slice(-MAX_CONVERSATION_MESSAGES));
+  const json = JSON.stringify(messages);
   const encrypted = await encryptContent(json);
   await redis.set(messagesKey(userId), encrypted);
 }

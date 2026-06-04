@@ -1,25 +1,35 @@
 import { openai } from "@ai-sdk/openai";
-import type { ModelMessage } from "@caltext/ai";
-import { buildSystemPrompt, createCaltextAgent } from "@caltext/ai";
+import type { ModelMessage } from "@skintext/ai";
 import {
+  buildSkintextSystemPrompt,
+  compactMessagesIfNeeded,
+  createSkintextAgent,
+  getCompactionModelName,
+  PRE_RUN_COMPACTION_THRESHOLD,
+} from "@skintext/ai";
+import {
+  getAdherenceStreak,
+  getAllProducts,
   getConversationMessages,
-  getDailyLog,
-  getStreak,
-  getWaterLog,
+  getRoutineLogForDate,
   recallAllMemories,
   saveConversationMessages,
-} from "@caltext/db";
-import type { AgentContext, UserProfile } from "@caltext/shared";
-import { getLocaleName, localDateString } from "@caltext/shared";
+} from "@skintext/db";
+import type { AgentContext, UserProfile } from "@skintext/shared";
+import { getLocaleName, localDateString } from "@skintext/shared";
 import { pruneMessages } from "ai";
 import type { RequestLogger } from "evlog";
 import { createAILogger } from "evlog/ai";
+import { start } from "workflow/api";
+import { oneOffReminderWorkflow } from "../../workflows/one-off-reminder";
 
 function buildUserMessage(text: string, hasImage?: boolean): ModelMessage {
   if (hasImage) {
     return {
       role: "user",
-      content: text ? `${text}\n\n[User attached a food photo]` : "[User sent a food photo]",
+      content: text
+        ? `${text}\n\n[User attached a skincare/product photo]`
+        : "[User sent a skincare/product photo]",
     };
   }
 
@@ -51,14 +61,15 @@ export async function handleMessage(
   const [rawHistory, memories, streak] = await Promise.all([
     getConversationMessages<ModelMessage>(userId),
     recallAllMemories(userId),
-    getStreak(userId),
+    getAdherenceStreak(userId),
   ]);
   const conversationHistory = stripImagesFromHistory(rawHistory);
 
-  const localDate = localDateString(user.timezone);
-  const [todayLog, todayWater] = await Promise.all([
-    getDailyLog(userId, localDate),
-    getWaterLog(userId, localDate),
+  const now = new Date();
+  const localDate = localDateString(user.timezone, now);
+  const [todayLog, products] = await Promise.all([
+    getRoutineLogForDate(userId, localDate),
+    getAllProducts(userId),
   ]);
 
   const hasImage = !!imageUrl;
@@ -68,7 +79,7 @@ export async function handleMessage(
       localDate,
       hasImage,
       historyLength: conversationHistory.length,
-      todayMeals: todayLog.mealCount,
+      todayEntries: todayLog.entryCount,
       streak: streak.current,
     },
   });
@@ -80,31 +91,73 @@ export async function handleMessage(
     locale: user.locale,
     timezone: user.timezone,
     localDate,
-    dailyCalorieTarget: user.dailyCalorieTarget,
     userProfile: user,
     memories: Object.keys(memories).length > 0 ? memories : null,
-    todayLog: todayLog.mealCount > 0 ? todayLog : null,
+    todayLog: todayLog.entryCount > 0 ? todayLog : null,
     streak: streak.current > 0 ? streak.current : null,
-    todayWater: todayWater.totalMl > 0 ? todayWater : null,
+    products,
     imageUrl,
+    currentTimestamp: now.toISOString(),
   };
 
   const ai = createAILogger(log, { toolInputs: { maxLength: 200 } });
   const model = ai.wrap(openai(hasImage ? "gpt-4.1" : "gpt-4.1-mini"));
+  const compactionModel = ai.wrap(openai(getCompactionModelName()));
 
-  const systemPrompt = buildSystemPrompt(ctx);
+  const systemPrompt = buildSkintextSystemPrompt(ctx);
   const userMessage = buildUserMessage(text, hasImage);
-  const agent = createCaltextAgent(systemPrompt, {
+  const agent = createSkintextAgent(systemPrompt, {
     userId,
     timezone: user.timezone,
     hasImage,
     imageUrl,
     model,
+    compactionModel,
+    scheduleOneOffReminderWorkflow: async ({ userId, reminderId }) => {
+      const run = await start(oneOffReminderWorkflow, [userId, reminderId]);
+      return run.runId;
+    },
   });
 
   const allMessages: ModelMessage[] = [...conversationHistory, userMessage];
+  const preRunCompaction = await compactMessagesIfNeeded(allMessages, {
+    model: compactionModel,
+    systemPrompt,
+    threshold: PRE_RUN_COMPACTION_THRESHOLD,
+  });
+
+  if (preRunCompaction.error) {
+    const error =
+      preRunCompaction.error instanceof Error
+        ? preRunCompaction.error.message
+        : String(preRunCompaction.error);
+    log.set({
+      compaction: {
+        phase: "pre-run",
+        compacted: false,
+        tokensBefore: preRunCompaction.tokensBefore,
+        thresholdTokens: preRunCompaction.thresholdTokens,
+        error,
+      },
+    });
+  } else {
+    log.set({
+      compaction: {
+        phase: "pre-run",
+        compacted: preRunCompaction.compacted,
+        tokensBefore: preRunCompaction.tokensBefore,
+        thresholdTokens: preRunCompaction.thresholdTokens,
+      },
+    });
+  }
+
+  const baseMessages = stripImagesFromHistory(preRunCompaction.messages);
+  if (preRunCompaction.compacted) {
+    await saveConversationMessages(userId, baseMessages);
+  }
+
   const messages = pruneMessages({
-    messages: allMessages,
+    messages: baseMessages,
     toolCalls: "before-last-2-messages",
     reasoning: "before-last-message",
     emptyMessages: "remove",
@@ -115,8 +168,7 @@ export async function handleMessage(
   const toSave = stripImagesFromHistory(
     pruneMessages({
       messages: [
-        ...conversationHistory,
-        userMessage,
+        ...baseMessages,
         ...(result.response.messages as ModelMessage[]),
       ],
       toolCalls: "before-last-2-messages",

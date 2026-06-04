@@ -1,8 +1,27 @@
-import type { UserProfile } from "@caltext/shared";
+import type { RoutinePreference, SensitivityLevel, SkinType, UserProfile } from "@skintext/shared";
 import { getRedis } from "./client";
 
 const userKey = (userId: string) => `user:${userId}`;
 const phoneIndexKey = (encryptedPhone: string) => `phone:${encryptedPhone}`;
+
+function parseList(value: unknown): string[] {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.map(String);
+  if (typeof value !== "string") return [];
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    return Array.isArray(parsed) ? parsed.map(String) : [];
+  } catch {
+    return value
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+}
+
+function stringifyList(value: string[]): string {
+  return JSON.stringify(value);
+}
 
 export async function resolveUserId(encryptedPhone: string): Promise<string | null> {
   const redis = getRedis();
@@ -26,13 +45,13 @@ export async function getUser(userId: string): Promise<UserProfile | null> {
     locale: String(d.locale ?? "en"),
     timezone: String(d.timezone ?? "UTC"),
     country: String(d.country ?? "US"),
-    dailyCalorieTarget: Number(d.dailyCalorieTarget ?? 2000),
-    goal: String(d.goal ?? "maintain") as UserProfile["goal"],
-    activity: String(d.activity ?? "moderate") as UserProfile["activity"],
-    sex: String(d.sex ?? "unspecified") as UserProfile["sex"],
-    age: Number(d.age ?? 30),
-    heightCm: Number(d.heightCm ?? 170),
-    weightKg: Number(d.weightKg ?? 70),
+    skinType: String(d.skinType ?? "unsure") as SkinType,
+    sensitivity: String(d.sensitivity ?? "unsure") as SensitivityLevel,
+    concerns: parseList(d.concerns),
+    goals: parseList(d.goals),
+    allergies: parseList(d.allergies),
+    currentProducts: parseList(d.currentProducts),
+    routinePreference: String(d.routinePreference ?? "simple") as RoutinePreference,
     onboardingComplete: String(d.onboardingComplete) === "true",
     consentedAt: d.consentedAt ? String(d.consentedAt) : null,
     consentVersion: d.consentVersion ? String(d.consentVersion) : null,
@@ -48,12 +67,18 @@ export async function createUser(
   const redis = getRedis();
   await redis.hset(userKey(userId), {
     phone: encryptedPhone,
-    ...profile,
+    name: profile.name,
+    locale: profile.locale,
+    timezone: profile.timezone,
+    country: profile.country,
+    skinType: profile.skinType,
+    sensitivity: profile.sensitivity,
+    concerns: stringifyList(profile.concerns),
+    goals: stringifyList(profile.goals),
+    allergies: stringifyList(profile.allergies),
+    currentProducts: stringifyList(profile.currentProducts),
+    routinePreference: profile.routinePreference,
     onboardingComplete: String(profile.onboardingComplete),
-    dailyCalorieTarget: String(profile.dailyCalorieTarget),
-    age: String(profile.age),
-    heightCm: String(profile.heightCm),
-    weightKg: String(profile.weightKg),
     consentedAt: profile.consentedAt ?? "",
     consentVersion: profile.consentVersion ?? "",
     createdAt: new Date().toISOString(),
@@ -84,13 +109,13 @@ export async function deleteAllUserData(userId: string): Promise<void> {
   const user = await getUser(userId);
   const keysToDelete: string[] = [
     userKey(userId),
-    `streak:${userId}`,
+    `routine_streak:${userId}`,
     `memory:${userId}`,
     `messages:${userId}`,
-    `weight:${userId}`,
-    `favorites:${userId}`,
+    `products:${userId}`,
     `reminder:${userId}`,
     `reminder_times:${userId}`,
+    `one_off_reminders:${userId}`,
     `onboarding:${userId}`,
     `export:${userId}`,
   ];
@@ -99,27 +124,21 @@ export async function deleteAllUserData(userId: string): Promise<void> {
     keysToDelete.push(phoneIndexKey(user.phone));
   }
 
-  const wildcardPatterns = [`meals:${userId}:*`, `daily:${userId}:*`, `water:${userId}:*`];
-
-  for (const pattern of wildcardPatterns) {
-    let cursor = "0";
-    do {
-      const [nextCursor, keys] = (await redis.scan(Number(cursor), {
-        match: pattern,
-        count: 100,
-      })) as unknown as [string, string[]];
-      cursor = nextCursor;
-      for (const key of keys) {
-        if (key.startsWith("meals:")) {
-          const mealIds = await redis.zrange<string[]>(key, 0, -1);
-          for (const mealId of mealIds) {
-            keysToDelete.push(`meal:${mealId}`);
-          }
-        }
-        keysToDelete.push(key);
+  let cursor = "0";
+  do {
+    const [nextCursor, keys] = (await redis.scan(Number(cursor), {
+      match: `routine_logs:${userId}:*`,
+      count: 100,
+    })) as unknown as [string, string[]];
+    cursor = nextCursor;
+    for (const key of keys) {
+      const entryIds = await redis.zrange<string[]>(key, 0, -1);
+      for (const entryId of entryIds ?? []) {
+        keysToDelete.push(`routine_entry:${entryId}`);
       }
-    } while (cursor !== "0");
-  }
+      keysToDelete.push(key);
+    }
+  } while (cursor !== "0");
 
   if (keysToDelete.length > 0) {
     const pipeline = redis.pipeline();

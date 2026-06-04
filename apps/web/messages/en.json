@@ -1,66 +1,66 @@
 {
   "Metadata": {
-    "title": "caltext - Your calorie tracker that lives in your texts",
-    "description": "Send a photo or describe your meal. AI handles the rest — calories, macros, streaks, all in iMessage.",
-    "ogTitle": "caltext - Your calorie tracker that lives in your texts",
-    "ogDescription": "Send a photo or describe your meal. AI handles the rest — calories, macros, streaks, all in iMessage."
+    "title": "Skintext - Your skincare routine bot in iMessage",
+    "description": "Build, track, and adjust your skincare routine by text. Send product labels, skin photos, or quick routine updates in iMessage.",
+    "ogTitle": "Skintext - Your skincare routine bot in iMessage",
+    "ogDescription": "Build, track, and adjust your skincare routine by text. Send product labels, skin photos, or quick routine updates in iMessage."
   },
   "Nav": {
-    "logo": "caltext",
+    "logo": "skintext",
     "features": "Features",
     "faqs": "FAQs",
     "getStarted": "Get Started"
   },
   "Hero": {
-    "eyebrow": "Meet caltext",
-    "headline": "Track calories from your\u00a0texts.",
-    "subtitle": "Send a photo or describe your meal. AI handles the rest\u00a0\u2014 calories, macros, streaks, all in iMessage.",
-    "trustLine": "Free trial \u00b7 No app required",
-    "socialProof": "67,000+ tracking calories"
+    "eyebrow": "Meet Skintext",
+    "headline": "Skincare routines from your texts.",
+    "subtitle": "Text your routine, send a product label, or share a skin photo. Skintext helps keep your routine simple, consistent, and easy to adjust in iMessage.",
+    "trustLine": "Free trial · No app required",
+    "socialProof": "67,000+ building better routines"
   },
   "IMessageButton": {
     "label": "Get Started in Messages",
     "shortLabel": "Get Started",
-    "smsBody": "Hi! I'd like to get started with caltext."
+    "smsBody": "Hi! I'd like to get started with Skintext."
   },
   "Features": {
     "heading": "Everything happens in your texts",
     "subtitle": "No app to download. No accounts to create. Just iMessage.",
     "snapOrText": {
-      "title": "Snap or Text",
-      "description": "Send a meal photo and see calories, macros, and easy tweaks before you log it."
+      "title": "Photo or Text",
+      "description": "Send a skin photo, product label, or routine shelf and get cautious, practical routine guidance."
     },
     "dailySummaries": {
-      "title": "Daily Summaries",
-      "description": "See where your calories and macros stand so you know what you have left today."
+      "title": "Routine Summaries",
+      "description": "See which AM and PM steps were done, what products you used, and any reactions you noted."
     },
     "smartReminders": {
       "title": "Smart Reminders",
-      "description": "Get meal-time reminders that help you stay on top of calories and macros."
+      "description": "Get calm morning and evening nudges that adapt to your saved routine."
     },
     "chat": {
       "snapOrText": {
         "bot0": {
-          "breakfast": "Good morning. Send breakfast when you're ready and I'll estimate the calories and macros.",
-          "lunch": "Lunch time. Send a photo and I'll estimate the calories and macros for you.",
-          "dinner": "Dinner check-in. Send a photo and I'll break down the calories and macros."
+          "morning": "Good morning. Send your AM lineup or a product label and I'll help place it in your routine.",
+          "midday": "Send a product label or skin photo whenever you want a quick routine check.",
+          "evening": "Evening check-in. Send what you're using tonight and I'll help keep it simple."
         },
-        "user1": "What if I skip the pita?",
-        "bot1": "That looks like a Mediterranean bowl. I'd log it at about 690 kcal.\n\n🫓 Pita wedge 160 kcal\n🧆 Chickpeas 210 kcal\n🥒 Cucumber, tomato & peppers 70 kcal\n🫒 Olives 90 kcal\n🥣 Yogurt sauce 80 kcal\n🌿 Greens, figs & extras 80 kcal\n\nEstimated macros: 58g carbs, 32g fat, 19g protein\n\nYou're at 1,420 / 2,100 kcal today with 680 left. If you want, I can adjust it for no pita, less sauce, or a smaller portion.",
-        "bot2": "Good call, dropping the pita saves you 160 kcal. Here's the updated version:",
-        "bot3": "🧆 Chickpeas 210 kcal\n🥒 Cucumber, tomato & peppers 70 kcal\n🫒 Olives 90 kcal\n🥣 Yogurt sauce 80 kcal\n🌿 Greens, figs & extras 80 kcal\n\nTotal: ~530 kcal\nMacros: 30g carbs · 29g fat · 19g protein\n\nThat leaves you about 840 kcal for the rest of the day. Want me to log this version?"
+        "user1": "Can I use this serum with my moisturizer?",
+        "bot1": "Image type: product label\nVisible: hydrating serum label, ingredient text partly readable\nFit: likely after cleansing and before moisturizer\nWatchouts: patch test first if your skin is sensitive\nNext: use it a few nights a week before increasing.",
+        "bot2": "I can save it to your products and add it to your evening routine.",
+        "bot3": "✅ Evening logged\nSerum · Moisturizer\nReaction: none noted"
       },
       "dailySummaries": {
-        "bot1": "Quick check-in for today:\n━━━━━━━━━━━━\n☀️ Protein oats 320 kcal\n🥗 Chicken bowl 410 kcal\n🍫 Afternoon snack 180 kcal\n🥘 Dinner 510 kcal\n\nTotal: 1,420 / 2,100 kcal\nProtein: 112g\n680 kcal left\n\nYou're in a really good spot today. Want me to suggest a high-protein snack for later?"
+        "bot1": "Today\nAM: done\nPM: not logged\nProducts: gentle cleanser, barrier cream\nNotes: mild dryness\n\nKeep the routine steady and avoid adding another new active tonight."
       },
       "smartReminders": {
         "bot1": {
-          "breakfast": "Good morning. You've got room for breakfast. Want to send a photo or just text me what you're having?",
-          "lunch": "Hey, lunch check-in. You've got about 1,180 kcal left today. Want to send a photo or just text me what you're having?",
-          "dinner": "Dinner check-in. You've still got room left today. Want to send a photo or just text me what you're having?"
+          "morning": "Morning routine check. Reply done when cleanser, moisturizer, and sunscreen are handled.",
+          "midday": "Quick skin check. Send a product label if you want help placing it.",
+          "evening": "Evening routine check. Reply done, skip, or send what you're using tonight."
         },
-        "user1": "Chicken burrito bowl with rice, beans and guac",
-        "bot2": "Nice. I'd put that around 760 kcal depending on the scoop sizes.\n\nI can log 760 now, or tighten it up if you send a photo."
+        "user1": "Done. Cleanser and barrier cream.",
+        "bot2": "✅ Evening logged\nCleanser · Barrier cream\nReaction: none noted"
       }
     }
   },
@@ -68,77 +68,77 @@
     "heading": "How it works",
     "subtitle": "Three steps. No downloads. No setup screens.",
     "step1": {
-      "title": "Text caltext",
-      "description": "Send a message to get started. caltext learns your goals, body stats, and preferences in a quick chat."
+      "title": "Text Skintext",
+      "description": "Send a message to get started. Skintext learns your skin goals, sensitivities, products, and reminder preferences in a quick chat."
     },
     "step2": {
-      "title": "Log Your Meals",
-      "description": "Text what you ate or snap a photo. AI identifies the food, looks up nutrition, and logs it instantly."
+      "title": "Log Your Routine",
+      "description": "Text done, list what you used, or send a product label. Skintext keeps track of AM and PM routine history."
     },
     "step3": {
-      "title": "Stay on Track",
-      "description": "Get daily summaries, weekly recaps, streak tracking, and friendly reminders at meal times."
+      "title": "Adjust Carefully",
+      "description": "Get routine summaries, product notes, adherence recaps, and conservative recommendations when something needs changing."
     }
   },
   "Faq": {
     "heading": "FAQs",
-    "q1": "How does caltext track my calories?",
-    "a1": "Text your meals or snap a photo. caltext uses AI to identify the food and portions, then looks up accurate nutrition data from the USDA database. It tracks your calories, protein, carbs, fat, and fiber automatically.",
+    "q1": "Can Skintext diagnose my skin?",
+    "a1": "No. Skintext can describe visible features cautiously, explain product labels, and suggest practical routine steps. It does not diagnose or replace a clinician.",
     "q2": "What do I need to get started?",
-    "a2": "Just an iPhone with iMessage. No app to download, no account to create. Text caltext and you're up and running in under 2 minutes.",
-    "q3": "Do I need to weigh my food?",
-    "a3": "Not at all. Rough estimates work great — just describe portions naturally like \"a big bowl of pasta\" or \"two slices of pizza.\" Photos work even better since the AI can estimate portion sizes visually.",
+    "a2": "Just an iPhone with iMessage. No app to download, no account to create. Text Skintext and set up your routine in a short chat.",
+    "q3": "Can I send product labels?",
+    "a3": "Yes. Send a product label, ingredient list, or routine shelf photo and Skintext can help place products, spot likely duplicates, and flag common irritation watchouts.",
     "q4": "How does the free trial work?",
-    "a4": "You get full access to all features during the trial period. Track meals, get summaries, set reminders — everything. No credit card required to start.",
+    "a4": "You get full access during the trial period. Track routines, save products, set reminders, and review summaries. No credit card required to start.",
     "q5": "What languages are supported?",
-    "a5": "caltext detects your language from your phone number and responds accordingly. English and Swedish are fully supported, with more languages coming soon."
+    "a5": "Skintext detects your language from your message and responds accordingly. English and Swedish are supported, with more languages coming soon."
   },
   "BottomCta": {
-    "heading": "Start tracking today",
-    "subtitle": "Open iMessage and text caltext. You'll be tracking calories in under two minutes.",
+    "heading": "Start your routine today",
+    "subtitle": "Open iMessage and text Skintext. Your routine setup takes only a short chat.",
     "buttonHint": "Opens iMessage on your Mac or iPhone",
     "qrLabel": "Scan with your phone"
   },
   "PhoneMockup": {
-    "header": "caltext",
+    "header": "skintext",
     "inputPlaceholder": "iMessage",
-    "lockTitle": "caltext",
-    "lockBody": "Lunch logged. 470 kcal added to your day.",
-    "lockBodyLogging": "Got your photo. Let me estimate it.",
-    "lockBodySummary": "📊 Here's your daily wrap-up.",
+    "lockTitle": "skintext",
+    "lockBody": "Evening routine logged.",
+    "lockBodyLogging": "Got your photo. Let me check the routine fit.",
+    "lockBodySummary": "Here's today's routine wrap-up.",
     "lockBodyReminder": {
-      "breakfast": "☀️ Breakfast time! Snap a photo and I'll handle the rest.",
-      "lunch": "🥗 Lunch time! Snap a photo and I'll handle the rest.",
-      "dinner": "🍽️ Dinner time! Snap a photo and I'll handle the rest."
+      "morning": "☀️ Morning routine check. Reply done when you're finished.",
+      "midday": "🧴 Send a product label if you want help placing it.",
+      "evening": "🌙 Evening routine check. Reply done or send what you're using."
     },
-    "msg1": "Had a chicken salad with avocado for lunch 🥗",
-    "msg2": "Nice lunch! 🥗🥑\n\n🍗 Grilled chicken — 285 kcal\n🥑 Avocado — 160 kcal\n🥬 Mixed greens — 25 kcal\n\nTotal: 470 kcal\nToday: 1,240 / 2,100 kcal\n\n860 left — you're on track! 🔥",
-    "msg3": "What's my streak?",
-    "msg4": "12 days straight! 🔥🔥🔥\nYour longest ever. Keep it going!"
+    "msg1": "Done tonight: cleanser and barrier cream",
+    "msg2": "✅ Evening logged\nCleanser · Barrier cream\nReaction: none noted",
+    "msg3": "Can I add a new serum?",
+    "msg4": "Yes, but introduce it slowly. Patch test first, use it a few nights a week, and pause if irritation shows up."
   },
   "Privacy": {
     "heading": "Privacy Policy",
-    "lastUpdated": "Last updated: April 2026",
-    "intro": "Cal Text (\"Caltext\", \"we\", \"us\") is committed to protecting your privacy. This policy explains what data we collect, how we use it, and your rights.",
+    "lastUpdated": "Last updated: June 2026",
+    "intro": "Skintext (\"Skintext\", \"we\", \"us\") is committed to protecting your privacy. This policy explains what data we collect, how we use it, and your rights.",
     "dataCollection": {
       "title": "Data We Collect",
-      "body": "When you use Caltext, we collect:\n\n• Your phone number (to identify your account and deliver messages via iMessage)\n• Your name, age, height, and weight (to calculate your personalized calorie target)\n• Sex, if you choose to share it — used only for the standard calorie formula; if you skip it, we use a neutral estimate\n• Meal descriptions and photos you send us\n• Nutrition and calorie data derived from your meals\n• Your timezone and country (detected from your phone number for localization)"
+      "body": "When you use Skintext, we collect:\n\n• Your phone number (to identify your account and deliver messages via iMessage)\n• Your name, skin goals, skin type if shared, sensitivities, allergies, and current products\n• Routine updates, product descriptions, product-label photos, and skin photos you send us\n• Routine logs, saved products, reminders, timezone, and country for localization"
     },
     "dataUsage": {
       "title": "How We Use Your Data",
-      "body": "We use your data to:\n\n• Provide personalized calorie and macro tracking\n• Generate daily summaries, weekly recaps, and meal reminders\n• Improve the accuracy of our food identification and nutrition estimates\n• Communicate with you via iMessage"
+      "body": "We use your data to:\n\n• Provide skincare routine tracking and product guidance\n• Generate routine summaries, adherence recaps, and reminders\n• Explain product labels and help place products in a routine\n• Communicate with you via iMessage"
     },
     "dataStorage": {
       "title": "Data Storage & Security",
-      "body": "Connections to our website and services use TLS (HTTPS). Your phone number is encrypted at rest using AES. Message history, meal log content, onboarding data during setup, and similar payloads are stored as encrypted application-layer blobs. Your profile fields (such as name and calorie target) are stored in our database with strict access controls. All data is stored on secure, access-controlled servers. We use industry-standard security measures to protect your information."
+      "body": "Connections to our website and services use TLS (HTTPS). Your phone number is encrypted at rest using AES. Message history, routine log content, onboarding data during setup, saved products, and similar payloads are stored as encrypted application-layer blobs. Profile fields are stored in our database with strict access controls. All data is stored on secure, access-controlled servers."
     },
     "thirdParty": {
       "title": "Third-Party Services",
-      "body": "We use the following third-party services to operate Caltext:\n\n• OpenAI — for food identification and natural language processing\n• USDA FoodData Central — for nutrition data lookup\n• Sendblue — for iMessage delivery\n\nThese services process data as necessary to provide our features. We do not sell your data to third parties."
+      "body": "We use the following third-party services to operate Skintext:\n\n• OpenAI — for image analysis and natural language processing\n• Sendblue — for iMessage delivery\n\nThese services process data as necessary to provide our features. We do not sell your data to third parties."
     },
     "retention": {
       "title": "Data Retention",
-      "body": "We retain your meal logs and profile data for as long as your account is active. You can request deletion of your data at any time by contacting us."
+      "body": "We retain your routine logs and profile data for as long as your account is active. You can request deletion of your data at any time."
     },
     "rights": {
       "title": "Your Rights",
@@ -146,52 +146,52 @@
     },
     "contact": {
       "title": "Contact",
-      "body": "If you have questions about this privacy policy, contact us at privacy@caltext.ai."
+      "body": "If you have questions about this privacy policy, contact us at privacy@skintext.ai."
     }
   },
   "Terms": {
     "heading": "Terms of Service",
-    "lastUpdated": "Last updated: April 2026",
-    "intro": "By using Cal Text (\"Caltext\", \"the Service\"), you agree to these terms. Please read them carefully.",
+    "lastUpdated": "Last updated: June 2026",
+    "intro": "By using Skintext (\"Skintext\", \"the Service\"), you agree to these terms. Please read them carefully.",
     "eligibility": {
       "title": "Eligibility",
-      "body": "You must be at least 16 years old and have access to an iPhone with iMessage to use Caltext."
+      "body": "You must be at least 16 years old and have access to an iPhone with iMessage to use Skintext."
     },
     "service": {
       "title": "The Service",
-      "body": "Caltext is an AI-powered calorie and nutrition tracking assistant that operates through iMessage. The service includes meal logging, daily summaries, weekly recaps, streak tracking, and meal-time reminders."
+      "body": "Skintext is an AI-powered skincare routine assistant that operates through iMessage. The service includes routine logging, product notes, summaries, adherence recaps, and reminders."
     },
     "accuracy": {
-      "title": "Nutrition Accuracy",
-      "body": "Caltext provides estimates of calories and macronutrients based on AI analysis and the USDA FoodData Central database. These are estimates and should not be considered exact measurements. Caltext is not a medical device and does not provide medical or dietary advice. Consult a healthcare professional for specific dietary needs."
+      "title": "Skincare Guidance",
+      "body": "Skintext provides routine support and conservative product guidance based on what you share. It does not diagnose, prescribe, or replace professional medical care. Consult a qualified clinician for concerning, severe, persistent, or rapidly changing symptoms."
     },
     "account": {
       "title": "Your Account",
-      "body": "Your account is identified by your phone number. You are responsible for all activity associated with your phone number. Do not share access to your iMessage account with others for the purpose of using Caltext."
+      "body": "Your account is identified by your phone number. You are responsible for all activity associated with your phone number. Do not share access to your iMessage account with others for the purpose of using Skintext."
     },
     "ip": {
       "title": "Intellectual Property",
-      "body": "All content, features, and functionality of Caltext are owned by Caltext and are protected by copyright and other intellectual property laws."
+      "body": "All content, features, and functionality of Skintext are owned by Skintext and are protected by copyright and other intellectual property laws."
     },
     "liability": {
       "title": "Limitation of Liability",
-      "body": "Caltext is provided \"as is\" without warranties of any kind. We are not liable for any damages arising from your use of the service, including but not limited to health outcomes based on nutrition estimates provided by the service."
+      "body": "Skintext is provided \"as is\" without warranties of any kind. We are not liable for any damages arising from your use of the service, including outcomes based on routine guidance provided by the service."
     },
     "changes": {
       "title": "Changes to Terms",
-      "body": "We may update these terms from time to time. Continued use of Caltext after changes constitutes acceptance of the new terms."
+      "body": "We may update these terms from time to time. Continued use of Skintext after changes constitutes acceptance of the new terms."
     },
     "contact": {
       "title": "Contact",
-      "body": "If you have questions about these terms, contact us at support@caltext.ai."
+      "body": "If you have questions about these terms, contact us at support@skintext.ai."
     }
   },
   "Footer": {
-    "logo": "caltext",
-    "tagline": "Calorie tracking that lives in your texts.",
+    "logo": "skintext",
+    "tagline": "Skincare routines that live in your texts.",
     "privacy": "Privacy",
     "terms": "Terms",
-    "copyright": "© {year} caltext",
+    "copyright": "© {year} skintext",
     "x": "X",
     "instagram": "Instagram",
     "tiktok": "TikTok"

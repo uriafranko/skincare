@@ -1,15 +1,21 @@
 import { describe, expect, mock, test } from "bun:test";
 
-mock.module("@caltext/shared", () => ({
+mock.module("@skintext/shared", () => ({
+  env: {},
+  encryptContent: async (s: string) => `enc:${s}`,
+  decrypt: async (s: string) => s.replace(/^enc:/, ""),
   getLocaleName: (locale: string) => {
     const names: Record<string, string> = { en: "English", sv: "Swedish" };
     return names[locale] ?? "English";
   },
-  DEFAULT_WATER_TARGET_ML: 2500,
 }));
 
-const { buildDailySummaryPrompt, buildReminderPrompt, buildSystemPrompt, buildWeeklyRecapPrompt } =
-  await import("../prompts");
+const {
+  buildDailyRoutineSummaryPrompt,
+  buildRoutineReminderPrompt,
+  buildSkintextSystemPrompt,
+  buildWeeklyRoutineRecapPrompt,
+} = await import("../prompts");
 
 const baseProfile = {
   id: "usr_test123",
@@ -18,17 +24,17 @@ const baseProfile = {
   locale: "en",
   timezone: "America/New_York",
   country: "US",
-  dailyCalorieTarget: 2000,
-  goal: "lose" as const,
-  activity: "moderate" as const,
-  sex: "female" as const,
-  age: 28,
-  heightCm: 168,
-  weightKg: 65,
+  skinType: "combination" as const,
+  sensitivity: "medium" as const,
+  concerns: ["dryness", "redness"],
+  goals: ["simple routine"],
+  allergies: ["fragrance"],
+  currentProducts: ["gentle cleanser"],
+  routinePreference: "simple" as const,
   onboardingComplete: true,
-  consentedAt: "2026-01-01T00:00:00Z",
-  consentVersion: "2026-04-08",
-  createdAt: "2026-01-01T00:00:00Z",
+  consentedAt: "2026-06-04T00:00:00Z",
+  consentVersion: "2026-06-04",
+  createdAt: "2026-06-04T00:00:00Z",
 };
 
 const baseContext = {
@@ -37,158 +43,101 @@ const baseContext = {
   localeName: "English",
   locale: "en",
   timezone: "America/New_York",
-  localDate: "2026-04-08",
-  dailyCalorieTarget: 2000,
+  localDate: "2026-06-04",
   userProfile: baseProfile,
   memories: null,
   todayLog: null,
   streak: null,
-  todayWater: null,
+  products: [],
 };
 
 function makeContext(overrides: Record<string, unknown> = {}) {
   return { ...baseContext, ...overrides };
 }
 
-describe("buildSystemPrompt", () => {
-  test("includes personality and base instructions", () => {
-    const prompt = buildSystemPrompt(makeContext());
-    expect(prompt).toContain("Caltext");
-    expect(prompt).toContain("English");
-    expect(prompt).toContain("Chill and minimal");
+describe("buildSkintextSystemPrompt", () => {
+  test("includes Skintext identity and exact-language rule", () => {
+    const prompt = buildSkintextSystemPrompt(makeContext());
+    expect(prompt).toContain("Skintext");
+    expect(prompt).toContain("EXACT language");
+    expect(prompt).toContain("skincare routine assistant");
   });
 
-  test("includes user profile when present", () => {
-    const prompt = buildSystemPrompt(makeContext());
-    expect(prompt).toContain("User: Alice");
-    expect(prompt).toContain("Daily target: 2000 kcal");
-    expect(prompt).toContain("Goal: lose");
+  test("includes skincare profile context", () => {
+    const prompt = buildSkintextSystemPrompt(makeContext());
+    expect(prompt).toContain("Skin type: combination");
+    expect(prompt).toContain("Sensitivity: medium");
+    expect(prompt).toContain("fragrance");
   });
 
-  test("includes memories when present", () => {
-    const prompt = buildSystemPrompt(
-      makeContext({ memories: { diet: "vegetarian", allergies: "peanuts" } }),
-    );
-    expect(prompt).toContain("What I know about them");
-    expect(prompt).toContain("diet: vegetarian");
-    expect(prompt).toContain("allergies: peanuts");
+  test("includes image handling and safety boundaries", () => {
+    const prompt = buildSkintextSystemPrompt(makeContext());
+    expect(prompt).toContain("analyzeSkincareImage");
+    expect(prompt).toContain("Do not diagnose");
+    expect(prompt).toContain("recommend professional care");
   });
 
-  test("includes today log when meals logged", () => {
-    const prompt = buildSystemPrompt(
+  test("includes routine and product tools", () => {
+    const prompt = buildSkintextSystemPrompt(makeContext());
+    expect(prompt).toContain("logRoutineStep");
+    expect(prompt).toContain("logProductUse");
+    expect(prompt).toContain("listProducts");
+  });
+
+  test("includes today's routine context when present", () => {
+    const prompt = buildSkintextSystemPrompt(
       makeContext({
         todayLog: {
-          calories: 1200,
-          protein: 80,
-          carbs: 120,
-          fat: 40,
-          fiber: 15,
-          mealCount: 2,
-          meals: [],
+          entries: [],
+          entryCount: 2,
+          completedSlots: ["morning"],
+          productsUsed: ["Barrier Cream"],
+          reactions: ["mild dryness"],
         },
       }),
     );
-    expect(prompt).toContain("Today so far: 2 meals");
-    expect(prompt).toContain("1200 kcal");
+    expect(prompt).toContain("Today so far: 2 routine entries");
+    expect(prompt).toContain("Barrier Cream");
+    expect(prompt).toContain("mild dryness");
   });
 
-  test("includes streak when > 1", () => {
-    const prompt = buildSystemPrompt(makeContext({ streak: 7 }));
-    expect(prompt).toContain("7 days");
+  test("does not include old-domain tracking language", () => {
+    const prompt = buildSkintextSystemPrompt(makeContext()).toLowerCase();
+    const oldTerms = ["calo" + "rie", "k" + "cal", "ma" + "cro"];
+    for (const term of oldTerms) {
+      expect(prompt).not.toContain(term);
+    }
   });
 
-  test("omits streak section when null or <= 1", () => {
-    const prompt = buildSystemPrompt(makeContext({ streak: 1 }));
-    expect(prompt).not.toContain("Streak:");
-    const prompt2 = buildSystemPrompt(makeContext({ streak: null }));
-    expect(prompt2).not.toContain("Streak:");
+  test("routes one-off reminders separately from recurring reminders", () => {
+    const prompt = buildSkintextSystemPrompt(
+      makeContext({ currentTimestamp: "2026-06-04T12:00:00.000Z" }),
+    );
+    expect(prompt).toContain("Use scheduleOneOffReminder");
+    expect(prompt).toContain("Use setReminders");
+    expect(prompt).toContain("Current timestamp: 2026-06-04T12:00:00.000Z");
+    expect(prompt).toContain("Do not use setReminders for one-off reminders");
   });
+});
 
-  test("responds in Swedish when locale is sv", () => {
-    const prompt = buildSystemPrompt(makeContext({ locale: "sv" }));
+describe("scheduled prompts", () => {
+  test("daily summary includes locale and routine status", () => {
+    const prompt = buildDailyRoutineSummaryPrompt("sv");
     expect(prompt).toContain("Swedish");
+    expect(prompt).toContain("AM:");
+    expect(prompt).toContain("PM:");
   });
 
-  test("includes packaged product label instructions", () => {
-    const prompt = buildSystemPrompt(makeContext());
-    expect(prompt).toContain("nutritionLabel");
-    expect(prompt).toContain("do NOT call lookupNutrition");
+  test("reminder prompt asks for done/skip or photo", () => {
+    const prompt = buildRoutineReminderPrompt("en");
+    expect(prompt).toContain("English");
+    expect(prompt).toContain("done/skip");
+    expect(prompt).toContain("product/skin photo");
   });
 
-  test("includes confirmation step instructions", () => {
-    const prompt = buildSystemPrompt(makeContext());
-    expect(prompt).toContain("Log it?");
-    expect(prompt).toContain("logMeal");
-  });
-
-  test("includes water tracking instructions", () => {
-    const prompt = buildSystemPrompt(makeContext());
-    expect(prompt).toContain("logWater");
-    expect(prompt).toContain("2500ml");
-  });
-
-  test("includes water status when present", () => {
-    const prompt = buildSystemPrompt(makeContext({ todayWater: { totalMl: 750, glasses: 3 } }));
-    expect(prompt).toContain("Water today: 750ml");
-    expect(prompt).toContain("3 glasses");
-  });
-
-  test("includes delete account instructions", () => {
-    const prompt = buildSystemPrompt(makeContext());
-    expect(prompt).toContain("deleteAccount");
-    expect(prompt).toContain("confirmed=false");
-  });
-
-  test("includes favorite meal instructions", () => {
-    const prompt = buildSystemPrompt(makeContext());
-    expect(prompt).toContain("saveFavorite");
-    expect(prompt).toContain("logFavorite");
-  });
-
-  test("includes profile update instructions", () => {
-    const prompt = buildSystemPrompt(makeContext());
-    expect(prompt).toContain("updateProfile");
-  });
-
-  test("includes weight logging instructions", () => {
-    const prompt = buildSystemPrompt(makeContext());
-    expect(prompt).toContain("logWeight");
-  });
-
-  test("includes data export instructions", () => {
-    const prompt = buildSystemPrompt(makeContext());
-    expect(prompt).toContain("exportData");
-  });
-});
-
-describe("buildDailySummaryPrompt", () => {
-  test("includes locale name", () => {
-    expect(buildDailySummaryPrompt("en")).toContain("English");
-    expect(buildDailySummaryPrompt("sv")).toContain("Swedish");
-  });
-
-  test("includes fiber and optional closing line rules", () => {
-    const p = buildDailySummaryPrompt("en");
-    expect(p).toContain("Fiber");
-    expect(p.toLowerCase()).toContain("optional");
-    expect(p.toLowerCase()).toContain("coaching");
-  });
-});
-
-describe("buildReminderPrompt", () => {
-  test("includes locale name", () => {
-    expect(buildReminderPrompt("en")).toContain("English");
-  });
-
-  test("describes progress and log CTA", () => {
-    const p = buildReminderPrompt("en");
-    expect(p.toLowerCase()).toContain("progress");
-    expect(p.toLowerCase()).toContain("photo");
-  });
-});
-
-describe("buildWeeklyRecapPrompt", () => {
-  test("includes locale name", () => {
-    expect(buildWeeklyRecapPrompt("en")).toContain("English");
+  test("weekly recap is adherence focused", () => {
+    const prompt = buildWeeklyRoutineRecapPrompt("en");
+    expect(prompt).toContain("Done: [x]/14 AM/PM slots");
+    expect(prompt).toContain("Reactions");
   });
 });

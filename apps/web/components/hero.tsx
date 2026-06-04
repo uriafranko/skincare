@@ -5,21 +5,28 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { IMessageButton } from "./imessage-button";
 
-const ALL_AVATARS = Array.from(
-  { length: 7 },
-  (_, i) => `https://cdn.caltext.ai/web/content/${i + 1}.jpg`,
-);
-const INITIAL_AVATARS = ALL_AVATARS.slice(4, 7);
+type HeroAvatar = {
+  id: string;
+  src: string;
+  objectPosition: string;
+};
+
+const ALL_AVATARS: HeroAvatar[] = [
+  { id: "routine-shelf", src: "/screensaver.png", objectPosition: "45% 42%" },
+  { id: "product-label", src: "/screensaver.png", objectPosition: "55% 50%" },
+  { id: "skin-check", src: "/screensaver.png", objectPosition: "50% 58%" },
+];
+const INITIAL_AVATARS = ALL_AVATARS;
 const SWAP_INTERVAL = 4000;
 
-function pickRandom(arr: string[], count: number): string[] {
+function pickRandom<T>(arr: T[], count: number): T[] {
   const shuffled = [...arr].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
 }
 
 export function Hero() {
   const t = useTranslations("Hero");
-  const [avatars, setAvatars] = useState<string[]>(INITIAL_AVATARS);
+  const [avatars, setAvatars] = useState<HeroAvatar[]>(INITIAL_AVATARS);
 
   const swap = useCallback(() => {
     setAvatars(pickRandom(ALL_AVATARS, 3));
@@ -40,15 +47,15 @@ export function Hero() {
         <div className="mb-8 -mt-2 flex items-center justify-center gap-3">
           <div className="flex -space-x-1.5" style={{ height: 28 }}>
             <AnimatePresence mode="popLayout">
-              {avatars.map((src) => (
+              {avatars.map((avatar) => (
                 <motion.img
-                  key={src}
-                  src={src}
+                  key={avatar.id}
+                  src={avatar.src}
                   alt=""
                   width={28}
                   height={28}
                   className="rounded-full border border-bg/80 object-cover"
-                  style={{ width: 28, height: 28 }}
+                  style={{ width: 28, height: 28, objectPosition: avatar.objectPosition }}
                   initial={{ opacity: 0, scale: 0.6, filter: "blur(4px) saturate(0.3)" }}
                   animate={{ opacity: 1, scale: 1, filter: "blur(0px) saturate(0.3)" }}
                   exit={{ opacity: 0, scale: 0.6, filter: "blur(4px) saturate(0.3)" }}

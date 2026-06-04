@@ -20,7 +20,7 @@ mock.module("../client", () => ({
   getRedis: () => mockRedis,
 }));
 
-mock.module("@caltext/shared", () => ({
+mock.module("@skintext/shared", () => ({
   env: {},
   encryptContent: async (s: string) => `enc:${s}`,
   decrypt: async (s: string) => {
@@ -36,8 +36,8 @@ const { saveConversationMessages, getConversationMessages, deleteAllMessages } =
 describe("conversation messages", () => {
   test("saves and retrieves ModelMessage array", async () => {
     const messages = [
-      { role: "user", content: "I had a salad" },
-      { role: "assistant", content: "Nice lunch! 🥗 About 350 kcal." },
+      { role: "user", content: "I used my cleanser tonight" },
+      { role: "assistant", content: "Evening routine logged." },
     ];
     await saveConversationMessages("usr_test", messages);
     const loaded = await getConversationMessages("usr_test");
@@ -46,15 +46,15 @@ describe("conversation messages", () => {
 
   test("preserves tool call messages", async () => {
     const messages = [
-      { role: "user", content: "I had a salad" },
+      { role: "user", content: "I used my moisturizer" },
       {
         role: "assistant",
         content: [
           {
             type: "tool-call",
             toolCallId: "tc_1",
-            toolName: "lookupNutrition",
-            args: { foodName: "salad" },
+            toolName: "logProductUse",
+            args: { productName: "moisturizer" },
           },
         ],
       },
@@ -64,17 +64,30 @@ describe("conversation messages", () => {
           {
             type: "tool-result",
             toolCallId: "tc_1",
-            toolName: "lookupNutrition",
-            output: { calories: 150 },
+            toolName: "logProductUse",
+            output: { logged: true },
           },
         ],
       },
-      { role: "assistant", content: "That salad has about 150 kcal." },
+      { role: "assistant", content: "Moisturizer logged for tonight." },
     ];
     await saveConversationMessages("usr_test2", messages);
     const loaded = await getConversationMessages("usr_test2");
     expect(loaded).toEqual(messages);
     expect(loaded).toHaveLength(4);
+  });
+
+  test("preserves more than 40 messages", async () => {
+    const messages = Array.from({ length: 45 }, (_, i) => ({
+      role: i % 2 === 0 ? "user" : "assistant",
+      content: `message ${i}`,
+    }));
+
+    await saveConversationMessages("usr_long", messages);
+    const loaded = await getConversationMessages("usr_long");
+
+    expect(loaded).toEqual(messages);
+    expect(loaded).toHaveLength(45);
   });
 
   test("returns empty array for unknown user", async () => {

@@ -1,5 +1,5 @@
-import { createPhoneMapping, getUser, resolveUserId } from "@caltext/db";
-import { detectRegion, generateId } from "@caltext/shared";
+import { createPhoneMapping, getUser, resolveUserId } from "@skintext/db";
+import { detectRegion, generateId } from "@skintext/shared";
 import type { RequestLogger } from "evlog";
 import { handleMessage } from "@/handlers/message";
 import { handleOnboarding } from "@/handlers/onboarding";

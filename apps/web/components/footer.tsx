@@ -57,13 +57,13 @@ function TikTokIcon() {
 export function Footer() {
   const t = useTranslations("Footer");
   const socialLinks = [
-    { href: "https://x.com/caltext", label: t("x"), Icon: XIcon },
+    { href: "https://x.com/skintext", label: t("x"), Icon: XIcon },
     {
-      href: "https://instagram.com/caltext",
+      href: "https://instagram.com/skintext",
       label: t("instagram"),
       Icon: InstagramIcon,
     },
-    { href: "https://tiktok.com/@caltext", label: t("tiktok"), Icon: TikTokIcon },
+    { href: "https://tiktok.com/@skintext", label: t("tiktok"), Icon: TikTokIcon },
   ] as const;
 
   return (

@@ -1,99 +1,123 @@
-export interface UserProfile {
-  id: string; // generated user ID, e.g. "usr_a7x2k9m"
-  phone: string; // encrypted phone (for Sendblue reverse lookup)
-  name: string;
-  locale: string; // BCP-47 language tag, e.g. "sv", "en", "pt-BR"
-  timezone: string; // IANA timezone, e.g. "Europe/Stockholm"
-  country: string; // ISO 3166-1 code
-  dailyCalorieTarget: number;
-  goal: "lose" | "maintain" | "gain";
-  activity: "sedentary" | "light" | "moderate" | "active" | "very_active";
-  sex: "male" | "female" | "unspecified";
-  age: number;
-  heightCm: number;
-  weightKg: number;
-  onboardingComplete: boolean;
-  consentedAt: string | null;
-  consentVersion: string | null;
-  createdAt: string; // ISO 8601
+export type SkinType = "dry" | "oily" | "combination" | "normal" | "unsure";
+
+export type SensitivityLevel = "low" | "medium" | "high" | "unsure";
+
+export type RoutinePreference = "simple" | "standard" | "detailed";
+
+export type RoutineSlot = "morning" | "evening" | "custom";
+
+export type OneOffReminderKind = "routine_followup" | "skin_checkin" | "custom";
+
+export type OneOffReminderStatus = "scheduled" | "sent" | "cancelled" | "failed";
+
+export interface OneOffReminder {
+  id: string;
+  userId: string;
+  sendAt: string;
+  timezone: string;
+  kind: OneOffReminderKind;
+  message: string;
+  status: OneOffReminderStatus;
+  createdAt: string;
+  updatedAt?: string;
+  sentAt?: string;
+  cancelledAt?: string;
+  failedAt?: string;
+  workflowRunId?: string;
 }
 
-export interface FoodItem {
+export interface ProductEntry {
+  id: string;
+  userId: string;
   name: string;
-  estimatedGrams: number;
-  preparationMethod: string;
-  confidence: "high" | "medium" | "low";
+  category?: string;
+  brand?: string;
+  ingredients?: string[];
+  notes?: string;
+  source: "photo" | "text" | "manual";
+  createdAt: string;
+}
+
+export interface RoutineStep {
+  name: string;
+  category?: string;
+  productId?: string;
+  productName?: string;
   notes?: string;
 }
 
-export interface NutritionInfo {
-  matchedName: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  fiber: number;
-}
-
-export interface MealItem extends FoodItem {
-  nutrition: NutritionInfo;
-}
-
-export interface MealEntry {
+export interface RoutineLogEntry {
   id: string;
   userId: string;
-  name?: string; // e.g. "Greek plate", "Afternoon snack"
-  items: MealItem[];
-  totalCalories: number;
-  totalProtein: number;
-  totalCarbs: number;
-  totalFat: number;
-  totalFiber: number;
-  photoUrl?: string;
+  slot: RoutineSlot;
+  steps: RoutineStep[];
+  completed: boolean;
+  reaction?: string;
+  notes?: string;
   source: "photo" | "text" | "manual";
-  timestamp: string; // ISO 8601 UTC
-  localDate: string; // YYYY-MM-DD in user's timezone
+  timestamp: string;
+  localDate: string;
 }
 
-export interface DailyLog {
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  fiber: number;
-  mealCount: number;
-  meals: MealEntry[];
+export interface DailyRoutineLog {
+  entries: RoutineLogEntry[];
+  entryCount: number;
+  completedSlots: RoutineSlot[];
+  productsUsed: string[];
+  reactions: string[];
 }
 
-export interface StreakInfo {
+export interface AdherenceStreak {
   current: number;
   longest: number;
-  lastLogDate: string; // YYYY-MM-DD in user's timezone
+  lastLogDate: string;
+}
+
+export interface UserProfile {
+  id: string;
+  phone: string;
+  name: string;
+  locale: string;
+  timezone: string;
+  country: string;
+  skinType: SkinType;
+  sensitivity: SensitivityLevel;
+  concerns: string[];
+  goals: string[];
+  allergies: string[];
+  currentProducts: string[];
+  routinePreference: RoutinePreference;
+  onboardingComplete: boolean;
+  consentedAt: string | null;
+  consentVersion: string | null;
+  createdAt: string;
 }
 
 export interface OnboardingState {
   name?: string;
   timezoneConfirmed?: boolean;
   timezone?: string;
-  sex?: "male" | "female" | "unspecified";
-  age?: number;
-  heightCm?: number;
-  weightKg?: number;
-  goal?: "lose" | "maintain" | "gain";
-  activity?: "sedentary" | "light" | "moderate" | "active" | "very_active";
+  skinType?: SkinType;
+  sensitivity?: SensitivityLevel;
+  concerns?: string[];
+  goals?: string[];
+  allergies?: string[];
+  currentProducts?: string[];
+  routinePreference?: RoutinePreference;
+  morningReminder?: string;
+  eveningReminder?: string;
   consented?: boolean;
   detectedLocale?: string;
   lastBotReply?: string;
 }
 
-export type OnboardingFieldKey = "name" | "body_stats" | "goal" | "activity" | "consent";
+export type OnboardingFieldKey = "name" | "skin_goals" | "skin_profile" | "consent";
 
 export function getMissingFields(state: OnboardingState): OnboardingFieldKey[] {
   const missing: OnboardingFieldKey[] = [];
   if (!state.name) missing.push("name");
-  if (!state.age || !state.heightCm || !state.weightKg) missing.push("body_stats");
-  if (!state.goal) missing.push("goal");
-  if (!state.activity) missing.push("activity");
+  if (!state.concerns?.length && !state.goals?.length) missing.push("skin_goals");
+  if (!state.skinType && !state.sensitivity) missing.push("skin_profile");
   if (missing.length === 0 && !state.consented) missing.push("consent");
   return missing;
 }
@@ -102,30 +126,20 @@ export function isOnboardingComplete(state: OnboardingState): boolean {
   return getMissingFields(state).length === 0 && state.consented === true;
 }
 
-export interface WaterLog {
-  totalMl: number;
-  glasses: number; // each glass = 250ml
-}
-
-export interface WeightEntry {
-  weightKg: number;
-  date: string; // YYYY-MM-DD
-}
-
 export interface AgentContext {
   userId: string;
   userName: string;
-  localeName: string; // human-readable language name
+  localeName: string;
   locale: string;
   timezone: string;
-  localDate: string; // YYYY-MM-DD in user's timezone
-  dailyCalorieTarget: number;
+  localDate: string;
   userProfile: UserProfile | null;
   memories: Record<string, string> | null;
-  todayLog: DailyLog | null;
+  todayLog: DailyRoutineLog | null;
   streak: number | null;
-  todayWater: WaterLog | null;
-  imageUrl?: string; // if the user sent a photo
+  products: ProductEntry[];
+  imageUrl?: string;
+  currentTimestamp?: string;
 }
 
 export interface PhoneRegionInfo {
