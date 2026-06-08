@@ -1,4 +1,4 @@
-import { eq, lte, sql } from "drizzle-orm";
+import { lte, sql } from "drizzle-orm";
 import { getDb } from "./client";
 import { exportBlobs } from "./schema";
 
@@ -24,8 +24,4 @@ export async function saveExportBlob(
 
 export async function deleteExpiredExportBlobs(): Promise<void> {
   await getDb().delete(exportBlobs).where(lte(exportBlobs.expiresAt, new Date()));
-}
-
-export async function deleteExportBlob(userId: string): Promise<void> {
-  await getDb().delete(exportBlobs).where(eq(exportBlobs.userId, userId));
 }

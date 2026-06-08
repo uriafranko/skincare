@@ -16,7 +16,12 @@ const {
   buildSkintextSystemPrompt,
   buildWeeklyRoutineRecapPrompt,
 } = await import("../prompts");
-const { USER_REMINDER_OPEN_TAG, USER_REMINDER_TAG_EXAMPLE } = await import("../user-reminder");
+const {
+  USER_REMINDER_CLOSE_TAG,
+  USER_REMINDER_OPEN_TAG,
+  USER_REMINDER_TAG_EXAMPLE,
+  wrapUserReminder,
+} = await import("../user-reminder");
 
 const baseProfile = {
   id: "usr_test123",
@@ -80,6 +85,12 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("internal scheduled reminder event");
     expect(prompt).toContain("Reply in the user's saved locale");
     expect(prompt).toContain("write the outbound text the user should receive");
+  });
+
+  test("wraps scheduled reminder input for synthetic agent turns", () => {
+    expect(wrapUserReminder("Check whether irritation improved.")).toBe(
+      `${USER_REMINDER_OPEN_TAG}\nCheck whether irritation improved.\n${USER_REMINDER_CLOSE_TAG}`,
+    );
   });
 
   test("includes action policy guidance", () => {

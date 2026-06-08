@@ -4,11 +4,6 @@
   "workspaces": {
     "": {
       "name": "skintext",
-      "dependencies": {
-        "@t3-oss/env-core": "^0.13.11",
-        "nanoid": "^5.1.7",
-        "zod": "^4.3.6",
-      },
       "devDependencies": {
         "@biomejs/biome": "^2.4.11",
         "@types/bun": "^1.3.11",
@@ -113,7 +108,6 @@
         "@skintext/ai": "*",
         "@skintext/shared": "*",
         "ai": "^6.0.156",
-        "zod": "^4.3.6",
       },
       "devDependencies": {
         "@types/node": "^25",

@@ -24,19 +24,14 @@
     "smsBody": "Hi! I'd like to get started with Skintext."
   },
   "Features": {
-    "heading": "Everything happens in your texts",
-    "subtitle": "No app to download. No accounts to create. Just iMessage.",
     "snapOrText": {
-      "title": "Photo or Text",
-      "description": "Send a skin photo, product label, or routine shelf and get cautious, practical routine guidance."
+      "title": "Photo or Text"
     },
     "dailySummaries": {
-      "title": "Routine Summaries",
-      "description": "See which AM and PM steps were done, what products you used, and any reactions you noted."
+      "title": "Routine Summaries"
     },
     "smartReminders": {
-      "title": "Smart Reminders",
-      "description": "Get calm morning and evening nudges that adapt to your saved routine."
+      "title": "Smart Reminders"
     },
     "chat": {
       "snapOrText": {
@@ -62,22 +57,6 @@
         "user1": "Done. Cleanser and barrier cream.",
         "bot2": "✅ Evening logged\nCleanser · Barrier cream\nReaction: none noted"
       }
-    }
-  },
-  "HowItWorks": {
-    "heading": "How it works",
-    "subtitle": "Three steps. No downloads. No setup screens.",
-    "step1": {
-      "title": "Text Skintext",
-      "description": "Send a message to get started. Skintext learns your skin goals, sensitivities, products, and reminder preferences in a quick chat."
-    },
-    "step2": {
-      "title": "Log Your Routine",
-      "description": "Text done, list what you used, or send a product label. Skintext keeps track of AM and PM routine history."
-    },
-    "step3": {
-      "title": "Adjust Carefully",
-      "description": "Get routine summaries, product notes, adherence recaps, and conservative recommendations when something needs changing."
     }
   },
   "Faq": {

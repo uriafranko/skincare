@@ -65,7 +65,7 @@ export interface SimulationRuntime {
   receive(text: string, ctx: RuntimeTurnContext): Promise<RuntimeReply>;
 }
 
-export interface PersonaTurnContext {
+interface PersonaTurnContext {
   scenario: SimulationScenario;
   transcript: TranscriptMessage[];
   state?: OnboardingState;
@@ -78,7 +78,7 @@ export interface PersonaDriver {
   next(ctx: PersonaTurnContext): Promise<string | null>;
 }
 
-export type CheckSeverity = "error" | "warning";
+type CheckSeverity = "error" | "warning";
 
 export interface EvaluationCheck {
   id: string;
