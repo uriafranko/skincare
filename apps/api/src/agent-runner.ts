@@ -102,7 +102,6 @@ export async function runAgentMessage(
     memories: Object.keys(memories).length > 0 ? memories : null,
     streak: streak.current > 0 ? streak.current : null,
     products,
-    imageUrl: options.imageUrl,
   };
 
   const ai = createAILogger(log, { toolInputs: { maxLength: 200 } });
@@ -114,8 +113,6 @@ export async function runAgentMessage(
   const agent = createSkintextAgent(systemPrompt, {
     userId,
     timezone: user.timezone,
-    hasImage,
-    imageUrl: options.imageUrl,
     model,
     compactionModel,
     scheduleOneOffReminderWorkflow: options.scheduleOneOffReminderWorkflow,

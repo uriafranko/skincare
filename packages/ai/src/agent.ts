@@ -2,7 +2,6 @@ import type { LanguageModelV3 } from "@ai-sdk/provider";
 import { type ModelMessage, stepCountIs, type Tool, ToolLoopAgent } from "ai";
 import { createRescueCompactionPrepareStep } from "./compaction";
 import { createCompactionGatewayModel, createDefaultGatewayModel } from "./models";
-import { createAnalyzeSkincareImageTool } from "./tools/analyze-skincare-image";
 import { deleteAccountTool } from "./tools/delete-account";
 import { exportDataTool } from "./tools/export-data";
 import { getUserProfile } from "./tools/get-profile";
@@ -40,8 +39,6 @@ function withContext<T extends Tool>(t: T, ctx: AgentSecurityContext): T {
 }
 
 export interface AgentOptions extends AgentSecurityContext {
-  hasImage?: boolean;
-  imageUrl?: string;
   model?: LanguageModelV3;
   compactionModel?: LanguageModelV3;
   scheduleOneOffReminderWorkflow?: ScheduleOneOffReminderWorkflow;
@@ -51,7 +48,6 @@ export interface AgentOptions extends AgentSecurityContext {
 export function createSkintextAgent(systemPrompt: string, ctx: AgentOptions) {
   const model = ctx.model ?? createDefaultGatewayModel();
   const tools: Record<string, Tool> = {
-    analyzeSkincareImage: createAnalyzeSkincareImageTool(ctx.imageUrl),
     logRoutineStep: withContext(logRoutineStepTool, ctx),
     deleteRoutineEntry: withContext(deleteRoutineEntryTool, ctx),
     getTodayRoutineLog: withContext(getTodayRoutineLogTool, ctx),

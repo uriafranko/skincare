@@ -137,7 +137,6 @@ export interface AgentContext {
   memories: Record<string, string> | null;
   streak: number | null;
   products: ProductEntry[];
-  imageUrl?: string;
 }
 
 export interface PhoneRegionInfo {

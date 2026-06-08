@@ -36,8 +36,7 @@ Targeted prompt/simulator tests:
 ```bash
 PATH="$HOME/.bun/bin:$PATH" "$HOME/.bun/bin/bun" test \
   packages/sim/src/__tests__/runner.test.ts \
-  packages/ai/src/__tests__/prompts.test.ts \
-  packages/ai/src/__tests__/image-schema.test.ts
+  packages/ai/src/__tests__/prompts.test.ts
 ```
 
 If env validation blocks those targeted tests, run them through dotenv with dummy Sendblue values:
@@ -56,7 +55,6 @@ const env = {
 const r = spawnSync(bun, ["test",
   "packages/sim/src/__tests__/runner.test.ts",
   "packages/ai/src/__tests__/prompts.test.ts",
-  "packages/ai/src/__tests__/image-schema.test.ts",
 ], { cwd: process.cwd(), env, stdio: "inherit" });
 process.exit(r.status ?? 1);'
 ```

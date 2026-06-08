@@ -140,7 +140,9 @@ describe("buildSkintextSystemPrompt", () => {
 
   test("includes image handling and safety boundaries", () => {
     const prompt = buildSkintextSystemPrompt(makeContext());
-    expect(prompt).toContain("analyzeSkincareImage");
+    expect(prompt).toContain("photo is already attached in the latest message context");
+    expect(prompt).toContain("Use it directly");
+    expect(prompt).toContain("request analysis");
     expect(prompt).toContain("Do not diagnose");
     expect(prompt).toContain("recommend professional care");
     expect(prompt).toContain("Write like a person texting");
@@ -151,6 +153,11 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("Answer, log, or update first");
     expect(prompt).toContain("skip extra offers");
     expect(prompt).toContain("Do not include absent symptoms or absent injuries");
+    expect(prompt).toContain("Do not add broad reassurance");
+    expect(prompt).toContain("nothing looks abnormal");
+    expect(prompt).toContain("Mention professional care only when urgent signs are visible");
+    expect(prompt).toContain("End photo replies after the practical next step");
+    expect(prompt).toContain("If you want, I can");
   });
 
   test("includes routine and product tools", () => {

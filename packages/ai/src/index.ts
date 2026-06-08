@@ -34,11 +34,6 @@ export {
   buildSkintextSystemPrompt,
   buildWeeklyRoutineRecapPrompt,
 } from "./prompts";
-export {
-  createAnalyzeSkincareImageTool,
-  SKINCARE_IMAGE_ANALYSIS_PROMPT,
-  skincareImageAnalysisSchema,
-} from "./tools/analyze-skincare-image";
 export { deleteAccountTool } from "./tools/delete-account";
 export { exportDataTool } from "./tools/export-data";
 export { getUserProfile } from "./tools/get-profile";
