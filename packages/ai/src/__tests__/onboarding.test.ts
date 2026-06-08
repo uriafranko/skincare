@@ -35,9 +35,9 @@ function output(overrides: Record<string, unknown> = {}) {
 
 const setupCompleteExceptConsent = {
   name: "Dana",
-  skinType: "combination",
+  skinType: "combination" as const,
   concerns: ["redness"],
-} as const;
+};
 
 describe("processOnboardingMessage", () => {
   beforeEach(() => {

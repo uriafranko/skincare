@@ -38,7 +38,7 @@ function withContext<T extends Tool>(t: T, ctx: AgentSecurityContext): T {
   } as T;
 }
 
-export interface AgentOptions extends AgentSecurityContext {
+interface AgentOptions extends AgentSecurityContext {
   model?: LanguageModelV3;
   compactionModel?: LanguageModelV3;
   scheduleOneOffReminderWorkflow?: ScheduleOneOffReminderWorkflow;

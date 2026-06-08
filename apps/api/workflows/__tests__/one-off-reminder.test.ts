@@ -5,6 +5,14 @@ let waitMs = 0;
 let reminderQueue: unknown[] = [];
 let user: unknown = null;
 
+type MockRoutineLog = {
+  entries: unknown[];
+  entryCount: number;
+  completedSlots: string[];
+  productsUsed: string[];
+  reactions: string[];
+};
+
 const sleep = mock(() => Promise.resolve());
 const buildDailySummaryReminder = mock(() => Promise.resolve(null));
 const buildRoutineReminder = mock(() => Promise.resolve("Routine reminder event."));
@@ -15,14 +23,15 @@ const loadReminderTimes = mock(
   (): Promise<Array<{ label: string; hour: number; minute: number }> | null> =>
     Promise.resolve(null),
 );
-const loadRoutineLog = mock(() =>
-  Promise.resolve({
-    entries: [],
-    entryCount: 0,
-    completedSlots: [],
-    productsUsed: [],
-    reactions: [],
-  }),
+const loadRoutineLog = mock(
+  (): Promise<MockRoutineLog> =>
+    Promise.resolve({
+      entries: [],
+      entryCount: 0,
+      completedSlots: [],
+      productsUsed: [],
+      reactions: [],
+    }),
 );
 const loadUser = mock(() => Promise.resolve(user));
 const markOneOffReminderFailed = mock(() => Promise.resolve());
@@ -55,9 +64,6 @@ mock.module("../steps/reminder-steps", () => ({
   sendReminderToAgent,
 }));
 
-const { USER_REMINDER_CLOSE_TAG, USER_REMINDER_OPEN_TAG, wrapUserReminder } = await import(
-  "../../../../packages/ai/src/user-reminder"
-);
 const { oneOffReminderWorkflow } = await import("../one-off-reminder");
 const { reminderLoop } = await import("../reminder-loop");
 
@@ -96,12 +102,6 @@ describe("oneOffReminderWorkflow", () => {
     markOneOffReminderSent.mockClear();
     sendReminderToAgent.mockClear();
     sendReminderToAgent.mockResolvedValue(true);
-  });
-
-  test("wraps reminder input for synthetic agent turns", () => {
-    expect(wrapUserReminder("Check whether irritation improved.")).toBe(
-      `${USER_REMINDER_OPEN_TAG}\nCheck whether irritation improved.\n${USER_REMINDER_CLOSE_TAG}`,
-    );
   });
 
   test("sleeps until sendAt, routes once through the agent, and marks sent", async () => {

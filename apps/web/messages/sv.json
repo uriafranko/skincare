@@ -24,19 +24,14 @@
     "smsBody": "Hej! Jag vill komma igång med Skintext."
   },
   "Features": {
-    "heading": "Allt händer i dina sms",
-    "subtitle": "Ingen app att ladda ner. Inga konton att skapa. Bara iMessage.",
     "snapOrText": {
-      "title": "Foto eller text",
-      "description": "Skicka hudbild, produktetikett eller rutinhylla och få försiktig, praktisk rutinhjälp."
+      "title": "Foto eller text"
     },
     "dailySummaries": {
-      "title": "Rutinsammandrag",
-      "description": "Se vilka morgon- och kvällssteg som gjordes, vilka produkter du använde och eventuella reaktioner."
+      "title": "Rutinsammandrag"
     },
     "smartReminders": {
-      "title": "Smarta påminnelser",
-      "description": "Få lugna morgon- och kvällspåminnelser som anpassas efter din sparade rutin."
+      "title": "Smarta påminnelser"
     },
     "chat": {
       "snapOrText": {
@@ -62,22 +57,6 @@
         "user1": "Klart. Rengöring och barriärkräm.",
         "bot2": "✅ Kväll loggad\nRengöring · Barriärkräm\nReaktion: ingen noterad"
       }
-    }
-  },
-  "HowItWorks": {
-    "heading": "Så fungerar det",
-    "subtitle": "Tre steg. Inga nedladdningar. Inga inställningar.",
-    "step1": {
-      "title": "Skriv till Skintext",
-      "description": "Skicka ett meddelande för att komma igång. Skintext lär sig dina hudmål, känsligheter, produkter och påminnelser i en snabb chatt."
-    },
-    "step2": {
-      "title": "Logga din rutin",
-      "description": "Skriv klart, lista vad du använde eller skicka en produktetikett. Skintext håller koll på morgon- och kvällshistorik."
-    },
-    "step3": {
-      "title": "Justera varsamt",
-      "description": "Få rutinsammandrag, produktanteckningar, veckokoll och försiktiga rekommendationer när något behöver ändras."
     }
   },
   "Faq": {

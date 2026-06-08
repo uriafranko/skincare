@@ -14,7 +14,7 @@ const MAX_HORIZON_MS = MAX_HORIZON_DAYS * 24 * 60 * 60 * 1000;
 const reminderKindSchema = z.enum(["routine_followup", "skin_checkin", "custom"]);
 const relativeUnitSchema = z.enum(["minutes", "hours", "days", "weeks"]);
 
-export type RelativeReminderUnit = z.infer<typeof relativeUnitSchema>;
+type RelativeReminderUnit = z.infer<typeof relativeUnitSchema>;
 
 export type OneOffReminderSchedule =
   | {
@@ -37,7 +37,7 @@ export interface ScheduleOneOffReminderInput {
   kind?: OneOffReminderKind;
 }
 
-export interface ScheduleOneOffReminderWorkflowInput {
+interface ScheduleOneOffReminderWorkflowInput {
   userId: string;
   reminderId: string;
 }
