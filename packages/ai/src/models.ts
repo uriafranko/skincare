@@ -1,10 +1,22 @@
-import { env } from "@skintext/shared";
+import {
+  env,
+  resolveCompactionGatewayModelName,
+  resolveDefaultGatewayModelName,
+} from "@skintext/shared";
 import { gateway } from "ai";
 
+export function getDefaultGatewayModelName(): string {
+  return resolveDefaultGatewayModelName(env);
+}
+
+export function getCompactionGatewayModelName(): string {
+  return resolveCompactionGatewayModelName(env);
+}
+
 export function createDefaultGatewayModel() {
-  return gateway(env.AI_GATEWAY_DEFAULT_MODEL);
+  return gateway(getDefaultGatewayModelName());
 }
 
 export function createCompactionGatewayModel() {
-  return gateway(env.AI_GATEWAY_COMPACTION_MODEL);
+  return gateway(getCompactionGatewayModelName());
 }

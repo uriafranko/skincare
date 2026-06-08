@@ -150,7 +150,6 @@ export interface AgentContext {
   memories: Record<string, string> | null;
   streak: number | null;
   products: ProductEntry[];
-  recentImages?: UserImage[];
 }
 
 export interface PhoneRegionInfo {

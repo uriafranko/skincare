@@ -23,7 +23,6 @@ import {
   getAdherenceStreak,
   getAllProducts,
   getConversationMessageRecords,
-  listUserImages,
   recallAllMemories,
 } from "@skintext/db";
 import type { AgentContext, UserProfile } from "@skintext/shared";
@@ -91,12 +90,11 @@ export async function runAgentMessage(
   options: RunAgentMessageOptions = {},
 ): Promise<string | null> {
   const userId = user.id;
-  const [historyRecords, memories, streak, products, recentImages] = await Promise.all([
+  const [historyRecords, memories, streak, products] = await Promise.all([
     getConversationMessageRecords<ModelMessage>(userId),
     recallAllMemories(userId),
     getAdherenceStreak(userId),
     getAllProducts(userId),
-    listUserImages(userId),
   ]);
   const conversationHistory = historyRecords.map((record) => record.value);
 
@@ -111,7 +109,6 @@ export async function runAgentMessage(
       hasImage,
       historyLength: conversationHistory.length,
       streak: streak.current,
-      recentImages: recentImages.length,
     },
   });
 
@@ -126,7 +123,6 @@ export async function runAgentMessage(
     memories: Object.keys(memories).length > 0 ? memories : null,
     streak: streak.current > 0 ? streak.current : null,
     products,
-    recentImages,
   };
 
   const ai = createAILogger(log, { toolInputs: { maxLength: 200 } });

@@ -1,3 +1,4 @@
+import { resolveDefaultGatewayModelName } from "@skintext/shared/model-config";
 import { gateway, generateText } from "ai";
 import type { PersonaDriver, SimulationScenario, TranscriptMessage } from "./types";
 
@@ -33,7 +34,7 @@ export function createModelPersona(
     throw new Error("AI_GATEWAY_API_KEY is required for --persona model.");
   }
 
-  const modelName = options.model ?? process.env.AI_GATEWAY_DEFAULT_MODEL ?? "openai/gpt-5.4-mini";
+  const modelName = options.model ?? resolveDefaultGatewayModelName(process.env);
   let usedOpening = false;
 
   return {

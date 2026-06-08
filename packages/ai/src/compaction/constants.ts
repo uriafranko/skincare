@@ -2,7 +2,6 @@ export const DEFAULT_CONTEXT_WINDOW_TOKENS = 200_000;
 export const DEFAULT_COMPACTION_RESERVE_TOKENS = 20_000;
 export const RESCUE_COMPACTION_RESERVE_TOKENS = 12_000;
 export const DEFAULT_KEEP_RECENT_TOKENS = 20_000;
-export const DEFAULT_COMPACTION_MODEL = "openai/gpt-5.4-nano";
 
 export const SUMMARY_MARKER = "[Skintext conversation summary]";
 export const ESTIMATED_IMAGE_TOKENS = 1_200;

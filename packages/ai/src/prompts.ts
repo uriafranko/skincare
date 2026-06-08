@@ -171,17 +171,6 @@ When you learn something durable about the user (skin sensitivity, allergies, pr
       .join("\n")}`;
   }
 
-  if (ctx.recentImages && ctx.recentImages.length > 0) {
-    prompt += `\n\nRecent saved photos, available for 30 days:\n${ctx.recentImages
-      .map((image) => {
-        const sourceText = image.sourceText?.trim().slice(0, 120);
-        return `- ${image.id}: received ${image.createdAt}, expires ${image.expiresAt}${
-          sourceText ? `, user text: ${sourceText}` : ""
-        }`;
-      })
-      .join("\n")}`;
-  }
-
   if (ctx.streak && ctx.streak > 1) {
     prompt += `\n\nAdherence streak: ${ctx.streak} days`;
   }

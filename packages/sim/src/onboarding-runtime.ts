@@ -1,4 +1,5 @@
 import type { OnboardingState } from "@skintext/shared";
+import { resolveDefaultGatewayModelName } from "@skintext/shared/model-config";
 import { gateway } from "ai";
 import { isLocalOnboardingComplete, mergeOnboardingState } from "./onboarding-state";
 import { advanceStubOnboarding } from "./stub-onboarding";
@@ -73,7 +74,7 @@ function createLiveOnboardingRuntime(options: OnboardingRuntimeOptions): Simulat
     throw new Error("AI_GATEWAY_API_KEY is required for --system live.");
   }
 
-  const modelName = options.model ?? process.env.AI_GATEWAY_DEFAULT_MODEL ?? "openai/gpt-5.4-mini";
+  const modelName = options.model ?? resolveDefaultGatewayModelName(process.env);
   let state: OnboardingState = {};
 
   return {

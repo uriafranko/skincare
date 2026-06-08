@@ -34,8 +34,8 @@ Fill in the required keys:
 | `DATABASE_URL` | [neon.tech](https://neon.tech) pooled Postgres connection string |
 | `ENCRYPTION_KEY` | 64-char hex key from `openssl rand -hex 32` |
 | `AI_GATEWAY_API_KEY` | [vercel.com/ai-gateway](https://vercel.com/ai-gateway) |
-| `AI_GATEWAY_DEFAULT_MODEL` | Default: `openai/gpt-5.4-mini` |
-| `AI_GATEWAY_COMPACTION_MODEL` | Default: `openai/gpt-5.4-nano` |
+| `AI_GATEWAY_DEFAULT_MODEL` | Optional override for the built-in Gateway model |
+| `AI_GATEWAY_COMPACTION_MODEL` | Optional compaction-only override; otherwise uses `AI_GATEWAY_DEFAULT_MODEL` |
 
 ### 3. Apply database migrations
 

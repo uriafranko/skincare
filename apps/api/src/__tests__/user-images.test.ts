@@ -65,16 +65,20 @@ mock.module("@skintext/shared", () => ({
 }));
 
 mock.module("@skintext/db", () => ({
+  createOneOffReminder: async () => {},
   deleteAllUserImages: async (userId: string) => {
     deletedAllUserImages.push(userId);
   },
   deleteBlobDeletionJob: async (key: string) => {
     deletedBlobDeletionJobs.push(key);
   },
+  deleteCustomReminderTimes: async () => {},
   deleteUserImageRecord: async () => {},
+  getCustomReminderTimes: async () => null,
   listAllUserImages: async () => allUserImages,
   listDueBlobDeletions: async () => dueBlobDeletions,
   listExpiredUserImages: async () => expiredImages,
+  markOneOffReminderFailed: async () => {},
   queueBlobDeletion: async (job: {
     key: string;
     reason: string;
@@ -84,6 +88,8 @@ mock.module("@skintext/db", () => ({
     queuedBlobDeletions.push(job);
   },
   saveUserImage: async (image: SavedImage) => saveUserImageImpl(image),
+  setCustomReminderTimes: async () => {},
+  setOneOffReminderWorkflowRunId: async () => {},
 }));
 
 mock.module("@/sendblue", () => ({

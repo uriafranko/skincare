@@ -5,7 +5,6 @@ export {
   compactMessagesIfNeeded,
   createCompactionSummaryMessage,
   createRescueCompactionPrepareStep,
-  DEFAULT_COMPACTION_MODEL,
   DEFAULT_COMPACTION_RESERVE_TOKENS,
   DEFAULT_CONTEXT_WINDOW_TOKENS,
   DEFAULT_KEEP_RECENT_TOKENS,
@@ -22,7 +21,12 @@ export {
   type StoredModelMessage,
   stripInternalMessageMetadata,
 } from "./compaction";
-export { createCompactionGatewayModel, createDefaultGatewayModel } from "./models";
+export {
+  createCompactionGatewayModel,
+  createDefaultGatewayModel,
+  getCompactionGatewayModelName,
+  getDefaultGatewayModelName,
+} from "./models";
 export {
   type OnboardingContext,
   type OnboardingResult,

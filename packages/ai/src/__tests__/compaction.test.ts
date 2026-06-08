@@ -6,6 +6,11 @@ const generateTextMock = mock(async (_options: { prompt?: string }) => ({
 }));
 const generateObjectMock = mock(async () => ({ object: {} }));
 const gatewayMock = mock((modelId: string) => ({ provider: "gateway", modelId }));
+const defaultGatewayModel = "openai/test-default";
+const sharedEnv = {
+  AI_GATEWAY_DEFAULT_MODEL: defaultGatewayModel,
+  AI_GATEWAY_COMPACTION_MODEL: undefined as string | undefined,
+};
 
 mock.module("ai", () => ({
   Output: {
@@ -18,9 +23,10 @@ mock.module("ai", () => ({
 }));
 
 mock.module("@skintext/shared", () => ({
-  env: { AI_GATEWAY_COMPACTION_MODEL: "openai/gpt-5.4-nano" },
+  DEFAULT_AI_GATEWAY_MODEL: defaultGatewayModel,
   decrypt: async (s: string) => s.replace(/^enc:/, ""),
   encryptContent: async (s: string) => `enc:${s}`,
+  env: sharedEnv,
   generateId: () => "reminder_test",
   getLocaleName: (locale: string) => {
     const names: Record<string, string> = { en: "English", sv: "Swedish" };
@@ -36,6 +42,15 @@ mock.module("@skintext/shared", () => ({
       Date.UTC(Number(year), Number(month) - 1, Number(day), hour + offsetHours, minute),
     );
   },
+  resolveCompactionGatewayModelName: (source: {
+    AI_GATEWAY_DEFAULT_MODEL?: string;
+    AI_GATEWAY_COMPACTION_MODEL?: string;
+  }) =>
+    source.AI_GATEWAY_COMPACTION_MODEL?.trim() ||
+    source.AI_GATEWAY_DEFAULT_MODEL?.trim() ||
+    defaultGatewayModel,
+  resolveDefaultGatewayModelName: (source: { AI_GATEWAY_DEFAULT_MODEL?: string }) =>
+    source.AI_GATEWAY_DEFAULT_MODEL?.trim() || defaultGatewayModel,
 }));
 
 const {
@@ -44,6 +59,7 @@ const {
   createCompactionSummaryMessage,
   createRescueCompactionPrepareStep,
   estimateMessagesContextUsage,
+  getCompactionModelName,
   isCompactionSummaryMessage,
   stripInternalMessageMetadata,
 } = await import("../compaction");
@@ -79,6 +95,16 @@ describe("conversation compaction", () => {
     generateObjectMock.mockClear();
     generateTextMock.mockClear();
     gatewayMock.mockClear();
+    sharedEnv.AI_GATEWAY_DEFAULT_MODEL = defaultGatewayModel;
+    sharedEnv.AI_GATEWAY_COMPACTION_MODEL = undefined;
+  });
+
+  test("uses the default model for compaction unless a compaction override is configured", () => {
+    sharedEnv.AI_GATEWAY_DEFAULT_MODEL = "openai/test-main";
+    expect(getCompactionModelName()).toBe("openai/test-main");
+
+    sharedEnv.AI_GATEWAY_COMPACTION_MODEL = "openai/test-compact";
+    expect(getCompactionModelName()).toBe("openai/test-compact");
   });
 
   test("does not compact below the reserved-token threshold", async () => {

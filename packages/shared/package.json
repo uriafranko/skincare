@@ -8,6 +8,11 @@
       "bun": "./src/index.ts",
       "types": "./src/index.ts",
       "import": "./dist/index.js"
+    },
+    "./model-config": {
+      "bun": "./src/model-config.ts",
+      "types": "./src/model-config.ts",
+      "import": "./dist/model-config.js"
     }
   },
   "scripts": {

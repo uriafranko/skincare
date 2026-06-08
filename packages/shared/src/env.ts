@@ -1,6 +1,7 @@
 import { createEnv } from "@t3-oss/env-core";
 import { vercel } from "@t3-oss/env-core/presets-zod";
 import { z } from "zod";
+import { DEFAULT_AI_GATEWAY_MODEL } from "./model-config";
 
 export const env = createEnv({
   server: {
@@ -10,8 +11,8 @@ export const env = createEnv({
     SENDBLUE_WEBHOOK_SECRET: z.string().min(1),
     DATABASE_URL: z.string().min(1),
     AI_GATEWAY_API_KEY: z.string().min(1),
-    AI_GATEWAY_DEFAULT_MODEL: z.string().min(1).default("openai/gpt-5.4-mini"),
-    AI_GATEWAY_COMPACTION_MODEL: z.string().min(1).default("openai/gpt-5.4-nano"),
+    AI_GATEWAY_DEFAULT_MODEL: z.string().min(1).default(DEFAULT_AI_GATEWAY_MODEL),
+    AI_GATEWAY_COMPACTION_MODEL: z.string().min(1).optional(),
     ENCRYPTION_KEY: z.string().length(64),
     CRON_SECRET: z.string().min(1).optional(),
   },

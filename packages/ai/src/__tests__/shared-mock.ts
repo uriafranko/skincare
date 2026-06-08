@@ -1,8 +1,11 @@
 export function createSharedMock(overrides: Record<string, unknown> = {}) {
+  const defaultGatewayModel = "openai/test-default";
+
   return {
     ADHERENCE_MILESTONES: {},
     CONSENT_VERSION: "2026-06-04",
     DAILY_SUMMARY_HOUR: 22,
+    DEFAULT_AI_GATEWAY_MODEL: defaultGatewayModel,
     ROUTINE_TIMES: [
       { label: "morning", hour: 8, minute: 0, emoji: "sun" },
       { label: "evening", hour: 21, minute: 0, emoji: "moon" },
@@ -40,6 +43,15 @@ export function createSharedMock(overrides: Record<string, unknown> = {}) {
     },
     localHour: () => 12,
     markRead: async () => {},
+    resolveCompactionGatewayModelName: (source: {
+      AI_GATEWAY_DEFAULT_MODEL?: string;
+      AI_GATEWAY_COMPACTION_MODEL?: string;
+    }) =>
+      source.AI_GATEWAY_COMPACTION_MODEL?.trim() ||
+      source.AI_GATEWAY_DEFAULT_MODEL?.trim() ||
+      defaultGatewayModel,
+    resolveDefaultGatewayModelName: (source: { AI_GATEWAY_DEFAULT_MODEL?: string }) =>
+      source.AI_GATEWAY_DEFAULT_MODEL?.trim() || defaultGatewayModel,
     sendImageFile: async () => {},
     sendImageMessage: async () => {},
     msUntil: () => 0,
