@@ -42,8 +42,11 @@ export function createSharedMock(overrides: Record<string, unknown> = {}) {
     markRead: async () => {},
     msUntil: () => 0,
     nextLocalTime: () => new Date("2026-06-05T12:00:00.000Z"),
+    sendImageFile: async () => {},
+    sendImageMessage: async () => {},
     sendMessage: async () => {},
     sendTyping: async () => {},
+    uploadMediaFile: async () => "https://cdn.sendblue.test/image.jpg",
     ...overrides,
   };
 }

@@ -90,6 +90,41 @@ export const products = pgTable(
   (table) => [index("products_user_created_at_idx").on(table.userId, table.createdAt)],
 );
 
+export const userImages = pgTable(
+  "user_images",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    key: text("key").notNull(),
+    value: text("value").notNull(),
+    createdAt: text("created_at").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("user_images_user_created_at_idx").on(table.userId, table.createdAt),
+    index("user_images_expires_at_idx").on(table.expiresAt),
+  ],
+);
+
+export const blobDeletionQueue = pgTable(
+  "blob_deletion_queue",
+  {
+    key: text("key").primaryKey(),
+    reason: text("reason").notNull(),
+    attempts: integer("attempts").notNull().default(0),
+    lastError: text("last_error"),
+    retryAfter: timestamp("retry_after", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [index("blob_deletion_queue_retry_after_idx").on(table.retryAfter)],
+);
+
 export const onboardingStates = pgTable(
   "onboarding_states",
   {

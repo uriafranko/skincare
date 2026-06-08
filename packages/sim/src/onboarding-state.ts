@@ -2,7 +2,7 @@ import type { OnboardingState } from "@skintext/shared";
 
 export type LocalOnboardingField = "name" | "skin_goals" | "skin_profile" | "consent";
 
-function mergeList(existing?: string[], incoming?: string[]): string[] {
+function mergeList(existing?: readonly string[], incoming?: readonly string[]): string[] {
   return Array.from(
     new Set(
       [...(existing ?? []), ...(incoming ?? [])].map((value) => value.trim()).filter(Boolean),

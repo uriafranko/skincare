@@ -13,6 +13,7 @@ export const env = createEnv({
     AI_GATEWAY_DEFAULT_MODEL: z.string().min(1).default("openai/gpt-5.4-mini"),
     AI_GATEWAY_COMPACTION_MODEL: z.string().min(1).default("openai/gpt-5.4-nano"),
     ENCRYPTION_KEY: z.string().length(64),
+    CRON_SECRET: z.string().min(1).optional(),
   },
   extends: [vercel()],
   runtimeEnv: process.env,

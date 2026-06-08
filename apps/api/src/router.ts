@@ -3,13 +3,16 @@ import { detectRegion, generateId } from "@skintext/shared";
 import type { RequestLogger } from "evlog";
 import { handleMessage } from "@/handlers/message";
 import { handleOnboarding } from "@/handlers/onboarding";
+import { normalizeInboundImage } from "@/image";
+import { pruneExpiredUserImageBlobs, saveInboundUserImage } from "@/user-images";
 
 export async function routeMessage(
   log: RequestLogger,
   encryptedPhone: string,
   rawPhone: string,
   text: string,
-  imageUrl?: string,
+  rawImageUrl?: string,
+  messageId?: string,
 ): Promise<string[]> {
   let userId = await resolveUserId(encryptedPhone);
   let region = null;
@@ -48,7 +51,33 @@ export async function routeMessage(
     ];
   }
 
+  let imageUrl: string | undefined;
+  const normalizedImage = rawImageUrl ? await normalizeInboundImage(rawImageUrl, log) : null;
+  if (rawImageUrl) {
+    imageUrl = normalizedImage?.dataUrl ?? rawImageUrl;
+  }
+
+  if (normalizedImage) {
+    await pruneExpiredUserImageBlobs(log).catch((error) => {
+      log.error(error as Error);
+      log.set({ imagePruneError: true });
+    });
+
+    try {
+      await saveInboundUserImage({
+        userId,
+        image: normalizedImage,
+        text,
+        messageId,
+        log,
+      });
+    } catch (error) {
+      log.error(error as Error);
+      log.set({ imageStorageError: true });
+    }
+  }
+
   log.set({ route: "message" });
-  const reply = await handleMessage(log, user, text, imageUrl);
+  const reply = await handleMessage(log, user, rawPhone, text, imageUrl);
   return reply ? [reply] : [];
 }

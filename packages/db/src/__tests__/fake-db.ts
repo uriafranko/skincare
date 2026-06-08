@@ -8,6 +8,7 @@ type Condition = { key: string; op: "=" | "<="; value: unknown };
 
 const tableKeys = new Map<unknown, (row: Row) => string>([
   [schema.adherenceStreaks, (row) => String(row.userId)],
+  [schema.blobDeletionQueue, (row) => String(row.key)],
   [schema.conversationMessages, (row) => `${row.userId}:${row.messageIndex}`],
   [schema.customReminderTimes, (row) => String(row.userId)],
   [schema.exportBlobs, (row) => String(row.userId)],
@@ -19,6 +20,7 @@ const tableKeys = new Map<unknown, (row: Row) => string>([
   [schema.products, (row) => String(row.id)],
   [schema.reminderRunIds, (row) => String(row.userId)],
   [schema.routineEntries, (row) => String(row.id)],
+  [schema.userImages, (row) => String(row.id)],
   [schema.users, (row) => String(row.id)],
 ]);
 
@@ -177,6 +179,7 @@ export function createFakeDb() {
   const db = {
     query: {
       adherenceStreaks: tableQuery(schema.adherenceStreaks),
+      blobDeletionQueue: tableQuery(schema.blobDeletionQueue),
       conversationMessages: tableQuery(schema.conversationMessages),
       customReminderTimes: tableQuery(schema.customReminderTimes),
       exportBlobs: tableQuery(schema.exportBlobs),
@@ -188,6 +191,7 @@ export function createFakeDb() {
       products: tableQuery(schema.products),
       reminderRunIds: tableQuery(schema.reminderRunIds),
       routineEntries: tableQuery(schema.routineEntries),
+      userImages: tableQuery(schema.userImages),
       users: tableQuery(schema.users),
     },
     insert: insertInto,

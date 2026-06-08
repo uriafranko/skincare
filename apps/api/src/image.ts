@@ -3,6 +3,14 @@ import convert from "heic-convert";
 import sharp from "sharp";
 
 const MAX_DIMENSION = 1024;
+const OUTPUT_CONTENT_TYPE = "image/jpeg";
+
+export interface NormalizedImage {
+  dataUrl: string;
+  buffer: Buffer;
+  contentType: typeof OUTPUT_CONTENT_TYPE;
+  size: number;
+}
 
 async function heicToJpeg(buffer: Buffer): Promise<Buffer> {
   const output = await convert({ buffer, format: "JPEG", quality: 0.9 });
@@ -22,12 +30,14 @@ function resizeAndEncode(input: Buffer): Promise<Buffer> {
 }
 
 /**
- * Fetch an image URL, convert HEIC/non-JPEG to JPEG, and resize for the vision API.
- * Returns a base64 data URL safe for OpenAI vision APIs.
+ * Fetch an image URL, convert HEIC/non-JPEG to JPEG, and resize for storage and vision.
  */
-export async function normalizeImageUrl(url: string, log?: RequestLogger): Promise<string> {
+export async function normalizeInboundImage(
+  url: string,
+  log?: RequestLogger,
+): Promise<NormalizedImage | null> {
   const res = await fetch(url);
-  if (!res.ok) return url;
+  if (!res.ok) return null;
 
   const buffer = Buffer.from(await res.arrayBuffer());
   const contentType = res.headers.get("content-type") ?? "";
@@ -48,5 +58,19 @@ export async function normalizeImageUrl(url: string, log?: RequestLogger): Promi
   }
 
   const base64 = jpeg.toString("base64");
-  return `data:image/jpeg;base64,${base64}`;
+  return {
+    dataUrl: `data:${OUTPUT_CONTENT_TYPE};base64,${base64}`,
+    buffer: jpeg,
+    contentType: OUTPUT_CONTENT_TYPE,
+    size: jpeg.byteLength,
+  };
+}
+
+/**
+ * Fetch an image URL, convert HEIC/non-JPEG to JPEG, and resize for the vision API.
+ * Returns a base64 data URL safe for OpenAI vision APIs, or the original URL if fetching fails.
+ */
+export async function normalizeImageUrl(url: string, log?: RequestLogger): Promise<string> {
+  const normalized = await normalizeInboundImage(url, log);
+  return normalized?.dataUrl ?? url;
 }

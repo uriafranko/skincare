@@ -2,7 +2,7 @@ import type { LanguageModelV3 } from "@ai-sdk/provider";
 import { type ModelMessage, stepCountIs, type Tool, ToolLoopAgent } from "ai";
 import { createRescueCompactionPrepareStep } from "./compaction";
 import { createCompactionGatewayModel, createDefaultGatewayModel } from "./models";
-import { deleteAccountTool } from "./tools/delete-account";
+import { createDeleteAccountTool, type DeleteAccountData } from "./tools/delete-account";
 import { exportDataTool } from "./tools/export-data";
 import { getUserProfile } from "./tools/get-profile";
 import {
@@ -24,6 +24,11 @@ import {
   type RecurringReminderScheduleSync,
 } from "./tools/set-reminders";
 import { updateProfileTool } from "./tools/update-profile";
+import {
+  createSendUserImageTool,
+  listUserImagesTool,
+  type SendUserImage,
+} from "./tools/user-images";
 
 export interface AgentSecurityContext {
   userId: string;
@@ -43,6 +48,8 @@ interface AgentOptions extends AgentSecurityContext {
   compactionModel?: LanguageModelV3;
   scheduleOneOffReminderWorkflow?: ScheduleOneOffReminderWorkflow;
   syncRecurringReminderSchedule?: RecurringReminderScheduleSync;
+  sendUserImage?: SendUserImage;
+  deleteAccountData?: DeleteAccountData;
 }
 
 export function createSkintextAgent(systemPrompt: string, ctx: AgentOptions) {
@@ -60,10 +67,15 @@ export function createSkintextAgent(systemPrompt: string, ctx: AgentOptions) {
     setReminders: withContext(createSetRemindersTool(ctx.syncRecurringReminderSchedule), ctx),
     getReminders: withContext(getRemindersTool, ctx),
     exportData: withContext(exportDataTool, ctx),
-    deleteAccount: withContext(deleteAccountTool, ctx),
+    deleteAccount: withContext(createDeleteAccountTool(ctx.deleteAccountData), ctx),
     saveMemory: withContext(saveMemoryTool, ctx),
     recallMemory: withContext(recallMemoryTool, ctx),
+    listUserImages: withContext(listUserImagesTool, ctx),
   };
+
+  if (ctx.sendUserImage) {
+    tools.sendUserImage = withContext(createSendUserImageTool(ctx.sendUserImage), ctx);
+  }
 
   if (ctx.scheduleOneOffReminderWorkflow) {
     tools.scheduleOneOffReminder = withContext(

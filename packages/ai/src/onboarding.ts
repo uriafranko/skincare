@@ -54,7 +54,7 @@ const CONSENT_ONLY_REPLY_INSTRUCTION = `${CONSENT_ASK_DESCRIPTION} Ask this in t
 const ENGLISH_GREETING_SETUP_REPLY =
   "Hey, I'm Skintext. I'll build a simple routine that fits you. Send your name, skin goal, skin type/sensitivity if known, avoids, products, and if you want reminders, best times. Unsure is fine. OK if I save this so reminders/logs work? You can delete anytime.";
 
-function formatList(values?: string[]): string | null {
+function formatList(values?: readonly string[]): string | null {
   return values?.length ? values.join(", ") : null;
 }
 

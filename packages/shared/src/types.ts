@@ -38,6 +38,19 @@ export interface ProductEntry {
   createdAt: string;
 }
 
+export interface UserImage {
+  id: string;
+  userId: string;
+  key: string;
+  contentType: string;
+  size: number;
+  source: "inbound";
+  sourceMessageId?: string;
+  sourceText?: string;
+  createdAt: string;
+  expiresAt: string;
+}
+
 export interface RoutineStep {
   name: string;
   category?: string;
@@ -99,10 +112,10 @@ export interface OnboardingState {
   timezone?: string;
   skinType?: SkinType;
   sensitivity?: SensitivityLevel;
-  concerns?: string[];
-  goals?: string[];
-  allergies?: string[];
-  currentProducts?: string[];
+  concerns?: readonly string[];
+  goals?: readonly string[];
+  allergies?: readonly string[];
+  currentProducts?: readonly string[];
   routinePreference?: RoutinePreference;
   morningReminder?: string;
   eveningReminder?: string;
@@ -137,6 +150,7 @@ export interface AgentContext {
   memories: Record<string, string> | null;
   streak: number | null;
   products: ProductEntry[];
+  recentImages?: UserImage[];
 }
 
 export interface PhoneRegionInfo {

@@ -1,20 +1,37 @@
-import { deleteReminderRunId, getReminderRunId, setReminderRunId } from "@skintext/db";
+import {
+  deleteAllUserData,
+  deleteReminderRunId,
+  getReminderRunId,
+  setReminderRunId,
+} from "@skintext/db";
 import type { UserProfile } from "@skintext/shared";
 import type { RequestLogger } from "evlog";
 import { getRun, start } from "workflow/api";
 import { runAgentMessage } from "@/agent-runner";
+import { deleteAllUserImageBlobs, sendStoredUserImage } from "@/user-images";
 import { oneOffReminderWorkflow } from "../../workflows/one-off-reminder";
 import { reminderLoop } from "../../workflows/reminder-loop";
 
 export async function handleMessage(
   log: RequestLogger,
   user: UserProfile,
+  rawPhone: string,
   text: string,
   imageUrl?: string,
 ): Promise<string | null> {
   return runAgentMessage(log, user, text, {
     imageUrl,
     hasImage: !!imageUrl,
+    sendUserImage: async ({ image, caption }) => {
+      await sendStoredUserImage({ phone: rawPhone, image, caption });
+    },
+    deleteAccountData: async (deleteUserId) => {
+      await deleteAllUserImageBlobs(deleteUserId, log).catch((error) => {
+        log.error(error as Error);
+        log.set({ imageDeleteError: true });
+      });
+      await deleteAllUserData(deleteUserId);
+    },
     scheduleOneOffReminderWorkflow: async ({ userId, reminderId }) => {
       const run = await start(oneOffReminderWorkflow, [userId, reminderId]);
       return run.runId;

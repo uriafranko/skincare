@@ -4,6 +4,7 @@ import {
   getConversationMessages,
   getRoutineLogForDate,
   getUser,
+  listUserImages,
   recallAllMemories,
   saveExportBlob,
 } from "@skintext/db";
@@ -20,12 +21,13 @@ export const exportDataTool = tool({
     timezone: z.string(),
   }),
   execute: async ({ userId, timezone }) => {
-    const [user, memories, streak, products, messages] = await Promise.all([
+    const [user, memories, streak, products, messages, images] = await Promise.all([
       getUser(userId),
       recallAllMemories(userId),
       getAdherenceStreak(userId),
       getAllProducts(userId),
       getConversationMessages(userId),
+      listUserImages(userId, 50),
     ]);
 
     if (!user) return { exported: false, message: "User not found." };
@@ -46,6 +48,7 @@ export const exportDataTool = tool({
       profile: { ...user, phone: "[encrypted]" },
       routineLogs,
       products,
+      savedImages: images,
       adherenceStreak: streak,
       memories,
       recentMessages: messages,
@@ -62,7 +65,7 @@ export const exportDataTool = tool({
 
     return {
       exported: true,
-      summary: `Exported ${routineDays} days of routine data (${totalEntries} entries), ${products.length} saved products, and ${Object.keys(memories).length} saved preferences.`,
+      summary: `Exported ${routineDays} days of routine data (${totalEntries} entries), ${products.length} saved products, ${images.length} saved photos, and ${Object.keys(memories).length} saved preferences.`,
       availableFor: "24 hours",
     };
   },
