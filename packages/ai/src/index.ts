@@ -1,19 +1,26 @@
 export { type AgentSecurityContext, createSkintextAgent, type ModelMessage } from "./agent";
 export {
+  annotateLastAssistantMessageUsage,
+  type ContextUsageEstimate,
   compactMessagesIfNeeded,
   createCompactionSummaryMessage,
   createRescueCompactionPrepareStep,
   DEFAULT_COMPACTION_MODEL,
+  DEFAULT_COMPACTION_RESERVE_TOKENS,
   DEFAULT_CONTEXT_WINDOW_TOKENS,
   DEFAULT_KEEP_RECENT_TOKENS,
+  estimateMessagesContextUsage,
   estimateMessagesTokens,
   estimateMessageTokens,
+  estimateMessageUsage,
   getCompactionModelName,
   isCompactionSummaryMessage,
   type MessageCompactionOptions,
   type MessageCompactionResult,
-  PRE_RUN_COMPACTION_THRESHOLD,
-  RESCUE_COMPACTION_THRESHOLD,
+  type PersistedMessageUsage,
+  RESCUE_COMPACTION_RESERVE_TOKENS,
+  type StoredModelMessage,
+  stripInternalMessageMetadata,
 } from "./compaction";
 export { createCompactionGatewayModel, createDefaultGatewayModel } from "./models";
 export {

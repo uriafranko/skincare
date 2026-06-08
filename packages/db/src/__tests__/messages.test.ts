@@ -76,6 +76,31 @@ describe("conversation messages", () => {
     expect(rows.every((row) => typeof row.value !== "string")).toBe(true);
   });
 
+  test("preserves internal message metadata", async () => {
+    const messages = [
+      { role: "user", content: "hello" },
+      {
+        role: "assistant",
+        content: "hi",
+        _skintext: {
+          usage: {
+            inputTokens: 100,
+            outputTokens: 20,
+            totalTokens: 120,
+            cacheReadTokens: 50,
+            cacheWriteTokens: 5,
+            systemPromptTokens: 10,
+            createdAt: "2026-06-04T12:00:00.000Z",
+          },
+        },
+      },
+    ];
+
+    await saveConversationMessages("usr_meta", messages);
+    const loaded = await getConversationMessages("usr_meta");
+    expect(loaded).toEqual(messages);
+  });
+
   test("preserves more than 40 messages", async () => {
     const messages = Array.from({ length: 45 }, (_, i) => ({
       role: i % 2 === 0 ? "user" : "assistant",

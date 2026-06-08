@@ -36,10 +36,13 @@ mock.module("@skintext/shared", () => ({
 }));
 
 const {
+  annotateLastAssistantMessageUsage,
   compactMessagesIfNeeded,
   createCompactionSummaryMessage,
   createRescueCompactionPrepareStep,
+  estimateMessagesContextUsage,
   isCompactionSummaryMessage,
+  stripInternalMessageMetadata,
 } = await import("../compaction");
 
 function user(content: string): ModelMessage {
@@ -50,6 +53,24 @@ function assistant(content: string): ModelMessage {
   return { role: "assistant", content };
 }
 
+function usage(overrides: Record<string, unknown> = {}) {
+  return {
+    inputTokens: 100,
+    inputTokenDetails: {
+      noCacheTokens: 60,
+      cacheReadTokens: 40,
+      cacheWriteTokens: 5,
+    },
+    outputTokens: 20,
+    outputTokenDetails: {
+      textTokens: 20,
+      reasoningTokens: undefined,
+    },
+    totalTokens: 120,
+    ...overrides,
+  };
+}
+
 describe("conversation compaction", () => {
   beforeEach(() => {
     generateObjectMock.mockClear();
@@ -57,22 +78,24 @@ describe("conversation compaction", () => {
     gatewayMock.mockClear();
   });
 
-  test("does not compact below threshold", async () => {
+  test("does not compact below the reserved-token threshold", async () => {
     const messages = [user("What cleanser should I use?"), assistant("Use a gentle cleanser.")];
 
     const result = await compactMessagesIfNeeded(messages, {
       contextWindowTokens: 10_000,
-      threshold: 0.7,
+      reserveTokens: 1_000,
       keepRecentTokens: 50,
       model: {} as never,
     });
 
     expect(result.compacted).toBe(false);
+    expect(result.thresholdTokens).toBe(9_000);
+    expect(result.reserveTokens).toBe(1_000);
     expect(result.messages).toEqual(messages);
     expect(generateTextMock).not.toHaveBeenCalled();
   });
 
-  test("compacts above the pre-run threshold and keeps the latest user turn", async () => {
+  test("compacts above the reserved-token threshold and keeps the latest user turn", async () => {
     const latest = user("Can I add azelaic acid tonight?");
     const messages = [
       user(`Earlier routine details ${"a".repeat(500)}`),
@@ -82,7 +105,7 @@ describe("conversation compaction", () => {
 
     const result = await compactMessagesIfNeeded(messages, {
       contextWindowTokens: 100,
-      threshold: 0.7,
+      reserveTokens: 30,
       keepRecentTokens: 10,
       model: {} as never,
     });
@@ -107,7 +130,7 @@ describe("conversation compaction", () => {
 
     const result = await compactMessagesIfNeeded(messages, {
       contextWindowTokens: 100,
-      threshold: 0.7,
+      reserveTokens: 30,
       keepRecentTokens: 10,
       model: {} as never,
     });
@@ -123,7 +146,7 @@ describe("conversation compaction", () => {
     expect(generateTextOptions!.prompt).toContain("Old summary with fragrance allergy.");
   });
 
-  test("prepareStep rescue only compacts above 80 percent", async () => {
+  test("prepareStep rescue compacts using the rescue reserve", async () => {
     const prepareStep = createRescueCompactionPrepareStep({
       contextWindowTokens: 100,
       keepRecentTokens: 10,
@@ -147,5 +170,128 @@ describe("conversation compaction", () => {
     expect(
       (largeResult as { messages: ModelMessage[] }).messages.filter(isCompactionSummaryMessage),
     ).toHaveLength(1);
+  });
+
+  test("prepareStep rescue still honors deprecated threshold option", async () => {
+    const prepareStep = createRescueCompactionPrepareStep({
+      contextWindowTokens: 100,
+      threshold: 0.99,
+      keepRecentTokens: 10,
+      model: {} as never,
+    });
+
+    const result = await prepareStep({
+      messages: [user("x".repeat(300)), assistant("short")],
+    });
+
+    expect(result).toEqual({});
+  });
+
+  test("uses persisted assistant usage as the context estimate anchor", () => {
+    const messages = annotateLastAssistantMessageUsage(
+      [user("old context"), assistant("old reply")],
+      usage({
+        inputTokens: 100,
+        outputTokens: 20,
+        inputTokenDetails: {
+          noCacheTokens: 50,
+          cacheReadTokens: 1_000,
+          cacheWriteTokens: 250,
+        },
+        totalTokens: 120,
+      }) as never,
+      { systemPrompt: "old system", estimatedInputTokens: 95 },
+    );
+
+    const estimate = estimateMessagesContextUsage(
+      [...messages, user("new trailing message")],
+      "new system",
+    );
+
+    expect(estimate.usageTokens).toBe(120);
+    expect(estimate.tokens).toBeLessThan(1_120);
+    expect(estimate.trailingTokens).toBeGreaterThan(0);
+    expect(estimate.lastUsageIndex).toBe(1);
+  });
+
+  test("tracks images separately from text token estimates", () => {
+    const imageBase64 = "a".repeat(400);
+    const messages: ModelMessage[] = [
+      {
+        role: "user",
+        content: [
+          { type: "text", text: "what is this product?" },
+          { type: "image", image: `data:image/jpeg;base64,${imageBase64}` },
+        ],
+      },
+      {
+        role: "user",
+        content: [{ type: "image", image: "https://example.com/photo.jpg" }],
+      },
+    ];
+
+    const estimate = estimateMessagesContextUsage(messages, "system");
+
+    expect(estimate.imageCount).toBe(2);
+    expect(estimate.imageTokens).toBe(2_400);
+    expect(estimate.imageDataUrlCount).toBe(1);
+    expect(estimate.imageRemoteUrlCount).toBe(1);
+    expect(estimate.imagePayloadBytes).toBe(300);
+  });
+
+  test("strips internal usage metadata before model calls", () => {
+    const messages = annotateLastAssistantMessageUsage(
+      [user("hi"), assistant("hello")],
+      usage() as never,
+      { systemPrompt: "system" },
+    );
+
+    expect("_skintext" in messages[1]!).toBe(true);
+
+    const clean = stripInternalMessageMetadata(messages);
+    expect("_skintext" in clean[1]!).toBe(false);
+    expect(clean).toEqual([
+      { role: "user", content: "hi" },
+      { role: "assistant", content: "hello" },
+    ]);
+  });
+
+  test("does not compact into a dangling tool result", async () => {
+    const messages: ModelMessage[] = [
+      user(`Original request ${"a".repeat(500)}`),
+      {
+        role: "assistant",
+        content: [
+          {
+            type: "tool-call",
+            toolCallId: "tc_1",
+            toolName: "getTodayRoutineLog",
+            input: {},
+          },
+        ],
+      },
+      {
+        role: "tool",
+        content: [
+          {
+            type: "tool-result",
+            toolCallId: "tc_1",
+            toolName: "getTodayRoutineLog",
+            output: { type: "json", value: { entryCount: 1 } },
+          },
+        ],
+      },
+    ];
+
+    const result = await compactMessagesIfNeeded(messages, {
+      contextWindowTokens: 100,
+      reserveTokens: 30,
+      keepRecentTokens: 10,
+      model: {} as never,
+    });
+
+    expect(result.compacted).toBe(true);
+    expect(result.messages[1]?.role).toBe("assistant");
+    expect(result.messages[2]?.role).toBe("tool");
   });
 });

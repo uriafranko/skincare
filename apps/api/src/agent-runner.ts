@@ -4,12 +4,14 @@ import type {
   ScheduleOneOffReminderWorkflow,
 } from "@skintext/ai";
 import {
+  annotateLastAssistantMessageUsage,
   buildSkintextSystemPrompt,
   compactMessagesIfNeeded,
   createCompactionGatewayModel,
   createDefaultGatewayModel,
   createSkintextAgent,
-  PRE_RUN_COMPACTION_THRESHOLD,
+  DEFAULT_COMPACTION_RESERVE_TOKENS,
+  stripInternalMessageMetadata,
 } from "@skintext/ai";
 import {
   getAdherenceStreak,
@@ -124,8 +126,24 @@ export async function runAgentMessage(
   const preRunCompaction = await compactMessagesIfNeeded(allMessages, {
     model: compactionModel,
     systemPrompt,
-    threshold: PRE_RUN_COMPACTION_THRESHOLD,
+    reserveTokens: DEFAULT_COMPACTION_RESERVE_TOKENS,
   });
+
+  const compactionLog = {
+    phase: "pre-run",
+    compacted: preRunCompaction.compacted,
+    tokensBefore: preRunCompaction.tokensBefore,
+    estimatedTokens: preRunCompaction.usageEstimate.estimatedTokens,
+    usageTokens: preRunCompaction.usageEstimate.usageTokens,
+    trailingTokens: preRunCompaction.usageEstimate.trailingTokens,
+    thresholdTokens: preRunCompaction.thresholdTokens,
+    reserveTokens: preRunCompaction.reserveTokens,
+    imageCount: preRunCompaction.usageEstimate.imageCount,
+    imageTokens: preRunCompaction.usageEstimate.imageTokens,
+    imagePayloadBytes: preRunCompaction.usageEstimate.imagePayloadBytes,
+    imageDataUrls: preRunCompaction.usageEstimate.imageDataUrlCount,
+    imageRemoteUrls: preRunCompaction.usageEstimate.imageRemoteUrlCount,
+  };
 
   if (preRunCompaction.error) {
     const error =
@@ -134,21 +152,14 @@ export async function runAgentMessage(
         : String(preRunCompaction.error);
     log.set({
       compaction: {
-        phase: "pre-run",
+        ...compactionLog,
         compacted: false,
-        tokensBefore: preRunCompaction.tokensBefore,
-        thresholdTokens: preRunCompaction.thresholdTokens,
         error,
       },
     });
   } else {
     log.set({
-      compaction: {
-        phase: "pre-run",
-        compacted: preRunCompaction.compacted,
-        tokensBefore: preRunCompaction.tokensBefore,
-        thresholdTokens: preRunCompaction.thresholdTokens,
-      },
+      compaction: compactionLog,
     });
   }
 
@@ -158,13 +169,30 @@ export async function runAgentMessage(
   }
 
   const messages = pruneMessages({
-    messages: baseMessages,
+    messages: stripInternalMessageMetadata(baseMessages),
     emptyMessages: "remove",
   });
 
   const result = await agent.generate({ messages });
+  log.set({
+    usage: {
+      inputTokens: result.usage.inputTokens,
+      outputTokens: result.usage.outputTokens,
+      totalTokens: result.usage.totalTokens,
+      cacheReadTokens: result.usage.inputTokenDetails?.cacheReadTokens,
+      cacheWriteTokens: result.usage.inputTokenDetails?.cacheWriteTokens,
+    },
+  });
 
-  const toSave = [...baseMessages, ...(result.response.messages as ModelMessage[])];
+  const responseMessages = annotateLastAssistantMessageUsage(
+    result.response.messages as ModelMessage[],
+    result.usage,
+    {
+      systemPrompt,
+      estimatedInputTokens: preRunCompaction.tokensBefore,
+    },
+  );
+  const toSave = [...baseMessages, ...responseMessages];
   await saveConversationMessages(userId, toSave);
 
   return result.text || null;
