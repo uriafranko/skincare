@@ -1,9 +1,4 @@
-import {
-  buildDailyRoutineSummaryPrompt,
-  buildRoutineReminderPrompt,
-  buildWeeklyRoutineRecapPrompt,
-  createDefaultGatewayModel,
-} from "@skintext/ai";
+import { wrapUserReminder } from "@skintext/ai";
 import {
   deleteReminderRunId,
   getAdherenceStreak,
@@ -18,8 +13,11 @@ import {
   updateAdherenceStreak,
 } from "@skintext/db";
 import type { AdherenceStreak, DailyRoutineLog, UserProfile } from "@skintext/shared";
-import { decrypt, localDateString, sendMessage } from "@skintext/shared";
-import { generateText } from "ai";
+import { decrypt, localDateString } from "@skintext/shared";
+import { createLogger } from "evlog";
+import { runAgentMessage } from "../../src/agent-runner";
+import { sendReplyBubbles } from "../../src/replies";
+import { buildRoutineReminderEvent } from "../reminder-events";
 
 export async function loadUser(userId: string): Promise<UserProfile | null> {
   "use step";
@@ -57,15 +55,37 @@ export async function loadRoutineLog(userId: string, timezone: string) {
   return getRoutineLogForDate(userId, localDate);
 }
 
-export async function sendMsg(userId: string, text: string) {
+export async function sendReminderToAgent(userId: string, text: string): Promise<boolean> {
   "use step";
   const user = await getUser(userId);
-  if (!user) return;
+  if (!user?.consentedAt) return false;
+
   const rawPhone = await decrypt(user.phone);
-  await sendMessage(rawPhone, text);
+  const log = createLogger({
+    scope: "scheduled_message",
+    userId,
+  });
+
+  try {
+    log.set({ input: { reminder: text.slice(0, 120) } });
+    const reply = await runAgentMessage(log, user, wrapUserReminder(text));
+    if (!reply) {
+      log.set({ output: { replies: 0, bubbles: 0 } });
+      return false;
+    }
+
+    const bubbles = await sendReplyBubbles(rawPhone, [reply]);
+    log.set({ output: { replies: 1, bubbles } });
+    return bubbles > 0;
+  } catch (err) {
+    log.error(err as Error);
+    throw err;
+  } finally {
+    log.emit();
+  }
 }
 
-export async function generateReminder(
+export async function buildRoutineReminder(
   userId: string,
   routineLabel: string,
   routineEmoji: string,
@@ -76,30 +96,21 @@ export async function generateReminder(
   "use step";
   const streak = await getAdherenceStreak(userId);
   const products = await getAllProducts(userId);
-  const productHint =
-    products.length > 0
-      ? `Saved products: ${products
-          .slice(0, 5)
-          .map((p) => p.name)
-          .join(", ")}`
-      : "No saved products yet.";
 
-  const result = await generateText({
-    model: createDefaultGatewayModel(),
-    system: buildRoutineReminderPrompt(locale),
-    prompt: `Generate a ${routineLabel} skincare routine reminder.
-Routine emoji to lead with if useful: ${routineEmoji}
-User first name: ${userName}
-Today completed slots: ${log.completedSlots.join(", ") || "none"}
-Entries logged today: ${log.entryCount}
-Products used today: ${log.productsUsed.join(", ") || "none"}
-Adherence streak: ${streak.current} days
-${productHint}`,
+  return buildRoutineReminderEvent({
+    routineLabel,
+    routineEmoji,
+    userLocale: locale,
+    userName,
+    completedSlots: log.completedSlots,
+    entryCount: log.entryCount,
+    productsUsed: log.productsUsed,
+    streakDays: streak.current,
+    productNames: products.map((p) => p.name),
   });
-  return result.text;
 }
 
-export async function generateDailySummary(
+export async function buildDailySummaryReminder(
   userId: string,
   locale: string,
 ): Promise<{ text: string; streak: AdherenceStreak; streakUpdated: boolean } | null> {
@@ -118,10 +129,9 @@ export async function generateDailySummary(
   const am = log.completedSlots.includes("morning") ? "done" : "not logged";
   const pm = log.completedSlots.includes("evening") ? "done" : "not logged";
 
-  const result = await generateText({
-    model: createDefaultGatewayModel(),
-    system: buildDailyRoutineSummaryPrompt(locale),
-    prompt: `Generate daily routine summary for ${user.name}.
+  return {
+    text: `Generate an end-of-day skincare routine summary for ${user.name}.
+User locale: ${locale}
 AM: ${am}
 PM: ${pm}
 Products used: ${log.productsUsed.join(", ") || "none logged"}
@@ -131,12 +141,15 @@ ${log.entries
   .map((e) => `- ${e.slot}: ${e.steps.map((s) => s.productName ?? s.name).join(", ")}`)
   .join("\n")}
 Streak: ${updatedStreak.current} days`,
-  });
-
-  return { text: result.text, streak: updatedStreak, streakUpdated };
+    streak: updatedStreak,
+    streakUpdated,
+  };
 }
 
-export async function generateWeeklyRecap(userId: string, locale: string): Promise<string | null> {
+export async function buildWeeklyRecapReminder(
+  userId: string,
+  locale: string,
+): Promise<string | null> {
   "use step";
   const user = await getUser(userId);
   if (!user) return null;
@@ -177,16 +190,11 @@ export async function generateWeeklyRecap(userId: string, locale: string): Promi
     .map(([name]) => name)
     .join(", ");
 
-  const result = await generateText({
-    model: createDefaultGatewayModel(),
-    system: buildWeeklyRoutineRecapPrompt(locale),
-    prompt: `Generate weekly recap for ${user.name}.
+  return `Generate a weekly skincare routine recap for ${user.name}.
+User locale: ${locale}
 Daily breakdown:
 ${dayLines}
 Done slots: ${doneSlots}/14
 Products used: ${topProducts || "none logged"}
-Reactions: ${Array.from(reactions).join("; ") || "none"}`,
-  });
-
-  return result.text;
+Reactions: ${Array.from(reactions).join("; ") || "none"}`;
 }

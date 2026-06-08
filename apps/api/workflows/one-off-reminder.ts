@@ -5,7 +5,7 @@ import {
   loadUser,
   markOneOffReminderFailed,
   markOneOffReminderSent,
-  sendMsg,
+  sendReminderToAgent,
 } from "./steps/reminder-steps";
 
 export async function oneOffReminderWorkflow(userId: string, reminderId: string) {
@@ -30,6 +30,10 @@ export async function oneOffReminderWorkflow(userId: string, reminderId: string)
     return;
   }
 
-  await sendMsg(userId, latest.message);
-  await markOneOffReminderSent(userId, reminderId);
+  const sent = await sendReminderToAgent(userId, latest.message);
+  if (sent) {
+    await markOneOffReminderSent(userId, reminderId);
+  } else {
+    await markOneOffReminderFailed(userId, reminderId);
+  }
 }

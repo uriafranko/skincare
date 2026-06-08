@@ -3,7 +3,7 @@ import { env } from "@skintext/shared";
 import { generateText, type ModelMessage } from "ai";
 import { createCompactionGatewayModel } from "./models";
 
-export const DEFAULT_CONTEXT_WINDOW_TOKENS = 1_047_576;
+export const DEFAULT_CONTEXT_WINDOW_TOKENS = 200_000;
 export const PRE_RUN_COMPACTION_THRESHOLD = 0.7;
 export const RESCUE_COMPACTION_THRESHOLD = 0.8;
 export const DEFAULT_KEEP_RECENT_TOKENS = 20_000;

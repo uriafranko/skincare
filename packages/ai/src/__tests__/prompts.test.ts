@@ -16,6 +16,7 @@ const {
   buildSkintextSystemPrompt,
   buildWeeklyRoutineRecapPrompt,
 } = await import("../prompts");
+const { USER_REMINDER_OPEN_TAG, USER_REMINDER_TAG_EXAMPLE } = await import("../user-reminder");
 
 const baseProfile = {
   id: "usr_test123",
@@ -46,7 +47,6 @@ const baseContext = {
   localDate: "2026-06-04",
   userProfile: baseProfile,
   memories: null,
-  todayLog: null,
   streak: null,
   products: [],
 };
@@ -68,6 +68,16 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("Never mention tool names");
     expect(prompt).toContain("internal workflows");
     expect(prompt).toContain("Describe actions as Skintext doing them directly");
+    expect(prompt).toContain(`Never mention ${USER_REMINDER_OPEN_TAG} tags`);
+  });
+
+  test("handles scheduled reminder events as internal agent inputs", () => {
+    const prompt = buildSkintextSystemPrompt(makeContext());
+    expect(prompt).toContain("Scheduled reminder events");
+    expect(prompt).toContain(USER_REMINDER_TAG_EXAMPLE);
+    expect(prompt).toContain("internal scheduled reminder event");
+    expect(prompt).toContain("Reply in the user's saved locale");
+    expect(prompt).toContain("write the outbound text the user should receive");
   });
 
   test("includes action policy guidance", () => {
@@ -146,23 +156,6 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("logRoutineStep");
     expect(prompt).toContain("logProductUse");
     expect(prompt).toContain("listProducts");
-  });
-
-  test("includes today's routine context when present", () => {
-    const prompt = buildSkintextSystemPrompt(
-      makeContext({
-        todayLog: {
-          entries: [],
-          entryCount: 2,
-          completedSlots: ["morning"],
-          productsUsed: ["Barrier Cream"],
-          reactions: ["mild dryness"],
-        },
-      }),
-    );
-    expect(prompt).toContain("Today so far: 2 routine entries");
-    expect(prompt).toContain("Barrier Cream");
-    expect(prompt).toContain("mild dryness");
   });
 
   test("does not include old-domain tracking language", () => {

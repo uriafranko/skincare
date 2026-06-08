@@ -135,7 +135,6 @@ export interface AgentContext {
   localDate: string;
   userProfile: UserProfile | null;
   memories: Record<string, string> | null;
-  todayLog: DailyRoutineLog | null;
   streak: number | null;
   products: ProductEntry[];
   imageUrl?: string;

@@ -56,3 +56,10 @@ export {
   setRemindersTool,
 } from "./tools/set-reminders";
 export { updateProfileTool } from "./tools/update-profile";
+export {
+  USER_REMINDER_CLOSE_TAG,
+  USER_REMINDER_OPEN_TAG,
+  USER_REMINDER_TAG,
+  USER_REMINDER_TAG_EXAMPLE,
+  wrapUserReminder,
+} from "./user-reminder";

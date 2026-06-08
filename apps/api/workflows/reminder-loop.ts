@@ -9,14 +9,14 @@ import {
 } from "@skintext/shared";
 import { sleep } from "workflow";
 import {
+  buildDailySummaryReminder,
+  buildRoutineReminder,
+  buildWeeklyRecapReminder,
   clearReminderRunId,
-  generateDailySummary,
-  generateReminder,
-  generateWeeklyRecap,
   loadReminderTimes,
   loadRoutineLog,
   loadUser,
-  sendMsg,
+  sendReminderToAgent,
 } from "./steps/reminder-steps";
 
 const EARLY_WAKE_TOLERANCE_MS = 1000;
@@ -65,7 +65,7 @@ export async function reminderLoop(userId: string) {
       );
 
       if (!alreadyCompleted) {
-        const reminder = await generateReminder(
+        const reminder = await buildRoutineReminder(
           userId,
           routine.label,
           routine.emoji,
@@ -73,7 +73,7 @@ export async function reminderLoop(userId: string) {
           user.name,
           log,
         );
-        await sendMsg(userId, reminder);
+        await sendReminderToAgent(userId, reminder);
       }
     }
 
@@ -86,15 +86,15 @@ export async function reminderLoop(userId: string) {
       continue;
     }
 
-    const summaryResult = await generateDailySummary(userId, locale);
+    const summaryResult = await buildDailySummaryReminder(userId, locale);
     if (summaryResult) {
-      await sendMsg(userId, summaryResult.text);
+      await sendReminderToAgent(userId, summaryResult.text);
 
       const milestoneMsg = summaryResult.streakUpdated
         ? ADHERENCE_MILESTONES[summaryResult.streak.current]
         : undefined;
       if (milestoneMsg) {
-        await sendMsg(userId, milestoneMsg);
+        await sendReminderToAgent(userId, milestoneMsg);
       }
     }
 
@@ -108,9 +108,9 @@ export async function reminderLoop(userId: string) {
         continue;
       }
 
-      const recap = await generateWeeklyRecap(userId, locale);
+      const recap = await buildWeeklyRecapReminder(userId, locale);
       if (recap) {
-        await sendMsg(userId, recap);
+        await sendReminderToAgent(userId, recap);
       }
     }
   }

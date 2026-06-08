@@ -1,9 +1,11 @@
 import type { AgentContext } from "@skintext/shared";
 import { getLocaleName } from "@skintext/shared";
+import { USER_REMINDER_OPEN_TAG, USER_REMINDER_TAG_EXAMPLE } from "./user-reminder";
 
 export function buildSkintextSystemPrompt(ctx: AgentContext): string {
   let prompt = `You are Skintext -- a skincare routine assistant in iMessage.
 CRITICAL: Always reply in the EXACT language of the user's LATEST message. If their last message is in English, reply in English. If in Swedish, reply in Swedish. The language of older messages does not matter. If unsure, default to English.
+Exception: if the latest message is wrapped in ${USER_REMINDER_OPEN_TAG} tags, it is an internal scheduled reminder event. Reply in the user's saved locale/language from context instead of the tag text's language.
 
 Scope:
 - Help users build, adjust, and track practical skincare routines.
@@ -27,6 +29,14 @@ Personality:
 User-facing boundary:
 - Never mention tool names, internal workflows, models, databases, memory retrieval, or "the system" to the user.
 - Describe actions as Skintext doing them directly ("I logged it", "I updated that"), not as a tool or model doing them.
+- Never mention ${USER_REMINDER_OPEN_TAG} tags, internal reminder events, or that a reminder was routed through the agent.
+
+Scheduled reminder events:
+- Messages wrapped in ${USER_REMINDER_TAG_EXAMPLE} are internal scheduled events, not the user's own words.
+- Use the current conversation history, saved profile, products, and logs to write the outbound text the user should receive.
+- If the event asks for a routine reminder, daily summary, weekly recap, milestone, or one-off follow-up, send that user-facing message directly.
+- Keep it concise and natural. Invite a quick reply only when it helps the current skincare flow.
+- Do not ask the user to clarify the reminder event unless the event is impossible to understand.
 
 Action policy:
 - If the user's intent is clear and low-risk, do it immediately: routine logs, product use, saved products, profile updates, recurring reminder changes, and one-off reminders.
@@ -154,17 +164,6 @@ When you learn something durable about the user (skin sensitivity, allergies, pr
     prompt += `\n\nSaved products:\n${ctx.products
       .map((p) => `- ${p.name}${p.category ? ` (${p.category})` : ""}`)
       .join("\n")}`;
-  }
-
-  if (ctx.todayLog && ctx.todayLog.entryCount > 0) {
-    const slots = ctx.todayLog.completedSlots.join(", ") || "none";
-    const products = ctx.todayLog.productsUsed.join(", ") || "none";
-    prompt += `\n\nToday so far: ${ctx.todayLog.entryCount} routine entries`;
-    prompt += `\nCompleted slots: ${slots}`;
-    prompt += `\nProducts used: ${products}`;
-    if (ctx.todayLog.reactions.length > 0) {
-      prompt += `\nReactions noted: ${ctx.todayLog.reactions.join("; ")}`;
-    }
   }
 
   if (ctx.streak && ctx.streak > 1) {

@@ -6,10 +6,10 @@ let reminderQueue: unknown[] = [];
 let user: unknown = null;
 
 const sleep = mock(() => Promise.resolve());
+const buildDailySummaryReminder = mock(() => Promise.resolve(null));
+const buildRoutineReminder = mock(() => Promise.resolve("Routine reminder event."));
+const buildWeeklyRecapReminder = mock(() => Promise.resolve(null));
 const clearReminderRunId = mock(() => Promise.resolve());
-const generateDailySummary = mock(() => Promise.resolve(null));
-const generateReminder = mock(() => Promise.resolve("Routine reminder."));
-const generateWeeklyRecap = mock(() => Promise.resolve(null));
 const loadOneOffReminder = mock(() => Promise.resolve(reminderQueue.shift() ?? null));
 const loadReminderTimes = mock(
   (): Promise<Array<{ label: string; hour: number; minute: number }> | null> =>
@@ -27,7 +27,7 @@ const loadRoutineLog = mock(() =>
 const loadUser = mock(() => Promise.resolve(user));
 const markOneOffReminderFailed = mock(() => Promise.resolve());
 const markOneOffReminderSent = mock(() => Promise.resolve());
-const sendMsg = mock(() => Promise.resolve());
+const sendReminderToAgent = mock(() => Promise.resolve(true));
 
 mock.module("workflow", () => ({
   sleep,
@@ -42,19 +42,22 @@ mock.module("@skintext/shared", () =>
 );
 
 mock.module("../steps/reminder-steps", () => ({
+  buildDailySummaryReminder,
+  buildRoutineReminder,
+  buildWeeklyRecapReminder,
   clearReminderRunId,
-  generateDailySummary,
-  generateReminder,
-  generateWeeklyRecap,
   loadOneOffReminder,
   loadReminderTimes,
   loadRoutineLog,
   loadUser,
   markOneOffReminderFailed,
   markOneOffReminderSent,
-  sendMsg,
+  sendReminderToAgent,
 }));
 
+const { USER_REMINDER_CLOSE_TAG, USER_REMINDER_OPEN_TAG, wrapUserReminder } = await import(
+  "@skintext/ai"
+);
 const { oneOffReminderWorkflow } = await import("../one-off-reminder");
 const { reminderLoop } = await import("../reminder-loop");
 
@@ -81,29 +84,49 @@ describe("oneOffReminderWorkflow", () => {
       consentedAt: "2026-06-04T12:00:00.000Z",
     };
     sleep.mockClear();
+    buildDailySummaryReminder.mockClear();
+    buildRoutineReminder.mockClear();
+    buildWeeklyRecapReminder.mockClear();
     clearReminderRunId.mockClear();
-    generateDailySummary.mockClear();
-    generateReminder.mockClear();
-    generateWeeklyRecap.mockClear();
     loadOneOffReminder.mockClear();
     loadReminderTimes.mockClear();
     loadRoutineLog.mockClear();
     loadUser.mockClear();
     markOneOffReminderFailed.mockClear();
     markOneOffReminderSent.mockClear();
-    sendMsg.mockClear();
+    sendReminderToAgent.mockClear();
+    sendReminderToAgent.mockResolvedValue(true);
   });
 
-  test("sleeps until sendAt, sends once, and marks sent", async () => {
+  test("wraps reminder input for synthetic agent turns", () => {
+    expect(wrapUserReminder("Check whether irritation improved.")).toBe(
+      `${USER_REMINDER_OPEN_TAG}\nCheck whether irritation improved.\n${USER_REMINDER_CLOSE_TAG}`,
+    );
+  });
+
+  test("sleeps until sendAt, routes once through the agent, and marks sent", async () => {
     waitMs = 1000;
     reminderQueue = [scheduledReminder, scheduledReminder];
 
     await oneOffReminderWorkflow("usr_test", "reminder_1");
 
     expect(sleep).toHaveBeenCalledWith("1000ms");
-    expect(sendMsg).toHaveBeenCalledWith("usr_test", "Check whether irritation improved.");
-    expect(sendMsg).toHaveBeenCalledTimes(1);
+    expect(sendReminderToAgent).toHaveBeenCalledWith(
+      "usr_test",
+      "Check whether irritation improved.",
+    );
+    expect(sendReminderToAgent).toHaveBeenCalledTimes(1);
     expect(markOneOffReminderSent).toHaveBeenCalledWith("usr_test", "reminder_1");
+  });
+
+  test("marks failed if the agent does not produce a reminder reply", async () => {
+    reminderQueue = [scheduledReminder, scheduledReminder];
+    sendReminderToAgent.mockResolvedValueOnce(false);
+
+    await oneOffReminderWorkflow("usr_test", "reminder_1");
+
+    expect(markOneOffReminderFailed).toHaveBeenCalledWith("usr_test", "reminder_1");
+    expect(markOneOffReminderSent).not.toHaveBeenCalled();
   });
 
   test("does not send a cancelled reminder after waking", async () => {
@@ -111,7 +134,7 @@ describe("oneOffReminderWorkflow", () => {
 
     await oneOffReminderWorkflow("usr_test", "reminder_1");
 
-    expect(sendMsg).not.toHaveBeenCalled();
+    expect(sendReminderToAgent).not.toHaveBeenCalled();
     expect(markOneOffReminderSent).not.toHaveBeenCalled();
   });
 
@@ -121,7 +144,7 @@ describe("oneOffReminderWorkflow", () => {
 
     await oneOffReminderWorkflow("usr_test", "reminder_1");
 
-    expect(sendMsg).not.toHaveBeenCalled();
+    expect(sendReminderToAgent).not.toHaveBeenCalled();
     expect(markOneOffReminderSent).not.toHaveBeenCalled();
     expect(markOneOffReminderFailed).not.toHaveBeenCalled();
   });
@@ -132,7 +155,7 @@ describe("oneOffReminderWorkflow", () => {
 
     await oneOffReminderWorkflow("usr_test", "reminder_1");
 
-    expect(sendMsg).not.toHaveBeenCalled();
+    expect(sendReminderToAgent).not.toHaveBeenCalled();
     expect(markOneOffReminderFailed).toHaveBeenCalledWith("usr_test", "reminder_1");
   });
 });
@@ -148,14 +171,14 @@ describe("reminderLoop", () => {
       consentedAt: "2026-06-04T12:00:00.000Z",
     };
     sleep.mockClear();
+    buildDailySummaryReminder.mockClear();
+    buildRoutineReminder.mockClear();
+    buildWeeklyRecapReminder.mockClear();
     clearReminderRunId.mockClear();
-    generateDailySummary.mockClear();
-    generateReminder.mockClear();
-    generateWeeklyRecap.mockClear();
     loadReminderTimes.mockClear();
     loadRoutineLog.mockClear();
     loadUser.mockClear();
-    sendMsg.mockClear();
+    sendReminderToAgent.mockClear();
   });
 
   test("exits without sending routine reminders when no opt-in schedule exists", async () => {
@@ -165,9 +188,9 @@ describe("reminderLoop", () => {
     await reminderLoop("usr_test");
 
     expect(clearReminderRunId).toHaveBeenCalledWith("usr_test");
-    expect(generateReminder).not.toHaveBeenCalled();
-    expect(generateDailySummary).not.toHaveBeenCalled();
-    expect(sendMsg).not.toHaveBeenCalled();
+    expect(buildRoutineReminder).not.toHaveBeenCalled();
+    expect(buildDailySummaryReminder).not.toHaveBeenCalled();
+    expect(sendReminderToAgent).not.toHaveBeenCalled();
   });
 
   test("uses only the reminder slots saved by the agent", async () => {
@@ -176,8 +199,8 @@ describe("reminderLoop", () => {
 
     await reminderLoop("usr_test");
 
-    expect(generateReminder).toHaveBeenCalledTimes(1);
-    expect(generateReminder).toHaveBeenCalledWith(
+    expect(buildRoutineReminder).toHaveBeenCalledTimes(1);
+    expect(buildRoutineReminder).toHaveBeenCalledWith(
       "usr_test",
       "morning",
       "☀️",
@@ -185,7 +208,7 @@ describe("reminderLoop", () => {
       "Alice",
       expect.any(Object),
     );
-    expect(generateDailySummary).toHaveBeenCalledWith("usr_test", "en");
-    expect(sendMsg).toHaveBeenCalledWith("usr_test", "Routine reminder.");
+    expect(buildDailySummaryReminder).toHaveBeenCalledWith("usr_test", "en");
+    expect(sendReminderToAgent).toHaveBeenCalledWith("usr_test", "Routine reminder event.");
   });
 });
