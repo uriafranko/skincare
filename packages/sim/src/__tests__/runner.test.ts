@@ -59,6 +59,37 @@ describe("local simulator", () => {
     expect(finalAssistant?.content).toContain("Good call keeping it simple");
   });
 
+  test("captures Hebrew onboarding details in stub mode", async () => {
+    const scenario = getScenario("onboarding-hebrew-basic");
+    const runtime = createOnboardingRuntime({
+      mode: "stub",
+      locale: scenario.locale,
+      timezone: scenario.timezone,
+    });
+    const persona =
+      scenario.persona.kind === "scripted"
+        ? createScriptedPersona(scenario.persona.messages)
+        : null;
+
+    expect(persona).not.toBeNull();
+
+    const result = await runSimulation(scenario, runtime, persona!);
+
+    expect(result.complete).toBe(true);
+    expect(result.finalState?.name).toBe("דנה");
+    expect(result.finalState?.skinType).toBe("combination");
+    expect(result.finalState?.sensitivity).toBe("medium");
+    expect(result.finalState?.allergies).toContain("fragrance");
+    expect(result.finalState?.morningReminder).toBe("08:00");
+    expect(result.finalState?.eveningReminder).toBe("21:00");
+    expect(result.finalState?.consented).toBe(true);
+    expect(result.evaluation.pass).toBe(true);
+    const finalAssistant = result.transcript
+      .filter((message) => message.role === "assistant")
+      .at(-1);
+    expect(finalAssistant?.content).toContain("הכל מוכן");
+  });
+
   test("keeps greeting-only setup compact and optional about reminders", async () => {
     const scenario = getScenario("onboarding-friction");
     const runtime = createOnboardingRuntime({

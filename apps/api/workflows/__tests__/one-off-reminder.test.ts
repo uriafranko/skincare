@@ -56,7 +56,7 @@ mock.module("../steps/reminder-steps", () => ({
 }));
 
 const { USER_REMINDER_CLOSE_TAG, USER_REMINDER_OPEN_TAG, wrapUserReminder } = await import(
-  "@skintext/ai"
+  "../../../../packages/ai/src/user-reminder"
 );
 const { oneOffReminderWorkflow } = await import("../one-off-reminder");
 const { reminderLoop } = await import("../reminder-loop");

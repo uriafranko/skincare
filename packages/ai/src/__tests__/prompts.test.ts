@@ -4,7 +4,7 @@ import { createSharedMock } from "./shared-mock";
 mock.module("@skintext/shared", () =>
   createSharedMock({
     getLocaleName: (locale: string) => {
-      const names: Record<string, string> = { en: "English", sv: "Swedish" };
+      const names: Record<string, string> = { en: "English", he: "Hebrew", sv: "Swedish" };
       return names[locale] ?? "English";
     },
   }),
@@ -60,6 +60,8 @@ describe("buildSkintextSystemPrompt", () => {
     const prompt = buildSkintextSystemPrompt(makeContext());
     expect(prompt).toContain("Skintext");
     expect(prompt).toContain("EXACT language");
+    expect(prompt).toContain("For any language the user writes in, reply in that same language");
+    expect(prompt).toContain("Hebrew -> Hebrew");
     expect(prompt).toContain("skincare routine assistant");
   });
 
@@ -216,5 +218,19 @@ describe("scheduled prompts", () => {
     expect(prompt).toContain("conversational");
     expect(prompt).toContain("user's first name");
     expect(prompt).toContain("grounded encouragement");
+  });
+
+  test("scheduled prompts support Hebrew locale names", () => {
+    expect(buildDailyRoutineSummaryPrompt("he")).toContain("Hebrew");
+    expect(buildRoutineReminderPrompt("he")).toContain("Hebrew");
+    expect(buildWeeklyRoutineRecapPrompt("he")).toContain("Hebrew");
+  });
+});
+
+describe("onboarding prompt source", () => {
+  test("completion guidance localizes done replies", async () => {
+    const source = await Bun.file(new URL("../onboarding.ts", import.meta.url)).text();
+    expect(source).toContain('localized equivalent of "done"');
+    expect(source).toContain('Do not use the English word "done" unless replying in English');
   });
 });

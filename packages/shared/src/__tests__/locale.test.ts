@@ -23,6 +23,13 @@ describe("detectRegion", () => {
     expect(result.country).toBe("JP");
   });
 
+  test("Israeli phone number", () => {
+    const result = detectRegion("+972501234567");
+    expect(result.locale).toBe("he");
+    expect(result.country).toBe("IL");
+    expect(result.timezone).toBeDefined();
+  });
+
   test("invalid phone falls back to US/English", () => {
     const result = detectRegion("not-a-phone");
     expect(result.locale).toBe("en");
@@ -35,6 +42,7 @@ describe("getLocaleName", () => {
     expect(getLocaleName("en")).toBe("English");
     expect(getLocaleName("sv")).toBe("Swedish");
     expect(getLocaleName("ja")).toBe("Japanese");
+    expect(getLocaleName("he")).toBe("Hebrew");
   });
 
   test("unknown locale falls back to English", () => {

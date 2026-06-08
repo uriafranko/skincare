@@ -77,6 +77,30 @@ export const onboardingScenarios: SimulationScenario[] = [
     },
     maxTurns: 6,
   },
+  {
+    id: "onboarding-hebrew-basic",
+    title: "Hebrew one-message setup",
+    area: "onboarding",
+    task: "Verify Hebrew onboarding can capture a complete setup without falling back to English-only extraction.",
+    locale: "he",
+    timezone: "Asia/Jerusalem",
+    persona: {
+      kind: "scripted",
+      profile:
+        "Dana writes in Hebrew, wants a simple routine, avoids fragrance, and gives consent in the first message.",
+      messages: [
+        "שלום, אני דנה. המטרה שלי היא פחות אדמומיות ויובש. העור שלי מעורב עם רגישות בינונית, ואני נמנעת מבישום. אני משתמשת בתכשיר ניקוי וקרם לחות. תזכיר לי ב-8:00 וב-21:00. כן, אפשר לשמור את זה.",
+      ],
+    },
+    expectations: {
+      onboardingComplete: true,
+      maxAssistantMessages: 1,
+      maxAssistantChars: 700,
+      requiredFields: ["name", "skin_goals", "skin_profile", "consent"],
+      addressUserByName: true,
+    },
+    maxTurns: 4,
+  },
 ];
 
 export const scenarios = onboardingScenarios;

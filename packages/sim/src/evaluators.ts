@@ -33,7 +33,15 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function hasNonAscii(value: string): boolean {
+  return Array.from(value).some((char) => char.charCodeAt(0) > 127);
+}
+
 function assistantMentionsName(transcript: TranscriptMessage[], name: string): boolean {
+  if (hasNonAscii(name)) {
+    return assistantMessages(transcript).some((message) => message.content.includes(name));
+  }
+
   const namePattern = new RegExp(`\\b${escapeRegExp(name)}\\b`, "i");
   return assistantMessages(transcript).some((message) => namePattern.test(message.content));
 }

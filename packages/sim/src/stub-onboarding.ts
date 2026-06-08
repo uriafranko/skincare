@@ -28,9 +28,23 @@ const concernKeywords = [
   "pigmentation",
   "dark spots",
   "wrinkles",
+  "אקנה",
+  "פצעונים",
+  "אדמומיות",
+  "יובש",
+  "לחיים יבשות",
 ];
 
-const goalKeywords = ["glow", "simple routine", "simpler routine", "clear skin", "even tone"];
+const goalKeywords = [
+  "glow",
+  "simple routine",
+  "simpler routine",
+  "clear skin",
+  "even tone",
+  "פחות אדמומיות",
+  "פחות יובש",
+  "שגרה פשוטה",
+];
 const productKeywords = [
   "cleanser",
   "moisturizer",
@@ -41,35 +55,56 @@ const productKeywords = [
   "retinol",
   "cerave",
   "tretinoin",
+  "תכשיר ניקוי",
+  "ניקוי",
+  "קרם לחות",
+  "לחות",
+  "מקדם הגנה",
 ];
+
+function hasNonAscii(value: string): boolean {
+  return Array.from(value).some((char) => char.charCodeAt(0) > 127);
+}
 
 function titleCaseName(value: string): string {
   const [first] = value.trim().split(/\s+/);
   if (!first) return value;
+  if (hasNonAscii(first)) return first;
   return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
 }
 
 function extractName(text: string): string | undefined {
   const match =
+    /(?:קוראים לי|שמי|אני)\s+([\p{Script=Hebrew}]{2,20})/u.exec(text) ??
     /\b(?:i am|i'm|im|my name is|name is|call me|jag heter)\s+([a-z][a-z'-]*)/i.exec(text) ??
     /^([A-Z][a-z'-]{1,20})\b/.exec(text.trim());
   if (!match?.[1]) return undefined;
 
   const name = titleCaseName(match[1]);
-  if (/^(Yes|Yeah|Yep|Ok|Okay|Sure|Fine|Hi|Hey|Hello|Thanks)$/.test(name)) return undefined;
+  if (/^(Yes|Yeah|Yep|Ok|Okay|Sure|Fine|Hi|Hey|Hello|Thanks|כן|שלום|היי)$/.test(name)) {
+    return undefined;
+  }
   return name;
 }
 
 function extractSkinType(lower: string): SkinType | undefined {
-  if (/\bnot sure\b|\bunsure\b|\bdon't know\b/.test(lower)) return "unsure";
+  if (/\bnot sure\b|\bunsure\b|\bdon't know\b|לא בטוח|לא בטוחה/.test(lower)) return "unsure";
   if (/\bcombination\b/.test(lower)) return "combination";
+  if (/מעורב|מעורבת/.test(lower)) return "combination";
   if (/\boily\b/.test(lower)) return "oily";
+  if (/שמן|שמנוני/.test(lower)) return "oily";
   if (/\bdry\b/.test(lower)) return "dry";
+  if (/יבש|יבשה/.test(lower)) return "dry";
   if (/\bnormal\b/.test(lower)) return "normal";
+  if (/רגיל|רגילה/.test(lower)) return "normal";
   return undefined;
 }
 
 function extractSensitivity(lower: string): SensitivityLevel | undefined {
+  if (/רגישות גבוהה|מאוד רגיש|מאד רגיש/.test(lower)) return "high";
+  if (/רגישות בינונית|קצת רגיש/.test(lower)) return "medium";
+  if (/רגישות נמוכה|לא רגיש/.test(lower)) return "low";
+  if (/רגישות.*(?:לא בטוח|לא בטוחה)/.test(lower)) return "unsure";
   if (/\bhigh sensitivity\b|\bvery sensitive\b|\beasily irritated\b/.test(lower)) return "high";
   if (/\bmedium sensitivity\b|\bsomewhat sensitive\b/.test(lower)) return "medium";
   if (/\blow sensitivity\b|\bnot sensitive\b/.test(lower)) return "low";
@@ -78,6 +113,8 @@ function extractSensitivity(lower: string): SensitivityLevel | undefined {
 }
 
 function extractRoutinePreference(lower: string): RoutinePreference | undefined {
+  if (/פשוט|בסיסי|מינימלי/.test(lower)) return "simple";
+  if (/מפורט|מתקדם/.test(lower)) return "detailed";
   if (/\bsimple\b|\bbasic\b|\bminimal\b/.test(lower)) return "simple";
   if (/\bdetailed\b|\badvanced\b/.test(lower)) return "detailed";
   if (/\bstandard\b/.test(lower)) return "standard";
@@ -91,7 +128,9 @@ function collectKeywords(lower: string, keywords: string[]): string[] {
 function extractAllergies(lower: string): string[] {
   const allergies: string[] = [];
   if (/\bfragrance\b/.test(lower)) allergies.push("fragrance");
+  if (/בישום|מבושם|ריח/.test(lower)) allergies.push("fragrance");
   if (/\ballerg(?:y|ic|ies)\b/.test(lower)) allergies.push("reported allergy");
+  if (/אלרג/.test(lower)) allergies.push("reported allergy");
   return allergies;
 }
 
@@ -134,15 +173,23 @@ function extractReminderTimes(
 }
 
 function extractConsent(lower: string, previousBotReply?: string): boolean | undefined {
-  const mentionsStorage = /\b(save|store|consent|data)\b/.test(lower);
+  const mentionsStorage = /\b(save|store|consent|data)\b|לשמור|שמירה|מידע|נתונים/.test(lower);
   const saysSure = /\bsure\b/.test(lower) && !/\bnot\s+sure\b/.test(lower);
-  const affirmative = /\b(yes|yep|yeah|ok|okay|agree|fine|consent)\b/.test(lower) || saysSure;
+  const affirmative =
+    /\b(yes|yep|yeah|ok|okay|agree|fine|consent)\b/.test(lower) ||
+    /כן|אפשר|בסדר|מאשר|מאשרת/.test(lower) ||
+    saysSure;
   const previousAskedConsent = /\b(save|store|consent|data)\b/i.test(previousBotReply ?? "");
   if ((mentionsStorage && affirmative) || (previousAskedConsent && affirmative)) return true;
   return undefined;
 }
 
 function buildCompleteReply(state: OnboardingState): string {
+  if (state.detectedLocale === "he") {
+    const name = state.name ? `, ${state.name}` : "";
+    return `הכל מוכן${name}. התחלה ברורה. אחרי השגרה אפשר לכתוב סיימתי, או לשלוח תמונת עור/מוצר כשאת רוצה עזרה למקם משהו.`;
+  }
+
   const name = state.name ? `, ${state.name}` : "";
   const compliment =
     state.routinePreference === "simple" ? "Good call keeping it simple." : "Nice clear setup.";
@@ -155,6 +202,10 @@ export function extractStubOnboarding(
 ): Partial<OnboardingState> {
   const lower = text.toLowerCase();
   const extracted: Partial<OnboardingState> = {};
+
+  if (!state.detectedLocale && /\p{Script=Hebrew}/u.test(text)) {
+    extracted.detectedLocale = "he";
+  }
 
   if (!state.name) {
     const name = extractName(text);

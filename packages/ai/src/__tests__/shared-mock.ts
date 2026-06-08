@@ -21,7 +21,7 @@ export function createSharedMock(overrides: Record<string, unknown> = {}) {
     env: {},
     generateId: () => "test_id",
     getLocaleName: (locale: string) => {
-      const names: Record<string, string> = { en: "English", sv: "Swedish" };
+      const names: Record<string, string> = { en: "English", he: "Hebrew", sv: "Swedish" };
       return names[locale] ?? "English";
     },
     getTimezoneCity: (timezone: string) =>

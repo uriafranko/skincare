@@ -161,7 +161,7 @@ TONE: warm, direct, iMessage-native. No bullets, no form language, no sales copy
     situation = `The user is fully set up. Reply with one compact confirmation in the user's language.
 Start with the natural equivalent of "All set" and use their first name if known.
 Add one brief, grounded compliment about their setup choices or clarity, not their appearance.
-Then include this next step in natural wording: text done after their routine, or send a skin/product photo anytime they want help placing something.
+Then include this next step in natural wording: they can text the localized equivalent of "done" after their routine, or send a skin/product photo anytime they want help placing something. Do not use the English word "done" unless replying in English.
 Keep it to 1-2 short sentences.`;
   } else {
     situation = `This is a follow-up message. The user already provided some info.
