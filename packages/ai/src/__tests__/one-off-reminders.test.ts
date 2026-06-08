@@ -2,11 +2,17 @@ import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { createSharedMock } from "./shared-mock";
 
 const createOneOffReminder = mock(() => Promise.resolve());
+const deleteCustomReminderTimes = mock(() => Promise.resolve());
+const getCustomReminderTimes = mock(() => Promise.resolve(null));
+const setCustomReminderTimes = mock(() => Promise.resolve());
 const setOneOffReminderWorkflowRunId = mock(() => Promise.resolve());
 const markOneOffReminderFailed = mock(() => Promise.resolve());
 
 mock.module("@skintext/db", () => ({
   createOneOffReminder,
+  deleteCustomReminderTimes,
+  getCustomReminderTimes,
+  setCustomReminderTimes,
   setOneOffReminderWorkflowRunId,
   markOneOffReminderFailed,
 }));
@@ -31,10 +37,20 @@ mock.module("@skintext/shared", () =>
 );
 
 const { scheduleOneOffReminder } = await import("../tools/one-off-reminders");
+const { createSetRemindersTool, getRemindersTool } = await import("../tools/set-reminders");
+
+function executeTool(tool: unknown, input: Record<string, unknown>) {
+  return (
+    tool as { execute: (args: Record<string, unknown>, options: unknown) => Promise<unknown> }
+  ).execute(input, {});
+}
 
 describe("scheduleOneOffReminder", () => {
   beforeEach(() => {
     createOneOffReminder.mockClear();
+    deleteCustomReminderTimes.mockClear();
+    getCustomReminderTimes.mockClear();
+    setCustomReminderTimes.mockClear();
     setOneOffReminderWorkflowRunId.mockClear();
     markOneOffReminderFailed.mockClear();
   });
@@ -156,5 +172,59 @@ describe("scheduleOneOffReminder", () => {
       error: "Could not start reminder workflow.",
     });
     expect(markOneOffReminderFailed).toHaveBeenCalledWith("usr_test", "reminder_test");
+  });
+});
+
+describe("recurring reminder tools", () => {
+  beforeEach(() => {
+    deleteCustomReminderTimes.mockClear();
+    getCustomReminderTimes.mockClear();
+    setCustomReminderTimes.mockClear();
+  });
+
+  test("stores exact opt-in reminder times and syncs the workflow", async () => {
+    const syncSchedule = mock(() => Promise.resolve("run_123"));
+    const tool = createSetRemindersTool(syncSchedule);
+    const times = [
+      { label: "morning", hour: 9, minute: 30 },
+      { label: "evening", hour: 20, minute: 45 },
+    ];
+
+    const result = await executeTool(tool, { userId: "usr_test", times });
+
+    expect(setCustomReminderTimes).toHaveBeenCalledWith("usr_test", times);
+    expect(deleteCustomReminderTimes).not.toHaveBeenCalled();
+    expect(syncSchedule).toHaveBeenCalledWith({ userId: "usr_test", enabled: true });
+    expect(result).toEqual({
+      updated: true,
+      enabled: true,
+      schedule: ["morning: 09:30", "evening: 20:45"],
+      workflowRunId: "run_123",
+    });
+  });
+
+  test("turns recurring reminders off with an empty schedule", async () => {
+    const syncSchedule = mock(() => Promise.resolve(undefined));
+    const tool = createSetRemindersTool(syncSchedule);
+
+    const result = await executeTool(tool, { userId: "usr_test", enabled: false, times: [] });
+
+    expect(deleteCustomReminderTimes).toHaveBeenCalledWith("usr_test");
+    expect(setCustomReminderTimes).not.toHaveBeenCalled();
+    expect(syncSchedule).toHaveBeenCalledWith({ userId: "usr_test", enabled: false });
+    expect(result).toEqual({
+      updated: true,
+      enabled: false,
+      schedule: [],
+      workflowRunId: null,
+    });
+  });
+
+  test("reports recurring reminders as disabled when no schedule exists", async () => {
+    getCustomReminderTimes.mockResolvedValueOnce(null);
+
+    const result = await executeTool(getRemindersTool, { userId: "usr_test" });
+
+    expect(result).toEqual({ enabled: false, schedule: [] });
   });
 });

@@ -5,6 +5,7 @@ import {
   createDefaultGatewayModel,
 } from "@skintext/ai";
 import {
+  deleteReminderRunId,
   getAdherenceStreak,
   getAllProducts,
   getCustomReminderTimes,
@@ -28,6 +29,11 @@ export async function loadUser(userId: string): Promise<UserProfile | null> {
 export async function loadReminderTimes(userId: string) {
   "use step";
   return getCustomReminderTimes(userId);
+}
+
+export async function clearReminderRunId(userId: string) {
+  "use step";
+  await deleteReminderRunId(userId);
 }
 
 export async function loadOneOffReminder(userId: string, reminderId: string) {

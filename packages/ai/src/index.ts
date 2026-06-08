@@ -49,5 +49,10 @@ export {
   logRoutineStepTool,
 } from "./tools/routine";
 export { saveMemoryTool } from "./tools/save-memory";
-export { getRemindersTool, setRemindersTool } from "./tools/set-reminders";
+export {
+  createSetRemindersTool,
+  getRemindersTool,
+  type RecurringReminderScheduleSync,
+  setRemindersTool,
+} from "./tools/set-reminders";
 export { updateProfileTool } from "./tools/update-profile";

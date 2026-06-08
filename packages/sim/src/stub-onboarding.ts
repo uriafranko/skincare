@@ -11,7 +11,7 @@ import {
 } from "./onboarding-state";
 
 const GREETING_SETUP_REPLY =
-  "Hey, I'm Skintext. I'll help build a simple routine that fits you. Tell me your name, main skin goal, skin type/sensitivity if known, anything you avoid, and current products. Unsure is fine. OK if I save this so reminders/logs work? You can delete anytime.";
+  "Hey, I'm Skintext. I'll build a simple routine that fits you. Send your name, skin goal, skin type/sensitivity if known, avoids, products, and if you want reminders, best times. Unsure is fine. OK if I save this so reminders/logs work? You can delete anytime.";
 
 const CONSENT_ONLY_REPLY = "OK if I save this so reminders/logs work? You can delete it anytime.";
 

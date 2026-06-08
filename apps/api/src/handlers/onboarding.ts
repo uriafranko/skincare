@@ -9,7 +9,7 @@ import {
   setReminderRunId,
 } from "@skintext/db";
 import type { OnboardingState } from "@skintext/shared";
-import { CONSENT_VERSION, generateId, isOnboardingComplete, ROUTINE_TIMES } from "@skintext/shared";
+import { CONSENT_VERSION, generateId, isOnboardingComplete } from "@skintext/shared";
 import type { RequestLogger } from "evlog";
 import { createAILogger } from "evlog/ai";
 import { start } from "workflow/api";
@@ -51,18 +51,7 @@ function buildReminderTimes(state: OnboardingState) {
   const morning = parseReminderTime("morning", state.morningReminder);
   const evening = parseReminderTime("evening", state.eveningReminder);
 
-  if (!morning && !evening) return [];
-
-  return ROUTINE_TIMES.map((routine) => {
-    const custom =
-      routine.label === "morning" ? morning : routine.label === "evening" ? evening : null;
-
-    return {
-      label: routine.label,
-      hour: custom?.hour ?? routine.hour,
-      minute: custom?.minute ?? routine.minute,
-    };
-  });
+  return [morning, evening].filter((time): time is NonNullable<typeof time> => !!time);
 }
 
 function saveInitialProducts(userId: string, products: string[]) {
@@ -174,11 +163,13 @@ export async function handleOnboarding(
       deleteOnboardingState(userId),
     ]);
 
-    try {
-      const run = await start(reminderLoop, [userId]);
-      await setReminderRunId(userId, run.runId);
-    } catch (err) {
-      log.error(err as Error);
+    if (reminderTimes.length > 0) {
+      try {
+        const run = await start(reminderLoop, [userId]);
+        await setReminderRunId(userId, run.runId);
+      } catch (err) {
+        log.error(err as Error);
+      }
     }
 
     return [welcomeReply];

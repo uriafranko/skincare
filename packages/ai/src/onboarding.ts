@@ -49,7 +49,7 @@ const extractionSchema = z.object({
 const CONSENT_ONLY_REPLY = "OK if I save this so reminders/logs work? You can delete it anytime.";
 
 const ENGLISH_GREETING_SETUP_REPLY =
-  "Hey, I'm Skintext. I'll help build a simple routine that fits you. Tell me your name, main skin goal, skin type/sensitivity if known, anything you avoid, and current products. Unsure is fine. OK if I save this so reminders/logs work? You can delete anytime.";
+  "Hey, I'm Skintext. I'll build a simple routine that fits you. Send your name, skin goal, skin type/sensitivity if known, avoids, products, and if you want reminders, best times. Unsure is fine. OK if I save this so reminders/logs work? You can delete anytime.";
 
 function formatList(values?: string[]): string | null {
   return values?.length ? values.join(", ") : null;
@@ -146,11 +146,12 @@ CONTENT (keep SHORT -- 2-3 short sentences, one bubble when possible):
 - When they share useful setup details, add one tiny, specific positive acknowledgment like "Nice, that's a clear starting point" or "Good call keeping it simple." Compliment their choices or clarity, not their appearance.
 - Any skin concern counts as the goal/concern. Dry cheeks, breakouts, acne, redness, texture, irritation, and similar phrases are enough.
 - Current products and reminder times are useful but optional. Do not block consent or completion on them.
+- Reminders are opt-in. Ask when they would like reminders only as an optional preference, and never imply reminders will be created by default.
 - If this message contains name + any skin goal/concern + skin type/sensitivity and only consent is missing, reply ONLY: "${CONSENT_ONLY_REPLY}"
-- If they only sent a greeting, ask for the setup essentials in one natural sentence: name, main skin goal/concern, skin type or sensitivity if known, anything they avoid, and current products.
+- If they only sent a greeting, ask for the setup essentials in one natural sentence: name, main skin goal/concern, skin type or sensitivity if known, anything they avoid, current products, and optional reminder times if they want reminders.
 - Say "unsure" is fine.
 - Include storage consent as part of the first ask: "${CONSENT_ONLY_REPLY}"
-- Reminder times are optional. Save them if the user gives them, but do not make them sound required.
+- Reminder times are optional and opt-in. Save them if the user gives them, but do not make them sound required and do not invent defaults.
 - Do not mention photos or product-label photos in the first setup ask unless the user sent or mentioned a photo.
 - End with a low-friction CTA: "Send it however is easiest."
 - Do not add "Send it however is easiest" to a consent-only reply.
@@ -167,7 +168,7 @@ Keep it to 1-2 short sentences.`;
 Already collected: ${describeState(state)}.
 Still missing: ${describeMissing(state)}.
 
-In your reply: briefly acknowledge any new info they just provided, then ask only for what is still missing -- one or two asks at a time if several fields are missing. If you know their first name, use it only when it feels natural, not in every reply. Add one small, specific positive acknowledgment when they share useful skincare context, like "Good call avoiding fragrance" or "Nice, that helps." Any concern counts as a goal/concern, so do not ask what they want to improve if they mention dryness, breakouts, acne, redness, texture, or similar concerns. If only consent is missing, ask exactly: "${CONSENT_ONLY_REPLY}" Keep it short and conversational.`;
+In your reply: briefly acknowledge any new info they just provided, then ask only for what is still missing -- one or two asks at a time if several fields are missing. If reminders are relevant and the reply would still stay short, ask when they would like reminders as an optional preference, not a required setup field. If you know their first name, use it only when it feels natural, not in every reply. Add one small, specific positive acknowledgment when they share useful skincare context, like "Good call avoiding fragrance" or "Nice, that helps." Any concern counts as a goal/concern, so do not ask what they want to improve if they mention dryness, breakouts, acne, redness, texture, or similar concerns. If only consent is missing, ask exactly: "${CONSENT_ONLY_REPLY}" Keep it short and conversational.`;
   }
 
   const { output } = await generateText({
@@ -188,6 +189,7 @@ EXTRACTION INSTRUCTIONS:
 - sensitivity: use "unsure" if they say they do not know.
 - routinePreference: infer "simple" if they ask for minimal/basic, "detailed" if they want many steps, otherwise null unless stated.
 - morningReminder/eveningReminder: normalize explicit reminder times to HH:mm in 24h local time. Use null if no time is mentioned.
+- Do not infer reminder times from routine labels alone. Only extract reminder times when the user provides an explicit time.
 - detectedLocale: detect the BCP-47 language code from the user's latest message text.
 
 REPLY INSTRUCTIONS:

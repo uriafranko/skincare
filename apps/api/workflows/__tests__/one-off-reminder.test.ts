@@ -6,7 +6,24 @@ let reminderQueue: unknown[] = [];
 let user: unknown = null;
 
 const sleep = mock(() => Promise.resolve());
+const clearReminderRunId = mock(() => Promise.resolve());
+const generateDailySummary = mock(() => Promise.resolve(null));
+const generateReminder = mock(() => Promise.resolve("Routine reminder."));
+const generateWeeklyRecap = mock(() => Promise.resolve(null));
 const loadOneOffReminder = mock(() => Promise.resolve(reminderQueue.shift() ?? null));
+const loadReminderTimes = mock(
+  (): Promise<Array<{ label: string; hour: number; minute: number }> | null> =>
+    Promise.resolve(null),
+);
+const loadRoutineLog = mock(() =>
+  Promise.resolve({
+    entries: [],
+    entryCount: 0,
+    completedSlots: [],
+    productsUsed: [],
+    reactions: [],
+  }),
+);
 const loadUser = mock(() => Promise.resolve(user));
 const markOneOffReminderFailed = mock(() => Promise.resolve());
 const markOneOffReminderSent = mock(() => Promise.resolve());
@@ -16,10 +33,22 @@ mock.module("workflow", () => ({
   sleep,
 }));
 
-mock.module("@skintext/shared", () => createSharedMock({ msUntil: () => waitMs }));
+mock.module("@skintext/shared", () =>
+  createSharedMock({
+    isDayOfWeek: () => false,
+    msUntil: () => waitMs,
+    nextLocalTime: () => new Date(Date.now() - 2000),
+  }),
+);
 
 mock.module("../steps/reminder-steps", () => ({
+  clearReminderRunId,
+  generateDailySummary,
+  generateReminder,
+  generateWeeklyRecap,
   loadOneOffReminder,
+  loadReminderTimes,
+  loadRoutineLog,
   loadUser,
   markOneOffReminderFailed,
   markOneOffReminderSent,
@@ -27,6 +56,7 @@ mock.module("../steps/reminder-steps", () => ({
 }));
 
 const { oneOffReminderWorkflow } = await import("../one-off-reminder");
+const { reminderLoop } = await import("../reminder-loop");
 
 const scheduledReminder = {
   id: "reminder_1",
@@ -45,10 +75,19 @@ describe("oneOffReminderWorkflow", () => {
     reminderQueue = [];
     user = {
       id: "usr_test",
+      name: "Alice",
+      locale: "en",
+      timezone: "Asia/Jerusalem",
       consentedAt: "2026-06-04T12:00:00.000Z",
     };
     sleep.mockClear();
+    clearReminderRunId.mockClear();
+    generateDailySummary.mockClear();
+    generateReminder.mockClear();
+    generateWeeklyRecap.mockClear();
     loadOneOffReminder.mockClear();
+    loadReminderTimes.mockClear();
+    loadRoutineLog.mockClear();
     loadUser.mockClear();
     markOneOffReminderFailed.mockClear();
     markOneOffReminderSent.mockClear();
@@ -95,5 +134,58 @@ describe("oneOffReminderWorkflow", () => {
 
     expect(sendMsg).not.toHaveBeenCalled();
     expect(markOneOffReminderFailed).toHaveBeenCalledWith("usr_test", "reminder_1");
+  });
+});
+
+describe("reminderLoop", () => {
+  beforeEach(() => {
+    waitMs = 0;
+    user = {
+      id: "usr_test",
+      name: "Alice",
+      locale: "en",
+      timezone: "Asia/Jerusalem",
+      consentedAt: "2026-06-04T12:00:00.000Z",
+    };
+    sleep.mockClear();
+    clearReminderRunId.mockClear();
+    generateDailySummary.mockClear();
+    generateReminder.mockClear();
+    generateWeeklyRecap.mockClear();
+    loadReminderTimes.mockClear();
+    loadRoutineLog.mockClear();
+    loadUser.mockClear();
+    sendMsg.mockClear();
+  });
+
+  test("exits without sending routine reminders when no opt-in schedule exists", async () => {
+    loadUser.mockResolvedValueOnce(user);
+    loadReminderTimes.mockResolvedValueOnce(null);
+
+    await reminderLoop("usr_test");
+
+    expect(clearReminderRunId).toHaveBeenCalledWith("usr_test");
+    expect(generateReminder).not.toHaveBeenCalled();
+    expect(generateDailySummary).not.toHaveBeenCalled();
+    expect(sendMsg).not.toHaveBeenCalled();
+  });
+
+  test("uses only the reminder slots saved by the agent", async () => {
+    loadUser.mockResolvedValueOnce(user).mockResolvedValueOnce(null);
+    loadReminderTimes.mockResolvedValueOnce([{ label: "morning", hour: 9, minute: 30 }]);
+
+    await reminderLoop("usr_test");
+
+    expect(generateReminder).toHaveBeenCalledTimes(1);
+    expect(generateReminder).toHaveBeenCalledWith(
+      "usr_test",
+      "morning",
+      "☀️",
+      "en",
+      "Alice",
+      expect.any(Object),
+    );
+    expect(generateDailySummary).toHaveBeenCalledWith("usr_test", "en");
+    expect(sendMsg).toHaveBeenCalledWith("usr_test", "Routine reminder.");
   });
 });

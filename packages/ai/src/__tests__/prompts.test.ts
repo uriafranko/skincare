@@ -70,6 +70,15 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("Describe actions as Skintext doing them directly");
   });
 
+  test("includes action policy guidance", () => {
+    const prompt = buildSkintextSystemPrompt(makeContext());
+    expect(prompt).toContain("Action policy");
+    expect(prompt).toContain("If the user's intent is clear and low-risk, do it immediately");
+    expect(prompt).toContain("ask for explicit confirmation first");
+    expect(prompt).toContain("ask one brief clarifying question instead of guessing");
+    expect(prompt).toContain("If an action fails, say what failed in first person");
+  });
+
   test("includes mistake and frustration recovery guidance", () => {
     const prompt = buildSkintextSystemPrompt(makeContext());
     expect(prompt).toContain("Mistakes and frustration");
@@ -82,6 +91,7 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("Natural memory use");
     expect(prompt).toContain("Use saved preferences and facts naturally");
     expect(prompt).toContain('Never say "I remember from memory"');
+    expect(prompt).toContain("Got it, I'll keep that in mind");
   });
 
   test("includes grounded personalization guidance", () => {
@@ -90,6 +100,16 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("Compliment choices and care, not appearance");
     expect(prompt).toContain("Avoid romantic, intense, dependency-building, or generic flattery");
     expect(prompt).toContain("Make the user feel seen");
+  });
+
+  test("includes human texture guidance", () => {
+    const prompt = buildSkintextSystemPrompt(makeContext());
+    expect(prompt).toContain("Human texture");
+    expect(prompt).toContain("Mirror the user's tone lightly");
+    expect(prompt).toContain("tiny natural acknowledgments");
+    expect(prompt).toContain("Gentle humor is OK around routine logistics");
+    expect(prompt).toContain("Never joke about the user's appearance");
+    expect(prompt).toContain("repeated logs do not sound robotic");
   });
 
   test("includes context priority guidance", () => {
@@ -112,9 +132,12 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("Do not diagnose");
     expect(prompt).toContain("recommend professional care");
     expect(prompt).toContain("Write like a person texting");
+    expect(prompt).toContain("Default to plain text");
     expect(prompt).toContain("Do not use labeled sections");
     expect(prompt).toContain("Do not introduce advice with templated phrases");
     expect(prompt).toContain("Prefer complete sentences over colon-led fragments");
+    expect(prompt).toContain("Answer, log, or update first");
+    expect(prompt).toContain("skip extra offers");
     expect(prompt).toContain("Do not include absent symptoms or absent injuries");
   });
 
@@ -153,11 +176,25 @@ describe("buildSkintextSystemPrompt", () => {
   test("routes one-off reminders separately from recurring reminders", () => {
     const prompt = buildSkintextSystemPrompt(makeContext());
     expect(prompt).toContain("Use scheduleOneOffReminder");
-    expect(prompt).toContain("Use setReminders");
+    expect(prompt).toContain("Use getReminders first");
+    expect(prompt).toContain("use setReminders");
     expect(prompt).toContain("Today's date: 2026-06-04");
     expect(prompt).toContain("pass a relative delay");
+    expect(prompt).toContain("use relative wording when natural");
     expect(prompt).not.toContain("Current timestamp:");
     expect(prompt).toContain("Do not use setReminders for one-off reminders");
+  });
+
+  test("treats recurring reminders as opt-in and adjustable", () => {
+    const prompt = buildSkintextSystemPrompt(makeContext());
+    expect(prompt).toContain("Recurring reminders");
+    expect(prompt).toContain("Recurring routine reminders are opt-in");
+    expect(prompt).toContain("ask what local time");
+    expect(prompt).toContain("Do not invent a time for a missing slot");
+    expect(prompt).toContain("call getReminders first");
+    expect(prompt).toContain("Preserve untouched reminder slots");
+    expect(prompt).toContain("updateProfile for timezone first");
+    expect(prompt).toContain("use getReminders");
   });
 });
 

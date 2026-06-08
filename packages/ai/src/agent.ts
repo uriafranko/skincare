@@ -19,7 +19,11 @@ import {
   logRoutineStepTool,
 } from "./tools/routine";
 import { saveMemoryTool } from "./tools/save-memory";
-import { getRemindersTool, setRemindersTool } from "./tools/set-reminders";
+import {
+  createSetRemindersTool,
+  getRemindersTool,
+  type RecurringReminderScheduleSync,
+} from "./tools/set-reminders";
 import { updateProfileTool } from "./tools/update-profile";
 
 export interface AgentSecurityContext {
@@ -41,6 +45,7 @@ export interface AgentOptions extends AgentSecurityContext {
   model?: LanguageModelV3;
   compactionModel?: LanguageModelV3;
   scheduleOneOffReminderWorkflow?: ScheduleOneOffReminderWorkflow;
+  syncRecurringReminderSchedule?: RecurringReminderScheduleSync;
 }
 
 export function createSkintextAgent(systemPrompt: string, ctx: AgentOptions) {
@@ -56,7 +61,7 @@ export function createSkintextAgent(systemPrompt: string, ctx: AgentOptions) {
     logProductUse: withContext(logProductUseTool, ctx),
     getUserProfile: withContext(getUserProfile, ctx),
     updateProfile: withContext(updateProfileTool, ctx),
-    setReminders: withContext(setRemindersTool, ctx),
+    setReminders: withContext(createSetRemindersTool(ctx.syncRecurringReminderSchedule), ctx),
     getReminders: withContext(getRemindersTool, ctx),
     exportData: withContext(exportDataTool, ctx),
     deleteAccount: withContext(deleteAccountTool, ctx),

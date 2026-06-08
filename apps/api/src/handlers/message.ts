@@ -8,20 +8,24 @@ import {
   PRE_RUN_COMPACTION_THRESHOLD,
 } from "@skintext/ai";
 import {
+  deleteReminderRunId,
   getAdherenceStreak,
   getAllProducts,
   getConversationMessages,
+  getReminderRunId,
   getRoutineLogForDate,
   recallAllMemories,
   saveConversationMessages,
+  setReminderRunId,
 } from "@skintext/db";
 import type { AgentContext, UserProfile } from "@skintext/shared";
 import { getLocaleName, localDateString } from "@skintext/shared";
 import { pruneMessages } from "ai";
 import type { RequestLogger } from "evlog";
 import { createAILogger } from "evlog/ai";
-import { start } from "workflow/api";
+import { getRun, start } from "workflow/api";
 import { oneOffReminderWorkflow } from "../../workflows/one-off-reminder";
+import { reminderLoop } from "../../workflows/reminder-loop";
 
 function buildUserMessage(text: string, hasImage?: boolean): ModelMessage {
   if (hasImage) {
@@ -114,6 +118,30 @@ export async function handleMessage(
     compactionModel,
     scheduleOneOffReminderWorkflow: async ({ userId, reminderId }) => {
       const run = await start(oneOffReminderWorkflow, [userId, reminderId]);
+      return run.runId;
+    },
+    syncRecurringReminderSchedule: async ({ userId, enabled }) => {
+      const existingRunId = await getReminderRunId(userId);
+
+      if (existingRunId) {
+        const run = getRun(existingRunId);
+        if (await run.exists) {
+          const status = await run.status;
+          if (status === "pending" || status === "running") {
+            await run.wakeUp();
+            return existingRunId;
+          }
+        }
+        await deleteReminderRunId(userId);
+      }
+
+      if (!enabled) {
+        await deleteReminderRunId(userId);
+        return undefined;
+      }
+
+      const run = await start(reminderLoop, [userId]);
+      await setReminderRunId(userId, run.runId);
       return run.runId;
     },
   });
