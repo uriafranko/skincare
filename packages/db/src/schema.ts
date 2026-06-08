@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   boolean,
   index,
@@ -66,13 +67,16 @@ export const conversationMessages = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    messageIndex: integer("message_index").notNull(),
     value: jsonb("value").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
+    compactedAt: timestamp("compacted_at", { withTimezone: true, mode: "date" }),
     updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
   },
   (table) => [
-    primaryKey({ columns: [table.userId, table.messageIndex] }),
-    index("conversation_messages_user_index_idx").on(table.userId, table.messageIndex),
+    index("conversation_messages_user_created_at_idx").on(table.userId, table.createdAt),
+    index("conversation_messages_active_user_created_at_idx")
+      .on(table.userId, table.createdAt)
+      .where(sql`${table.compactedAt} is null`),
   ],
 );
 

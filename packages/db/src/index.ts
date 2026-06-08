@@ -2,7 +2,16 @@ export { getDb } from "./client";
 export { deleteExpiredExportBlobs, saveExportBlob } from "./exports";
 export { deleteMemory, recallAllMemories, recallMemory, saveMemory } from "./memory";
 export { acquireMessageSlot } from "./message-slots";
-export { deleteAllMessages, getConversationMessages, saveConversationMessages } from "./messages";
+export {
+  appendConversationMessages,
+  type ConversationMessageRecord,
+  compactConversationMessages,
+  deleteAllMessages,
+  getAllConversationMessageRecords,
+  getAllConversationMessages,
+  getConversationMessageRecords,
+  getConversationMessages,
+} from "./messages";
 export { deleteOnboardingState, getOnboardingState, setOnboardingState } from "./onboarding";
 export {
   deleteAllProducts,

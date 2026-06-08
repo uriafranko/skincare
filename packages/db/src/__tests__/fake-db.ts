@@ -4,12 +4,13 @@ type Row = Record<string, unknown>;
 type Table = (typeof schema)[keyof typeof schema];
 type SqlLike = { queryChunks?: unknown[] };
 type QueryConfig = { where?: unknown };
-type Condition = { key: string; op: "=" | "<="; value: unknown };
+type Condition = { key: string; op: "=" | "<="; value: unknown } | { key: string; op: "is null" };
+let nextFakeRowKey = 0;
 
 const tableKeys = new Map<unknown, (row: Row) => string>([
   [schema.adherenceStreaks, (row) => String(row.userId)],
   [schema.blobDeletionQueue, (row) => String(row.key)],
-  [schema.conversationMessages, (row) => `${row.userId}:${row.messageIndex}`],
+  [schema.conversationMessages, (row) => String(row.__fakeKey)],
   [schema.customReminderTimes, (row) => String(row.userId)],
   [schema.exportBlobs, (row) => String(row.userId)],
   [schema.expiringKeys, (row) => String(row.key)],
@@ -40,6 +41,10 @@ function collectConditions(expr: unknown, out: Condition[] = []): Condition[] {
     const op = chunks[i + 1] as { value?: string[] } | undefined;
     const param = chunks[i + 2] as { value?: unknown } | undefined;
     const opText = op?.value?.join("") ?? "";
+    if (opText.includes("is null")) {
+      out.push({ key: columnKey(chunk.name), op: "is null" });
+      continue;
+    }
     if (param && "value" in param) {
       if (opText.includes("<="))
         out.push({ key: columnKey(chunk.name), op: "<=", value: param.value });
@@ -61,6 +66,7 @@ function compareValues(left: unknown, right: unknown): number {
 
 function matches(row: Row, where?: unknown): boolean {
   return collectConditions(where).every((condition) => {
+    if (condition.op === "is null") return row[condition.key] == null;
     if (condition.op === "<=") return compareValues(row[condition.key], condition.value) <= 0;
     return row[condition.key] === condition.value;
   });
@@ -72,6 +78,17 @@ function materialize(value: Row): Row {
     out[key] = (val as SqlLike | undefined)?.queryChunks ? new Date() : val;
   }
   return out;
+}
+
+function materializeForTable(table: Table, value: Row): Row {
+  const row = materialize(value);
+  if (table === schema.conversationMessages) {
+    row.__fakeKey ??= `conversation:${nextFakeRowKey++}`;
+    row.createdAt ??= new Date();
+    row.compactedAt ??= null;
+    row.updatedAt ??= row.createdAt;
+  }
+  return row;
 }
 
 export function createFakeDb() {
@@ -99,7 +116,7 @@ export function createFakeDb() {
     if (table === schema.oneOffReminders)
       rows.sort((a, b) => String(a.sendAt).localeCompare(String(b.sendAt)));
     if (table === schema.conversationMessages)
-      rows.sort((a, b) => compareValues(a.messageIndex, b.messageIndex));
+      rows.sort((a, b) => compareValues(a.createdAt ?? "", b.createdAt ?? ""));
     if (table === schema.routineEntries)
       rows.sort((a, b) => String(a.timestamp).localeCompare(String(b.timestamp)));
     return rows.map((row) => ({ ...row }));
@@ -117,7 +134,9 @@ export function createFakeDb() {
       _rows: undefined as Row[] | undefined,
       _doNothing: false,
       values(row: Row | Row[]) {
-        builder._rows = (Array.isArray(row) ? row : [row]).map(materialize);
+        builder._rows = (Array.isArray(row) ? row : [row]).map((value) =>
+          materializeForTable(table, value),
+        );
         return builder;
       },
       onConflictDoUpdate(config: { set: Row }) {

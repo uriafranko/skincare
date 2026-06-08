@@ -13,15 +13,18 @@ import {
   createDefaultGatewayModel,
   createSkintextAgent,
   DEFAULT_COMPACTION_RESERVE_TOKENS,
+  isCompactionSummaryMessage,
   stripInternalMessageMetadata,
 } from "@skintext/ai";
 import {
+  appendConversationMessages,
+  type ConversationMessageRecord,
+  compactConversationMessages,
   getAdherenceStreak,
   getAllProducts,
-  getConversationMessages,
+  getConversationMessageRecords,
   listUserImages,
   recallAllMemories,
-  saveConversationMessages,
 } from "@skintext/db";
 import type { AgentContext, UserProfile } from "@skintext/shared";
 import { getLocaleName, localDateString } from "@skintext/shared";
@@ -66,6 +69,20 @@ function buildUserMessage(text: string, imageUrl?: string, hasImage?: boolean): 
   return { role: "user", content: text };
 }
 
+function selectCompactionCutoff(
+  records: ConversationMessageRecord<ModelMessage>[],
+  compactedMessages: ModelMessage[],
+): Date | null {
+  const firstMessage = compactedMessages[0];
+  if (!firstMessage || !isCompactionSummaryMessage(firstMessage)) return null;
+
+  const recentMessageCount = compactedMessages.length - 1;
+  const cutoff = Math.max(0, records.length - recentMessageCount);
+  const compactedRecord = records[cutoff - 1];
+
+  return compactedRecord?.createdAt ?? null;
+}
+
 // Single main-agent entrypoint for inbound user texts and scheduled reminder events.
 export async function runAgentMessage(
   log: RequestLogger,
@@ -74,14 +91,14 @@ export async function runAgentMessage(
   options: RunAgentMessageOptions = {},
 ): Promise<string | null> {
   const userId = user.id;
-  const [rawHistory, memories, streak, products, recentImages] = await Promise.all([
-    getConversationMessages<ModelMessage>(userId),
+  const [historyRecords, memories, streak, products, recentImages] = await Promise.all([
+    getConversationMessageRecords<ModelMessage>(userId),
     recallAllMemories(userId),
     getAdherenceStreak(userId),
     getAllProducts(userId),
     listUserImages(userId),
   ]);
-  const conversationHistory = rawHistory;
+  const conversationHistory = historyRecords.map((record) => record.value);
 
   const now = new Date();
   const localDate = localDateString(user.timezone, now);
@@ -118,6 +135,8 @@ export async function runAgentMessage(
 
   const systemPrompt = buildSkintextSystemPrompt(ctx);
   const userMessage = buildUserMessage(text, options.imageUrl, hasImage);
+  const userRecords = await appendConversationMessages<ModelMessage>(userId, [userMessage]);
+
   const agent = createSkintextAgent(systemPrompt, {
     userId,
     timezone: user.timezone,
@@ -130,6 +149,7 @@ export async function runAgentMessage(
   });
 
   const allMessages: ModelMessage[] = [...conversationHistory, userMessage];
+  const allMessageRecords = [...historyRecords, ...userRecords];
   const preRunCompaction = await compactMessagesIfNeeded(allMessages, {
     model: compactionModel,
     systemPrompt,
@@ -171,8 +191,15 @@ export async function runAgentMessage(
   }
 
   const baseMessages = preRunCompaction.messages;
-  if (preRunCompaction.compacted) {
-    await saveConversationMessages(userId, baseMessages);
+  const summaryMessage = baseMessages[0];
+  const compactionCutoff = selectCompactionCutoff(allMessageRecords, baseMessages);
+  if (
+    preRunCompaction.compacted &&
+    summaryMessage &&
+    isCompactionSummaryMessage(summaryMessage) &&
+    compactionCutoff
+  ) {
+    await compactConversationMessages(userId, compactionCutoff, summaryMessage);
   }
 
   const messages = pruneMessages({
@@ -199,8 +226,7 @@ export async function runAgentMessage(
       estimatedInputTokens: preRunCompaction.tokensBefore,
     },
   );
-  const toSave = [...baseMessages, ...responseMessages];
-  await saveConversationMessages(userId, toSave);
+  await appendConversationMessages(userId, responseMessages);
 
   return result.text || null;
 }

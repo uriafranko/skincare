@@ -1,7 +1,7 @@
 import {
   getAdherenceStreak,
+  getAllConversationMessages,
   getAllProducts,
-  getConversationMessages,
   getRoutineLogForDate,
   getUser,
   listUserImages,
@@ -26,7 +26,7 @@ export const exportDataTool = tool({
       recallAllMemories(userId),
       getAdherenceStreak(userId),
       getAllProducts(userId),
-      getConversationMessages(userId),
+      getAllConversationMessages(userId),
       listUserImages(userId, 50),
     ]);
 
@@ -51,7 +51,7 @@ export const exportDataTool = tool({
       savedImages: images,
       adherenceStreak: streak,
       memories,
-      recentMessages: messages,
+      messages,
     };
 
     const blob = await encryptContent(JSON.stringify(exportData));

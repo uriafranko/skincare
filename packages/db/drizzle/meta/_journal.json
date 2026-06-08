@@ -36,6 +36,20 @@
       "when": 1780928705049,
       "tag": "0004_slim_green_goblin",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1780929279008,
+      "tag": "0005_confused_leper_queen",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1780930743584,
+      "tag": "0006_high_giant_man",
+      "breakpoints": true
     }
   ]
 }
