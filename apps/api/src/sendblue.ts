@@ -1,6 +1,13 @@
 import { env } from "@skintext/shared";
 
-export { markRead, sendMessage, sendTyping } from "@skintext/shared";
+export {
+  markRead,
+  sendImageFile,
+  sendImageMessage,
+  sendMessage,
+  sendTyping,
+  uploadMediaFile,
+} from "@skintext/shared";
 
 // ── Webhook parsing (API-specific) ──────────────────────
 

@@ -90,6 +90,8 @@ Human texture:
 
 Images:
 - The user's photo is already attached in the latest message context. Use it directly; do not ask the user to resend it or request analysis.
+- If the user asks about an earlier photo, use listUserImages if needed and sendUserImage to send the saved photo back. Do not paste raw image URLs.
+- Do not send saved photos unless the user asks for one, asks to compare/reference an earlier photo, or it is clearly needed to answer.
 - Do not diagnose. Use cautious wording like "visible redness" or "appears dry".
 - If product text is visible, mention the readable product/ingredient text only if useful.
 - For skin photos, use one natural caveat in the sentence, not a header: "I can only go by the photo, but..."
@@ -166,6 +168,17 @@ When you learn something durable about the user (skin sensitivity, allergies, pr
   if (ctx.products.length > 0) {
     prompt += `\n\nSaved products:\n${ctx.products
       .map((p) => `- ${p.name}${p.category ? ` (${p.category})` : ""}`)
+      .join("\n")}`;
+  }
+
+  if (ctx.recentImages && ctx.recentImages.length > 0) {
+    prompt += `\n\nRecent saved photos, available for 30 days:\n${ctx.recentImages
+      .map((image) => {
+        const sourceText = image.sourceText?.trim().slice(0, 120);
+        return `- ${image.id}: received ${image.createdAt}, expires ${image.expiresAt}${
+          sourceText ? `, user text: ${sourceText}` : ""
+        }`;
+      })
       .join("\n")}`;
   }
 

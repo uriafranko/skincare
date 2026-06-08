@@ -1,7 +1,9 @@
 import type {
+  DeleteAccountData,
   ModelMessage,
   RecurringReminderScheduleSync,
   ScheduleOneOffReminderWorkflow,
+  SendUserImage,
 } from "@skintext/ai";
 import {
   annotateLastAssistantMessageUsage,
@@ -17,6 +19,7 @@ import {
   getAdherenceStreak,
   getAllProducts,
   getConversationMessages,
+  listUserImages,
   recallAllMemories,
   saveConversationMessages,
 } from "@skintext/db";
@@ -29,6 +32,8 @@ import { createAILogger } from "evlog/ai";
 export interface RunAgentMessageOptions {
   imageUrl?: string;
   hasImage?: boolean;
+  sendUserImage?: SendUserImage;
+  deleteAccountData?: DeleteAccountData;
   scheduleOneOffReminderWorkflow?: ScheduleOneOffReminderWorkflow;
   syncRecurringReminderSchedule?: RecurringReminderScheduleSync;
 }
@@ -69,11 +74,12 @@ export async function runAgentMessage(
   options: RunAgentMessageOptions = {},
 ): Promise<string | null> {
   const userId = user.id;
-  const [rawHistory, memories, streak, products] = await Promise.all([
+  const [rawHistory, memories, streak, products, recentImages] = await Promise.all([
     getConversationMessages<ModelMessage>(userId),
     recallAllMemories(userId),
     getAdherenceStreak(userId),
     getAllProducts(userId),
+    listUserImages(userId),
   ]);
   const conversationHistory = rawHistory;
 
@@ -88,6 +94,7 @@ export async function runAgentMessage(
       hasImage,
       historyLength: conversationHistory.length,
       streak: streak.current,
+      recentImages: recentImages.length,
     },
   });
 
@@ -102,6 +109,7 @@ export async function runAgentMessage(
     memories: Object.keys(memories).length > 0 ? memories : null,
     streak: streak.current > 0 ? streak.current : null,
     products,
+    recentImages,
   };
 
   const ai = createAILogger(log, { toolInputs: { maxLength: 200 } });
@@ -115,6 +123,8 @@ export async function runAgentMessage(
     timezone: user.timezone,
     model,
     compactionModel,
+    sendUserImage: options.sendUserImage,
+    deleteAccountData: options.deleteAccountData,
     scheduleOneOffReminderWorkflow: options.scheduleOneOffReminderWorkflow,
     syncRecurringReminderSchedule: options.syncRecurringReminderSchedule,
   });

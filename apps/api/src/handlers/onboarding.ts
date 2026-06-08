@@ -15,7 +15,7 @@ import { createAILogger } from "evlog/ai";
 import { start } from "workflow/api";
 import { reminderLoop } from "../../workflows/reminder-loop";
 
-function mergeList(existing?: string[], incoming?: string[]): string[] {
+function mergeList(existing?: readonly string[], incoming?: readonly string[]): string[] {
   return Array.from(
     new Set(
       [...(existing ?? []), ...(incoming ?? [])].map((value) => value.trim()).filter(Boolean),
@@ -54,7 +54,7 @@ function buildReminderTimes(state: OnboardingState) {
   return [morning, evening].filter((time): time is NonNullable<typeof time> => !!time);
 }
 
-function saveInitialProducts(userId: string, products: string[]) {
+function saveInitialProducts(userId: string, products: readonly string[]) {
   const createdAt = new Date().toISOString();
   return products.map((name) =>
     saveProduct({
@@ -147,10 +147,10 @@ export async function handleOnboarding(
       country,
       skinType: merged.skinType ?? "unsure",
       sensitivity: merged.sensitivity ?? "unsure",
-      concerns: merged.concerns ?? [],
-      goals: merged.goals ?? [],
-      allergies: merged.allergies ?? [],
-      currentProducts: merged.currentProducts ?? [],
+      concerns: [...(merged.concerns ?? [])],
+      goals: [...(merged.goals ?? [])],
+      allergies: [...(merged.allergies ?? [])],
+      currentProducts: [...(merged.currentProducts ?? [])],
       routinePreference: merged.routinePreference ?? "simple",
       onboardingComplete: true,
       consentedAt: new Date().toISOString(),

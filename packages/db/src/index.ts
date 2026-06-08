@@ -36,6 +36,19 @@ export {
 } from "./routine-log";
 export { getAdherenceStreak, updateAdherenceStreak } from "./streak";
 export {
+  type BlobDeletionJob,
+  deleteAllUserImages,
+  deleteBlobDeletionJob,
+  deleteUserImageRecord,
+  getUserImage,
+  listAllUserImages,
+  listDueBlobDeletions,
+  listExpiredUserImages,
+  listUserImages,
+  queueBlobDeletion,
+  saveUserImage,
+} from "./user-images";
+export {
   createPendingUserForPhone,
   createPhoneMapping,
   createUser,

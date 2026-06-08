@@ -154,6 +154,8 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("photo is already attached in the latest message context");
     expect(prompt).toContain("Use it directly");
     expect(prompt).toContain("request analysis");
+    expect(prompt).toContain("listUserImages");
+    expect(prompt).toContain("sendUserImage");
     expect(prompt).toContain("Do not diagnose");
     expect(prompt).toContain("recommend professional care");
     expect(prompt).toContain("Write like a person texting");
@@ -176,6 +178,31 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("logRoutineStep");
     expect(prompt).toContain("logProductUse");
     expect(prompt).toContain("listProducts");
+  });
+
+  test("includes recent saved image context when present", () => {
+    const prompt = buildSkintextSystemPrompt(
+      makeContext({
+        recentImages: [
+          {
+            id: "img_123",
+            userId: "usr_test123",
+            key: "user-images/2026/06/04/img_123.jpg",
+            contentType: "image/jpeg",
+            size: 1234,
+            source: "inbound",
+            sourceText: "is this irritation improving?",
+            createdAt: "2026-06-04T12:00:00.000Z",
+            expiresAt: "2026-07-04T12:00:00.000Z",
+          },
+        ],
+      }),
+    );
+
+    expect(prompt).toContain("Recent saved photos");
+    expect(prompt).toContain("available for 30 days");
+    expect(prompt).toContain("img_123");
+    expect(prompt).toContain("is this irritation improving?");
   });
 
   test("does not include old-domain tracking language", () => {

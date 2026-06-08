@@ -3,5 +3,11 @@
   "regions": ["iad1", "fra1", "hnd1"],
   "installCommand": "cd ../.. && bun install --frozen-lockfile",
   "buildCommand": "cd ../.. && TURBO_PLATFORM_ENV_DISABLED=true turbo build --filter=@skintext/api",
-  "bunVersion": "1.x"
+  "bunVersion": "1.x",
+  "crons": [
+    {
+      "path": "/cron/prune-images",
+      "schedule": "0 3 * * *"
+    }
+  ]
 }

@@ -34,7 +34,11 @@ export {
   buildSkintextSystemPrompt,
   buildWeeklyRoutineRecapPrompt,
 } from "./prompts";
-export { deleteAccountTool } from "./tools/delete-account";
+export {
+  createDeleteAccountTool,
+  type DeleteAccountData,
+  deleteAccountTool,
+} from "./tools/delete-account";
 export { exportDataTool } from "./tools/export-data";
 export { getUserProfile } from "./tools/get-profile";
 export {
@@ -58,6 +62,12 @@ export {
   setRemindersTool,
 } from "./tools/set-reminders";
 export { updateProfileTool } from "./tools/update-profile";
+export {
+  createSendUserImageTool,
+  listUserImagesTool,
+  type SendUserImage,
+  type SendUserImageInput,
+} from "./tools/user-images";
 export {
   USER_REMINDER_CLOSE_TAG,
   USER_REMINDER_OPEN_TAG,
