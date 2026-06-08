@@ -1,4 +1,13 @@
-import { boolean, index, integer, pgTable, primaryKey, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
 
 export const users = pgTable(
   "users",
@@ -51,13 +60,21 @@ export const memories = pgTable(
   ],
 );
 
-export const conversationMessages = pgTable("conversation_messages", {
-  userId: text("user_id")
-    .primaryKey()
-    .references(() => users.id, { onDelete: "cascade" }),
-  value: text("value").notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
-});
+export const conversationMessages = pgTable(
+  "conversation_messages",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    messageIndex: integer("message_index").notNull(),
+    value: jsonb("value").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.messageIndex] }),
+    index("conversation_messages_user_index_idx").on(table.userId, table.messageIndex),
+  ],
+);
 
 export const products = pgTable(
   "products",

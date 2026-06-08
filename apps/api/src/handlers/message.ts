@@ -164,13 +164,10 @@ export async function handleMessage(
 
   const result = await agent.generate({ messages });
 
-  const toSave = stripImagesFromHistory(
-    pruneMessages({
-      messages: [...baseMessages, ...(result.response.messages as ModelMessage[])],
-      toolCalls: "before-last-2-messages",
-      emptyMessages: "remove",
-    }),
-  );
+  const toSave = stripImagesFromHistory([
+    ...baseMessages,
+    ...(result.response.messages as ModelMessage[]),
+  ]);
   await saveConversationMessages(userId, toSave);
 
   return result.text || null;
