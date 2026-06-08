@@ -233,4 +233,10 @@ describe("onboarding prompt source", () => {
     expect(source).toContain('localized equivalent of "done"');
     expect(source).toContain('Do not use the English word "done" unless replying in English');
   });
+
+  test("setup guidance localizes consent and CTA copy", async () => {
+    const source = await Bun.file(new URL("../onboarding.ts", import.meta.url)).text();
+    expect(source).toContain("Ask whether it is OK to save setup details");
+    expect(source).toContain("End with a localized low-friction CTA");
+  });
 });

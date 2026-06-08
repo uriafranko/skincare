@@ -47,6 +47,9 @@ const extractionSchema = z.object({
 });
 
 const CONSENT_ONLY_REPLY = "OK if I save this so reminders/logs work? You can delete it anytime.";
+const CONSENT_ASK_DESCRIPTION =
+  "Ask whether it is OK to save setup details so reminders/logs work, and say they can delete it anytime.";
+const CONSENT_ONLY_REPLY_INSTRUCTION = `${CONSENT_ASK_DESCRIPTION} Ask this in the user's language, with no other setup asks.`;
 
 const ENGLISH_GREETING_SETUP_REPLY =
   "Hey, I'm Skintext. I'll build a simple routine that fits you. Send your name, skin goal, skin type/sensitivity if known, avoids, products, and if you want reminders, best times. Unsure is fine. OK if I save this so reminders/logs work? You can delete anytime.";
@@ -58,6 +61,10 @@ function formatList(values?: string[]): string | null {
 function isEnglishGreetingOnly(text: string, locale: string): boolean {
   if (locale && !locale.toLowerCase().startsWith("en")) return false;
   return /^(?:hi|hey|hello|yo)[\s!.]*$/i.test(text.trim());
+}
+
+function isEnglishLocale(locale?: string | null): boolean {
+  return !locale || locale.toLowerCase().startsWith("en");
 }
 
 function hasSetupBasics(state: OnboardingState, extracted: Partial<OnboardingState>): boolean {
@@ -147,14 +154,14 @@ CONTENT (keep SHORT -- 2-3 short sentences, one bubble when possible):
 - Any skin concern counts as the goal/concern. Dry cheeks, breakouts, acne, redness, texture, irritation, and similar phrases are enough.
 - Current products and reminder times are useful but optional. Do not block consent or completion on them.
 - Reminders are opt-in. Ask when they would like reminders only as an optional preference, and never imply reminders will be created by default.
-- If this message contains name + any skin goal/concern + skin type/sensitivity and only consent is missing, reply ONLY: "${CONSENT_ONLY_REPLY}"
+- If this message contains name + any skin goal/concern + skin type/sensitivity and only consent is missing, ${CONSENT_ONLY_REPLY_INSTRUCTION}
 - If they only sent a greeting, ask for the setup essentials in one natural sentence: name, main skin goal/concern, skin type or sensitivity if known, anything they avoid, current products, and optional reminder times if they want reminders.
 - Say "unsure" is fine.
-- Include storage consent as part of the first ask: "${CONSENT_ONLY_REPLY}"
+- Include storage consent as part of the first ask in the user's language. ${CONSENT_ASK_DESCRIPTION}
 - Reminder times are optional and opt-in. Save them if the user gives them, but do not make them sound required and do not invent defaults.
 - Do not mention photos or product-label photos in the first setup ask unless the user sent or mentioned a photo.
-- End with a low-friction CTA: "Send it however is easiest."
-- Do not add "Send it however is easiest" to a consent-only reply.
+- End with a localized low-friction CTA that lets them know they can send the details however is easiest.
+- Do not add that low-friction CTA to a consent-only reply.
 
 TONE: warm, direct, iMessage-native. No bullets, no form language, no sales copy.`;
   } else if (ctx.complete) {
@@ -168,7 +175,7 @@ Keep it to 1-2 short sentences.`;
 Already collected: ${describeState(state)}.
 Still missing: ${describeMissing(state)}.
 
-In your reply: briefly acknowledge any new info they just provided, then ask only for what is still missing -- one or two asks at a time if several fields are missing. If reminders are relevant and the reply would still stay short, ask when they would like reminders as an optional preference, not a required setup field. If you know their first name, use it only when it feels natural, not in every reply. Add one small, specific positive acknowledgment when they share useful skincare context, like "Good call avoiding fragrance" or "Nice, that helps." Any concern counts as a goal/concern, so do not ask what they want to improve if they mention dryness, breakouts, acne, redness, texture, or similar concerns. If only consent is missing, ask exactly: "${CONSENT_ONLY_REPLY}" Keep it short and conversational.`;
+In your reply: briefly acknowledge any new info they just provided, then ask only for what is still missing -- one or two asks at a time if several fields are missing. If reminders are relevant and the reply would still stay short, ask when they would like reminders as an optional preference, not a required setup field. If you know their first name, use it only when it feels natural, not in every reply. Add one small, specific positive acknowledgment when they share useful skincare context, like "Good call avoiding fragrance" or "Nice, that helps." Any concern counts as a goal/concern, so do not ask what they want to improve if they mention dryness, breakouts, acne, redness, texture, or similar concerns. If only consent is missing, ${CONSENT_ONLY_REPLY_INSTRUCTION}. Keep it short and conversational.`;
   }
 
   const { output } = await generateText({
@@ -184,7 +191,7 @@ SITUATION: ${situation}
 
 EXTRACTION INSTRUCTIONS:
 - Extract values the user stated or confirmed in this message. Use null for anything not addressed.
-- If your previous message asked the user to confirm something and the user replies affirmatively (yes, yeah, yep, ja, japp, oui, si, ok, sure, etc.), mark consented as true only when the confirmation is about data storage.
+- If your previous message asked the user to confirm something and the user replies affirmatively (yes, yeah, yep, ja, japp, oui, si, ok, sure, כן, etc.), mark consented as true only when the confirmation is about data storage.
 - skinType: use "unsure" if they say they do not know.
 - sensitivity: use "unsure" if they say they do not know.
 - routinePreference: infer "simple" if they ask for minimal/basic, "detailed" if they want many steps, otherwise null unless stated.
@@ -230,8 +237,11 @@ REPLY INSTRUCTIONS:
     extracted.detectedLocale = output.detectedLocale;
   }
 
+  const outputLocale = output.detectedLocale ?? state.detectedLocale ?? ctx.locale;
+  const shouldAskConsentOnly =
+    !state.consented && !extracted.consented && hasSetupBasics(state, extracted);
   const reply =
-    !state.consented && !extracted.consented && hasSetupBasics(state, extracted)
+    shouldAskConsentOnly && isEnglishLocale(outputLocale)
       ? CONSENT_ONLY_REPLY
       : normalizeAssistantText(output.reply);
 

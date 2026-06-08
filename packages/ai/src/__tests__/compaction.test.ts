@@ -8,6 +8,9 @@ const generateObjectMock = mock(async () => ({ object: {} }));
 const gatewayMock = mock((modelId: string) => ({ provider: "gateway", modelId }));
 
 mock.module("ai", () => ({
+  Output: {
+    object: (value: unknown) => value,
+  },
   gateway: gatewayMock,
   generateObject: generateObjectMock,
   generateText: generateTextMock,
