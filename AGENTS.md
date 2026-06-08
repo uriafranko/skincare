@@ -21,6 +21,8 @@ Do not `source .env`. The root `.env` can contain shell metacharacters, so shell
 
 Root `.env` contains `AI_GATEWAY_API_KEY`. Some isolated tests import shared env validation and may also require Sendblue variables; use dummy Sendblue values only for tests that do not exercise Sendblue behavior.
 
+`packages/db` uses Drizzle's Neon HTTP driver. Do not use `db.transaction()`; it throws at runtime. Use `db.batch()` or separate statements.
+
 ## Common Commands
 
 ```bash

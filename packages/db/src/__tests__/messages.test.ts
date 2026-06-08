@@ -1,4 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
+import { conversationMessages } from "../schema";
 import { createFakeDb } from "./fake-db";
 import { createSharedMock } from "./shared-mock";
 
@@ -30,6 +31,11 @@ describe("conversation messages", () => {
     await saveConversationMessages("usr_test", messages);
     const loaded = await getConversationMessages("usr_test");
     expect(loaded).toEqual(messages);
+
+    const rows = fakeDb.rows(conversationMessages).filter((row) => row.userId === "usr_test");
+    expect(rows).toHaveLength(2);
+    expect(rows.map((row) => row.messageIndex)).toEqual([0, 1]);
+    expect(rows.map((row) => row.value)).toEqual(messages);
   });
 
   test("preserves tool call messages", async () => {
@@ -63,6 +69,11 @@ describe("conversation messages", () => {
     const loaded = await getConversationMessages("usr_test2");
     expect(loaded).toEqual(messages);
     expect(loaded).toHaveLength(4);
+
+    const rows = fakeDb.rows(conversationMessages).filter((row) => row.userId === "usr_test2");
+    expect(rows).toHaveLength(4);
+    expect(rows.map((row) => row.value)).toEqual(messages);
+    expect(rows.every((row) => typeof row.value !== "string")).toBe(true);
   });
 
   test("preserves more than 40 messages", async () => {
@@ -81,6 +92,44 @@ describe("conversation messages", () => {
   test("returns empty array for unknown user", async () => {
     const messages = await getConversationMessages("usr_unknown");
     expect(messages).toEqual([]);
+  });
+
+  test("reads legacy single-row encrypted history", async () => {
+    const messages = [
+      { role: "user", content: "legacy hello" },
+      { role: "assistant", content: "legacy reply" },
+    ];
+    await fakeDb
+      .insert(conversationMessages)
+      .values({
+        userId: "usr_legacy",
+        messageIndex: 0,
+        value: `enc:${JSON.stringify(messages)}`,
+      })
+      .returning({ messageIndex: conversationMessages.messageIndex });
+
+    const loaded = await getConversationMessages("usr_legacy");
+    expect(loaded).toEqual(messages);
+  });
+
+  test("reads legacy per-message encrypted rows", async () => {
+    const messages = [
+      { role: "user", content: "legacy row hello" },
+      { role: "assistant", content: "legacy row reply" },
+    ];
+    await fakeDb
+      .insert(conversationMessages)
+      .values(
+        messages.map((message, messageIndex) => ({
+          userId: "usr_legacy_rows",
+          messageIndex,
+          value: `enc:${JSON.stringify(message)}`,
+        })),
+      )
+      .returning({ messageIndex: conversationMessages.messageIndex });
+
+    const loaded = await getConversationMessages("usr_legacy_rows");
+    expect(loaded).toEqual(messages);
   });
 
   test("deleteAllMessages clears conversation", async () => {

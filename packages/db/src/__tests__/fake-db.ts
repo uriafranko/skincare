@@ -8,7 +8,7 @@ type Condition = { key: string; op: "=" | "<="; value: unknown };
 
 const tableKeys = new Map<unknown, (row: Row) => string>([
   [schema.adherenceStreaks, (row) => String(row.userId)],
-  [schema.conversationMessages, (row) => String(row.userId)],
+  [schema.conversationMessages, (row) => `${row.userId}:${row.messageIndex}`],
   [schema.customReminderTimes, (row) => String(row.userId)],
   [schema.exportBlobs, (row) => String(row.userId)],
   [schema.expiringKeys, (row) => String(row.key)],
@@ -96,6 +96,8 @@ export function createFakeDb() {
       rows.sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
     if (table === schema.oneOffReminders)
       rows.sort((a, b) => String(a.sendAt).localeCompare(String(b.sendAt)));
+    if (table === schema.conversationMessages)
+      rows.sort((a, b) => compareValues(a.messageIndex, b.messageIndex));
     if (table === schema.routineEntries)
       rows.sort((a, b) => String(a.timestamp).localeCompare(String(b.timestamp)));
     return rows.map((row) => ({ ...row }));
@@ -108,7 +110,71 @@ export function createFakeDb() {
     };
   }
 
-  return {
+  function insertInto(table: Table) {
+    const builder = {
+      _rows: undefined as Row[] | undefined,
+      _doNothing: false,
+      values(row: Row | Row[]) {
+        builder._rows = (Array.isArray(row) ? row : [row]).map(materialize);
+        return builder;
+      },
+      onConflictDoUpdate(config: { set: Row }) {
+        if (!builder._rows) throw new Error("Missing insert row");
+        const store = storeFor(table);
+        for (const row of builder._rows) {
+          const key = keyFor(table, row);
+          const existing = store.get(key);
+          store.set(key, existing ? { ...existing, ...materialize(config.set) } : row);
+        }
+        return Promise.resolve([]);
+      },
+      onConflictDoNothing() {
+        builder._doNothing = true;
+        return builder;
+      },
+      returning(selection: Row) {
+        if (!builder._rows) throw new Error("Missing insert row");
+        const store = storeFor(table);
+        const selectedRows: Row[] = [];
+        for (const row of builder._rows) {
+          const key = keyFor(table, row);
+          if (builder._doNothing && store.has(key)) continue;
+          store.set(key, row);
+          selectedRows.push(
+            Object.fromEntries(Object.keys(selection).map((field) => [field, row[field]])),
+          );
+        }
+        return Promise.resolve(selectedRows);
+      },
+    };
+    return builder;
+  }
+
+  function deleteFrom(table: Table) {
+    return {
+      where: async (where: unknown) => {
+        const store = storeFor(table);
+        for (const [key, row] of store.entries()) {
+          if (matches(row, where)) store.delete(key);
+        }
+      },
+    };
+  }
+
+  function updateTable(table: Table) {
+    return {
+      set: (updates: Row) => ({
+        where: async (where: unknown) => {
+          const store = storeFor(table);
+          for (const [key, row] of store.entries()) {
+            if (matches(row, where)) store.set(key, { ...row, ...materialize(updates) });
+          }
+        },
+      }),
+    };
+  }
+
+  const db = {
     query: {
       adherenceStreaks: tableQuery(schema.adherenceStreaks),
       conversationMessages: tableQuery(schema.conversationMessages),
@@ -124,64 +190,16 @@ export function createFakeDb() {
       routineEntries: tableQuery(schema.routineEntries),
       users: tableQuery(schema.users),
     },
-    insert(table: Table) {
-      const builder = {
-        _row: undefined as Row | undefined,
-        _doNothing: false,
-        values(row: Row) {
-          builder._row = materialize(row);
-          return builder;
-        },
-        onConflictDoUpdate(config: { set: Row }) {
-          if (!builder._row) throw new Error("Missing insert row");
-          const store = storeFor(table);
-          const key = keyFor(table, builder._row);
-          const existing = store.get(key);
-          store.set(key, existing ? { ...existing, ...materialize(config.set) } : builder._row);
-          return Promise.resolve([]);
-        },
-        onConflictDoNothing() {
-          builder._doNothing = true;
-          return builder;
-        },
-        returning(selection: Row) {
-          if (!builder._row) throw new Error("Missing insert row");
-          const store = storeFor(table);
-          const key = keyFor(table, builder._row);
-          if (builder._doNothing && store.has(key)) return Promise.resolve([]);
-          store.set(key, builder._row);
-          const selected = Object.fromEntries(
-            Object.keys(selection).map((field) => [field, builder._row?.[field]]),
-          );
-          return Promise.resolve([selected]);
-        },
-      };
-      return builder;
-    },
-    delete(table: Table) {
-      return {
-        where: async (where: unknown) => {
-          const store = storeFor(table);
-          for (const [key, row] of store.entries()) {
-            if (matches(row, where)) store.delete(key);
-          }
-        },
-      };
-    },
-    update(table: Table) {
-      return {
-        set: (updates: Row) => ({
-          where: async (where: unknown) => {
-            const store = storeFor(table);
-            for (const [key, row] of store.entries()) {
-              if (matches(row, where)) store.set(key, { ...row, ...materialize(updates) });
-            }
-          },
-        }),
-      };
-    },
+    insert: insertInto,
+    delete: deleteFrom,
+    update: updateTable,
     rows(table: Table) {
       return Array.from(storeFor(table).values()).map((row) => ({ ...row }));
     },
+    async batch<T extends readonly unknown[]>(queries: T): Promise<T> {
+      return Promise.all(queries) as Promise<T>;
+    },
   };
+
+  return db;
 }
