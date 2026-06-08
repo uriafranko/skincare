@@ -14,7 +14,7 @@ export function buildRoutineReminderEvent(input: {
       ? `Saved products: ${input.productNames.slice(0, 5).join(", ")}`
       : "No saved products yet.";
 
-  return `Generate a ${input.routineLabel} skincare routine reminder.
+  return `Generate a skincare routine reminder for the ${input.routineLabel} routine.
 User locale: ${input.userLocale}
 Routine emoji to lead with if useful: ${input.routineEmoji}
 User first name: ${input.userName}

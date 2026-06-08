@@ -211,4 +211,21 @@ describe("reminderLoop", () => {
     expect(buildDailySummaryReminder).toHaveBeenCalledWith("usr_test", "en");
     expect(sendReminderToAgent).toHaveBeenCalledWith("usr_test", "Routine reminder event.");
   });
+
+  test("does not send a routine reminder for an already completed slot", async () => {
+    loadUser.mockResolvedValueOnce(user).mockResolvedValueOnce(null);
+    loadReminderTimes.mockResolvedValueOnce([{ label: "morning", hour: 9, minute: 30 }]);
+    loadRoutineLog.mockResolvedValueOnce({
+      entries: [],
+      entryCount: 1,
+      completedSlots: ["morning"],
+      productsUsed: ["SPF"],
+      reactions: [],
+    });
+
+    await reminderLoop("usr_test");
+
+    expect(buildRoutineReminder).not.toHaveBeenCalled();
+    expect(sendReminderToAgent).not.toHaveBeenCalled();
+  });
 });
