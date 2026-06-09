@@ -1,8 +1,8 @@
 {
   "Metadata": {
-    "title": "Skintext - Your skincare routine bot in iMessage",
+    "title": "Skintext - Skincare help in iMessage",
     "description": "Build, track, and adjust your skincare routine by text. Send product labels, skin photos, or quick routine updates in iMessage.",
-    "ogTitle": "Skintext - Your skincare routine bot in iMessage",
+    "ogTitle": "Skintext - Skincare help in iMessage",
     "ogDescription": "Build, track, and adjust your skincare routine by text. Send product labels, skin photos, or quick routine updates in iMessage."
   },
   "Nav": {
@@ -13,10 +13,10 @@
   },
   "Hero": {
     "eyebrow": "Meet Skintext",
-    "headline": "Skincare routines from your texts.",
-    "subtitle": "Text your routine, send a product label, or share a skin photo. Skintext helps keep your routine simple, consistent, and easy to adjust in iMessage.",
-    "trustLine": "Free trial · No app required",
-    "socialProof": "67,000+ building better routines"
+    "headline": "Skincare help that stays in your texts.",
+    "subtitle": "Set up a simple routine once, then text updates, product labels, or skin photos. Skintext keeps history useful, reminders opt-in, and replies concise.",
+    "trustLine": "No app required · Consent before saving",
+    "socialProof": "Built for short, practical iMessage help"
   },
   "IMessageButton": {
     "label": "Get Started in Messages",
@@ -24,6 +24,32 @@
     "smsBody": "Hi! I'd like to get started with Skintext."
   },
   "Features": {
+    "story": {
+      "eyebrow": "Values in the iPhone history",
+      "heading": "A chat that earns its memory.",
+      "subtitle": "The phone story follows the same rules as the assistant: short replies, consent before memory, opt-in reminders, and history used only when it helps.",
+      "snapOrText": {
+        "value": "Careful with photos",
+        "heading": "Use a photo when words are slower.",
+        "body": "Send a product label, shelf, or skin photo and Skintext answers in routine terms: where it fits, what to watch, and what to do next.",
+        "point1": "It describes visible details cautiously and avoids diagnosis.",
+        "point2": "When a product should be remembered, it asks before saving it."
+      },
+      "smartReminders": {
+        "value": "Opt-in reminders",
+        "heading": "Nudges only when you ask for them.",
+        "body": "Skintext asks for the reminder slots and local times you want, then keeps routine prompts short enough to answer with done or skip.",
+        "point1": "No invented morning or evening reminder defaults.",
+        "point2": "One-off follow-ups and recurring reminders stay separate."
+      },
+      "dailySummaries": {
+        "value": "Useful history",
+        "heading": "History becomes a short answer.",
+        "body": "Logs, saved products, and recent messages turn into status checks and summaries without making you repeat the whole routine.",
+        "point1": "Routine status comes from verified logs, not guesses from chat.",
+        "point2": "Export and delete paths are part of the same data story."
+      }
+    },
     "snapOrText": {
       "title": "Photo or Text"
     },

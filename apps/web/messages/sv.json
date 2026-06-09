@@ -1,8 +1,8 @@
 {
   "Metadata": {
-    "title": "Skintext - Din hudvårdsrutin i iMessage",
+    "title": "Skintext - Hudvårdshjälp i iMessage",
     "description": "Bygg, följ och justera din hudvårdsrutin via sms. Skicka produktetiketter, hudbilder eller snabba rutinuppdateringar i iMessage.",
-    "ogTitle": "Skintext - Din hudvårdsrutin i iMessage",
+    "ogTitle": "Skintext - Hudvårdshjälp i iMessage",
     "ogDescription": "Bygg, följ och justera din hudvårdsrutin via sms. Skicka produktetiketter, hudbilder eller snabba rutinuppdateringar i iMessage."
   },
   "Nav": {
@@ -13,10 +13,10 @@
   },
   "Hero": {
     "eyebrow": "Möt Skintext",
-    "headline": "Hudvårdsrutiner från dina sms.",
-    "subtitle": "Skriv din rutin, skicka en produktetikett eller dela en hudbild. Skintext hjälper dig hålla rutinen enkel, konsekvent och lätt att justera i iMessage.",
-    "trustLine": "Gratis provperiod · Ingen app krävs",
-    "socialProof": "67 000+ bygger bättre rutiner"
+    "headline": "Hudvårdshjälp som stannar i dina meddelanden.",
+    "subtitle": "Sätt upp en enkel rutin en gång och sms:a sedan uppdateringar, produktetiketter eller hudbilder. Skintext gör historiken användbar, påminnelser frivilliga och svaren korta.",
+    "trustLine": "Ingen app krävs · Samtycke före lagring",
+    "socialProof": "Byggt för kort, praktisk iMessage-hjälp"
   },
   "IMessageButton": {
     "label": "Kom igång i Meddelanden",
@@ -24,6 +24,32 @@
     "smsBody": "Hej! Jag vill komma igång med Skintext."
   },
   "Features": {
+    "story": {
+      "eyebrow": "Värden i iPhone-historiken",
+      "heading": "En chatt som förtjänar sitt minne.",
+      "subtitle": "Telefonhistoriken följer samma regler som assistenten: korta svar, samtycke före minne, frivilliga påminnelser och historik som bara används när den hjälper.",
+      "snapOrText": {
+        "value": "Försiktig med bilder",
+        "heading": "Använd en bild när ord tar längre tid.",
+        "body": "Skicka en produktetikett, hylla eller hudbild så svarar Skintext i rutintermer: var den passar, vad du ska hålla koll på och nästa steg.",
+        "point1": "Den beskriver synliga detaljer försiktigt och undviker diagnoser.",
+        "point2": "När en produkt bör kommas ihåg frågar den innan den sparas."
+      },
+      "smartReminders": {
+        "value": "Frivilliga påminnelser",
+        "heading": "Påminnelser bara när du ber om dem.",
+        "body": "Skintext frågar vilka rutintider och lokala tider du vill ha och håller sedan påminnelserna korta nog att svara klart eller hoppar över.",
+        "point1": "Inga påhittade standardtider för morgon eller kväll.",
+        "point2": "Engångsuppföljningar och återkommande påminnelser hålls isär."
+      },
+      "dailySummaries": {
+        "value": "Användbar historik",
+        "heading": "Historik blir ett kort svar.",
+        "body": "Loggar, sparade produkter och senaste meddelanden blir statuskollar och sammanfattningar utan att du behöver upprepa hela rutinen.",
+        "point1": "Rutinstatus kommer från verifierade loggar, inte gissningar från chatten.",
+        "point2": "Export och radering ingår i samma datahistoria."
+      }
+    },
     "snapOrText": {
       "title": "Foto eller text"
     },

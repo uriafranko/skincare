@@ -5,17 +5,17 @@
   --font-body: var(--font-inter);
   --font-logo: var(--font-jakarta);
 
-  --color-bg: #f6f4f1;
-  --color-card: #edeae6;
-  --color-elevated: #e5e2dd;
-  --color-primary: #2c2825;
-  --color-secondary: #7a746e;
-  --color-muted: #a39d96;
-  --color-accent: #34c759;
-  --color-accent-hover: #2db84e;
-  --color-border: #ddd9d4;
+  --color-bg: #f7faf8;
+  --color-card: #ffffff;
+  --color-elevated: #eef3ef;
+  --color-primary: #202321;
+  --color-secondary: #5f6c64;
+  --color-muted: #8b968f;
+  --color-accent: #2fbf63;
+  --color-accent-hover: #28a957;
+  --color-border: #dce5df;
   --color-imessage: #34c759;
-  --color-imessage-gray: #ddd9d4;
+  --color-imessage-gray: #dce5df;
 
   --animate-fade-in-up: fade-in-up 0.6s ease-out both;
 }

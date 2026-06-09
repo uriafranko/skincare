@@ -14,7 +14,7 @@ export function BottomCta() {
   return (
     <section id="get-started" className="py-20 sm:py-28">
       <div className="mx-auto max-w-3xl px-6">
-        <div className="rounded-3xl border border-border bg-card px-8 py-14 text-center sm:px-16">
+        <div className="rounded-[8px] border border-border bg-card px-8 py-14 text-center shadow-[0_18px_48px_rgba(32,35,33,0.06)] sm:px-16">
           <h2 className="font-heading text-3xl font-extrabold text-primary sm:text-4xl">
             {t("heading")}
           </h2>
@@ -30,7 +30,7 @@ export function BottomCta() {
             <div className="block h-px w-24 bg-border sm:hidden" />
 
             <div className="flex flex-col items-center gap-3">
-              <div className="rounded-2xl border border-border p-3">
+              <div className="rounded-[8px] border border-border p-3">
                 <QRCodeSVG
                   value={smsHref}
                   size={120}

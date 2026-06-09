@@ -56,7 +56,7 @@ export function ChatDemoRail({
       }}
     >
       <div
-        className={`pointer-events-auto flex max-w-[calc(100vw-1.5rem)] items-center overflow-x-auto rounded-[22px] border border-primary/5 bg-[rgba(237,234,230,0.95)] shadow-[0_10px_30px_rgba(44,40,37,0.06)] backdrop-blur-[18px] ${
+        className={`pointer-events-auto flex max-w-[calc(100vw-1.5rem)] items-center overflow-x-auto rounded-[22px] border border-primary/5 bg-[rgba(247,250,248,0.95)] shadow-[0_10px_30px_rgba(32,35,33,0.06)] backdrop-blur-[18px] ${
           isSmall ? "gap-0 p-0.5" : "gap-1 p-1 sm:gap-1 sm:p-1.5"
         }`}
       >

@@ -20,7 +20,7 @@ const INITIAL_AVATARS = ALL_AVATARS;
 const SWAP_INTERVAL = 4000;
 
 function pickRandom<T>(arr: T[], count: number): T[] {
-  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  const shuffled = arr.toSorted(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
 }
 
@@ -42,8 +42,8 @@ export function Hero() {
   }, [swap]);
 
   return (
-    <section className="pt-32 pb-10 sm:pt-40 sm:pb-14">
-      <div className="mx-auto max-w-3xl px-6 text-center">
+    <section className="pt-28 pb-8 sm:pt-36 sm:pb-10">
+      <div className="mx-auto max-w-4xl px-6 text-center">
         <div className="mb-8 -mt-2 flex items-center justify-center gap-3">
           <div className="flex -space-x-1.5" style={{ height: 28 }}>
             <AnimatePresence mode="popLayout">
@@ -64,14 +64,12 @@ export function Hero() {
               ))}
             </AnimatePresence>
           </div>
-          <span className="text-[15px] font-semibold tracking-tight text-primary">
-            {t("socialProof")}
-          </span>
+          <span className="text-[15px] font-semibold text-primary">{t("socialProof")}</span>
         </div>
-        <h1 className="font-heading text-5xl leading-[0.98] font-bold tracking-tight text-primary sm:text-6xl md:text-7xl">
+        <h1 className="font-heading text-5xl leading-[0.98] font-bold text-primary sm:text-6xl md:text-7xl">
           {t("headline")}
         </h1>
-        <p className="mx-auto mt-6 max-w-xl text-xl leading-[1.5] text-secondary">
+        <p className="mx-auto mt-6 max-w-2xl text-xl leading-[1.5] text-secondary">
           {t("subtitle")}
         </p>
         <div className="mt-8 flex flex-col items-center gap-3">
