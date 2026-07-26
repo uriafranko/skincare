@@ -3,6 +3,7 @@ import { Mastra } from "@mastra/core/mastra";
 import { deleteUserMemory, mastraStorage, skintextMemory } from "./memory";
 import { getDefaultModelName } from "./models";
 import { buildSkintextSystemPrompt } from "./prompts";
+import { skintextProviderHistoryCompat } from "./provider-history";
 import {
   createSkintextRequestContext,
   getSkintextRuntime,
@@ -81,6 +82,7 @@ export const skintextAgent = new Agent({
   name: "Skintext",
   model: getDefaultModelName(),
   memory: skintextMemory,
+  inputProcessors: [skintextProviderHistoryCompat],
   instructions: ({ requestContext }) =>
     buildSkintextSystemPrompt(getSkintextRuntime(requestContext).agentContext),
   tools: ({ requestContext }) => {
