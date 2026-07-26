@@ -1,15 +1,8 @@
+import { createTool } from "@mastra/core/tools";
 import { getUserImage, listUserImages } from "@skintext/db";
 import type { UserImage } from "@skintext/shared";
-import { tool } from "ai";
 import { z } from "zod";
-
-export interface SendUserImageInput {
-  userId: string;
-  image: UserImage;
-  caption?: string;
-}
-
-export type SendUserImage = (input: SendUserImageInput) => Promise<void>;
+import { getSkintextRuntime } from "../runtime";
 
 function imageSummary(image: UserImage) {
   return {
@@ -22,14 +15,15 @@ function imageSummary(image: UserImage) {
   };
 }
 
-export const listUserImagesTool = tool({
+export const listUserImagesTool = createTool({
+  id: "list-user-images",
   description:
     "List the user's recent saved inbound skincare/product photos that are still available. Use this before sending or referring to an old photo when you need the image ID.",
   inputSchema: z.object({
-    userId: z.string(),
     limit: z.number().int().min(1).max(10).optional(),
   }),
-  execute: async ({ userId, limit }) => {
+  execute: async ({ limit }, context) => {
+    const { userId } = getSkintextRuntime(context.requestContext);
     const images = await listUserImages(userId, limit ?? 6);
     if (images.length === 0) {
       return { images: [], message: "No saved user images are currently available." };
@@ -39,32 +33,28 @@ export const listUserImagesTool = tool({
   },
 });
 
-export function createSendUserImageTool(sendUserImage: SendUserImage) {
-  return tool({
-    description:
-      "Send one of the user's saved photos back to them in iMessage. Use when the user asks to see, compare, or reference an earlier photo. Call listUserImages first if you do not know the image ID.",
-    inputSchema: z.object({
-      userId: z.string(),
-      imageId: z.string().describe("ID of the saved image to send."),
-      caption: z
-        .string()
-        .max(300)
-        .optional()
-        .describe("Optional short caption to send with the image."),
-    }),
-    execute: async ({ userId, imageId, caption }) => {
-      const image = await getUserImage(userId, imageId);
-      if (!image) {
-        return { sent: false, message: "Image not found or expired." };
-      }
+export const sendUserImageTool = createTool({
+  id: "send-user-image",
+  description:
+    "Send one of the user's saved photos back to them in iMessage. Use when the user asks to see, compare, or reference an earlier photo. Call listUserImages first if you do not know the image ID.",
+  inputSchema: z.object({
+    imageId: z.string().describe("ID of the saved image to send."),
+    caption: z
+      .string()
+      .max(300)
+      .optional()
+      .describe("Optional short caption to send with the image."),
+  }),
+  execute: async ({ imageId, caption }, context) => {
+    const { userId, sendUserImage } = getSkintextRuntime(context.requestContext);
+    if (!sendUserImage) return { sent: false, message: "Image sending is unavailable." };
 
-      const trimmedCaption = caption?.trim() || undefined;
-      await sendUserImage({ userId, image, caption: trimmedCaption });
+    const image = await getUserImage(userId, imageId);
+    if (!image) {
+      return { sent: false, message: "Image not found or expired." };
+    }
 
-      return {
-        sent: true,
-        image: imageSummary(image),
-      };
-    },
-  });
-}
+    await sendUserImage({ userId, image, caption: caption?.trim() || undefined });
+    return { sent: true, image: imageSummary(image) };
+  },
+});

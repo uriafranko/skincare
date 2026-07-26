@@ -1,12 +1,22 @@
 import { describe, expect, test } from "bun:test";
 import {
   isDayOfWeek,
+  isValidTimeZone,
   localDateString,
   localDateTimeToDate,
   localHour,
   msUntil,
   nextLocalTime,
 } from "../timezone";
+
+describe("isValidTimeZone", () => {
+  test("accepts real IANA timezones and rejects guesses", () => {
+    expect(isValidTimeZone("America/New_York")).toBe(true);
+    expect(isValidTimeZone("Asia/Jerusalem")).toBe(true);
+    expect(isValidTimeZone("New York")).toBe(false);
+    expect(isValidTimeZone("")).toBe(false);
+  });
+});
 
 describe("localDateString", () => {
   test("returns YYYY-MM-DD in the given timezone", () => {
@@ -41,6 +51,10 @@ describe("localDateTimeToDate", () => {
 
   test("rejects invalid local dates", () => {
     expect(localDateTimeToDate("2026-02-30", 8, 0, "America/New_York")).toBeNull();
+  });
+
+  test("rejects local clock times skipped by daylight saving time", () => {
+    expect(localDateTimeToDate("2026-03-08", 2, 30, "America/New_York")).toBeNull();
   });
 });
 

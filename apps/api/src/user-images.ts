@@ -47,7 +47,7 @@ function sourceText(text: string): string | undefined {
 
 function logStorageError(log: RequestLogger | undefined, error: unknown, key?: string): void {
   log?.error(error instanceof Error ? error : new Error(String(error)));
-  log?.set({ imageStorageError: key ? { key } : true });
+  log?.set({ imageStorageError: { occurred: true, hasBlobKey: !!key } });
 }
 
 function nextBlobDeletionRetry(): Date {
@@ -121,7 +121,7 @@ export async function saveInboundUserImage({
     throw error;
   }
 
-  log?.set({ imageStorage: { id, key, size: image.size, expiresAt: record.expiresAt } });
+  log?.set({ imageStorage: { retained: true, ttlDays: 30 } });
   return record;
 }
 
@@ -221,6 +221,6 @@ export async function deleteAllUserImageBlobs(
   }
 
   await deleteAllUserImages(userId);
-  log?.set({ imageDelete: { userId, attempted: images.length, deleted, queued, errors } });
+  log?.set({ imageDelete: { attempted: images.length, deleted, queued, errors } });
   return { attempted: images.length, deleted, queued, errors };
 }

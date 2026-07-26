@@ -1,4 +1,12 @@
-import type { RoutinePreference, SensitivityLevel, SkinType, UserProfile } from "@skintext/shared";
+import type {
+  AgeBand,
+  CommunicationStyle,
+  RoutinePreference,
+  SensitivityLevel,
+  SkinType,
+  StyleOfferState,
+  UserProfile,
+} from "@skintext/shared";
 import { eq } from "drizzle-orm";
 import { getDb } from "./client";
 import { phoneMappings, users } from "./schema";
@@ -47,6 +55,7 @@ function pendingUserValues(
     name: "",
     locale: profile.locale,
     timezone: profile.timezone,
+    timezoneConfirmed: false,
     country: profile.country,
     skinType: "unsure",
     sensitivity: "unsure",
@@ -55,6 +64,12 @@ function pendingUserValues(
     allergies: stringifyList([]),
     currentProducts: stringifyList([]),
     routinePreference: "simple",
+    ageBand: null,
+    communicationStyle: "clear_expert",
+    styleOfferState: "pending",
+    photoRetentionConsentedAt: null,
+    photoRetentionConsentVersion: null,
+    photoRetentionOfferShownAt: null,
     onboardingComplete: false,
     consentedAt: null,
     consentVersion: null,
@@ -109,6 +124,7 @@ export async function getUser(userId: string): Promise<UserProfile | null> {
     name: String(d.name ?? ""),
     locale: String(d.locale ?? "en"),
     timezone: String(d.timezone ?? "UTC"),
+    timezoneConfirmed: d.timezoneConfirmed === true,
     country: String(d.country ?? "US"),
     skinType: String(d.skinType ?? "unsure") as SkinType,
     sensitivity: String(d.sensitivity ?? "unsure") as SensitivityLevel,
@@ -117,6 +133,18 @@ export async function getUser(userId: string): Promise<UserProfile | null> {
     allergies: parseList(d.allergies),
     currentProducts: parseList(d.currentProducts),
     routinePreference: String(d.routinePreference ?? "simple") as RoutinePreference,
+    ageBand: d.ageBand ? (String(d.ageBand) as AgeBand) : null,
+    communicationStyle: String(d.communicationStyle ?? "clear_expert") as CommunicationStyle,
+    styleOfferState: String(d.styleOfferState ?? "pending") as StyleOfferState,
+    photoRetentionConsentedAt: d.photoRetentionConsentedAt
+      ? String(d.photoRetentionConsentedAt)
+      : null,
+    photoRetentionConsentVersion: d.photoRetentionConsentVersion
+      ? String(d.photoRetentionConsentVersion)
+      : null,
+    photoRetentionOfferShownAt: d.photoRetentionOfferShownAt
+      ? String(d.photoRetentionOfferShownAt)
+      : null,
     onboardingComplete: String(d.onboardingComplete) === "true",
     consentedAt: d.consentedAt ? String(d.consentedAt) : null,
     consentVersion: d.consentVersion ? String(d.consentVersion) : null,
@@ -138,6 +166,7 @@ export async function createUser(
       name: profile.name,
       locale: profile.locale,
       timezone: profile.timezone,
+      timezoneConfirmed: profile.timezoneConfirmed,
       country: profile.country,
       skinType: profile.skinType,
       sensitivity: profile.sensitivity,
@@ -146,6 +175,12 @@ export async function createUser(
       allergies: stringifyList(profile.allergies),
       currentProducts: stringifyList(profile.currentProducts),
       routinePreference: profile.routinePreference,
+      ageBand: profile.ageBand,
+      communicationStyle: profile.communicationStyle,
+      styleOfferState: profile.styleOfferState,
+      photoRetentionConsentedAt: profile.photoRetentionConsentedAt,
+      photoRetentionConsentVersion: profile.photoRetentionConsentVersion,
+      photoRetentionOfferShownAt: profile.photoRetentionOfferShownAt,
       onboardingComplete: profile.onboardingComplete,
       consentedAt: profile.consentedAt,
       consentVersion: profile.consentVersion,
@@ -158,6 +193,7 @@ export async function createUser(
         name: profile.name,
         locale: profile.locale,
         timezone: profile.timezone,
+        timezoneConfirmed: profile.timezoneConfirmed,
         country: profile.country,
         skinType: profile.skinType,
         sensitivity: profile.sensitivity,
@@ -166,6 +202,12 @@ export async function createUser(
         allergies: stringifyList(profile.allergies),
         currentProducts: stringifyList(profile.currentProducts),
         routinePreference: profile.routinePreference,
+        ageBand: profile.ageBand,
+        communicationStyle: profile.communicationStyle,
+        styleOfferState: profile.styleOfferState,
+        photoRetentionConsentedAt: profile.photoRetentionConsentedAt,
+        photoRetentionConsentVersion: profile.photoRetentionConsentVersion,
+        photoRetentionOfferShownAt: profile.photoRetentionOfferShownAt,
         onboardingComplete: profile.onboardingComplete,
         consentedAt: profile.consentedAt,
         consentVersion: profile.consentVersion,
@@ -194,6 +236,9 @@ export async function updateUser(
       case "timezone":
         updates.timezone = value;
         break;
+      case "timezoneConfirmed":
+        updates.timezoneConfirmed = value === "true";
+        break;
       case "country":
         updates.country = value;
         break;
@@ -217,6 +262,24 @@ export async function updateUser(
         break;
       case "routinePreference":
         updates.routinePreference = value;
+        break;
+      case "ageBand":
+        updates.ageBand = value || null;
+        break;
+      case "communicationStyle":
+        updates.communicationStyle = value;
+        break;
+      case "styleOfferState":
+        updates.styleOfferState = value;
+        break;
+      case "photoRetentionConsentedAt":
+        updates.photoRetentionConsentedAt = value || null;
+        break;
+      case "photoRetentionConsentVersion":
+        updates.photoRetentionConsentVersion = value || null;
+        break;
+      case "photoRetentionOfferShownAt":
+        updates.photoRetentionOfferShownAt = value || null;
         break;
       case "onboardingComplete":
         updates.onboardingComplete = value === "true";

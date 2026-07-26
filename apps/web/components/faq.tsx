@@ -50,12 +50,12 @@ export function Faq() {
   const t = useTranslations("Faq");
 
   return (
-    <section id="faqs" className="border-t border-border py-20 sm:py-28">
-      <div className="mx-auto max-w-2xl px-6">
-        <h2 className="text-center font-heading text-3xl font-extrabold text-primary sm:text-4xl">
+    <section id="faqs" className="py-16 sm:py-24">
+      <div className="mx-auto max-w-2xl px-5 sm:px-6">
+        <h2 className="font-heading text-3xl font-bold tracking-[-0.04em] text-primary sm:text-4xl">
           {t("heading")}
         </h2>
-        <div className="mt-12">
+        <div className="mt-8 border-t border-border">
           {FAQ_KEYS.map((key) => (
             <FaqItem key={key} q={t(`q${key}`)} a={t(`a${key}`)} />
           ))}

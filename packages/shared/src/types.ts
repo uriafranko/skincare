@@ -4,6 +4,18 @@ export type SensitivityLevel = "low" | "medium" | "high" | "unsure";
 
 export type RoutinePreference = "simple" | "standard" | "detailed";
 
+export type AgeBand = "16_17" | "18_plus";
+
+export type CommunicationStyle =
+  | "clear_expert"
+  | "gentle_coach"
+  | "playful_guide"
+  | "straight_talk";
+
+export type StyleOfferState = "pending" | "shown" | "chosen";
+
+export type SkintextRiskState = "routine" | "caution" | "escalation";
+
 export type RoutineSlot = "morning" | "evening" | "custom";
 
 export type OneOffReminderKind = "routine_followup" | "skin_checkin" | "custom";
@@ -92,6 +104,7 @@ export interface UserProfile {
   name: string;
   locale: string;
   timezone: string;
+  timezoneConfirmed: boolean;
   country: string;
   skinType: SkinType;
   sensitivity: SensitivityLevel;
@@ -100,6 +113,12 @@ export interface UserProfile {
   allergies: string[];
   currentProducts: string[];
   routinePreference: RoutinePreference;
+  ageBand: AgeBand | null;
+  communicationStyle: CommunicationStyle;
+  styleOfferState: StyleOfferState;
+  photoRetentionConsentedAt: string | null;
+  photoRetentionConsentVersion: string | null;
+  photoRetentionOfferShownAt: string | null;
   onboardingComplete: boolean;
   consentedAt: string | null;
   consentVersion: string | null;
@@ -107,6 +126,8 @@ export interface UserProfile {
 }
 
 export interface OnboardingState {
+  ageBand?: AgeBand;
+  ageEligible?: boolean;
   name?: string;
   timezoneConfirmed?: boolean;
   timezone?: string;
@@ -124,13 +145,23 @@ export interface OnboardingState {
   lastBotReply?: string;
 }
 
-export type OnboardingFieldKey = "name" | "skin_goals" | "skin_profile" | "consent";
+export type OnboardingFieldKey =
+  | "age_band"
+  | "name"
+  | "skin_goals"
+  | "skin_profile"
+  | "timezone"
+  | "consent";
 
 export function getMissingFields(state: OnboardingState): OnboardingFieldKey[] {
   const missing: OnboardingFieldKey[] = [];
+  if (!state.ageBand) missing.push("age_band");
   if (!state.name) missing.push("name");
   if (!state.concerns?.length && !state.goals?.length) missing.push("skin_goals");
   if (!state.skinType && !state.sensitivity) missing.push("skin_profile");
+  if ((state.morningReminder || state.eveningReminder) && !state.timezoneConfirmed) {
+    missing.push("timezone");
+  }
   if (missing.length === 0 && !state.consented) missing.push("consent");
   return missing;
 }
@@ -147,9 +178,33 @@ export interface AgentContext {
   timezone: string;
   localDate: string;
   userProfile: UserProfile | null;
-  memories: Record<string, string> | null;
+  riskState: SkintextRiskState;
+  shouldOfferStyle: boolean;
+  shouldOfferPhotoRetention: boolean;
+  hasImage: boolean;
+  isScheduledEvent: boolean;
+  activeExperiment: RoutineExperiment | null;
   streak: number | null;
   products: ProductEntry[];
+}
+
+export type RoutineExperimentStatus = "active" | "completed" | "stopped";
+
+export type RoutineExperimentOutcome = "helped" | "no_change" | "worse" | "inconclusive";
+
+export interface RoutineExperiment {
+  id: string;
+  userId: string;
+  change: string;
+  baseline?: string;
+  startedAt: string;
+  plannedReviewAt?: string;
+  status: RoutineExperimentStatus;
+  outcome?: RoutineExperimentOutcome;
+  outcomeNotes?: string;
+  reminderId?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface PhoneRegionInfo {

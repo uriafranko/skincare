@@ -59,12 +59,16 @@ mock.module("files-sdk/vercel-blob", () => ({
 }));
 
 mock.module("@skintext/shared", () => ({
+  PERSONALITY_POLICY_VERSION: "personality-v1",
+  PHOTO_RETENTION_CONSENT_VERSION: "2026-07-26",
   decrypt: async (s: string) => s.replace(/^enc:/, ""),
   encryptContent: async (s: string) => `enc:${s}`,
   generateId: () => "img_test",
+  isValidTimeZone: () => true,
 }));
 
 mock.module("@skintext/db", () => ({
+  cancelOneOffReminder: async () => null,
   createOneOffReminder: async () => {},
   deleteAllUserImages: async (userId: string) => {
     deletedAllUserImages.push(userId);
@@ -75,9 +79,12 @@ mock.module("@skintext/db", () => ({
   deleteCustomReminderTimes: async () => {},
   deleteUserImageRecord: async () => {},
   getCustomReminderTimes: async () => null,
+  getOneOffReminder: async () => null,
+  getUser: async () => null,
   listAllUserImages: async () => allUserImages,
   listDueBlobDeletions: async () => dueBlobDeletions,
   listExpiredUserImages: async () => expiredImages,
+  listOneOffReminders: async () => [],
   markOneOffReminderFailed: async () => {},
   queueBlobDeletion: async (job: {
     key: string;
@@ -90,6 +97,7 @@ mock.module("@skintext/db", () => ({
   saveUserImage: async (image: SavedImage) => saveUserImageImpl(image),
   setCustomReminderTimes: async () => {},
   setOneOffReminderWorkflowRunId: async () => {},
+  updateUser: async () => {},
 }));
 
 mock.module("@/sendblue", () => ({

@@ -5,21 +5,18 @@ type Table = (typeof schema)[keyof typeof schema];
 type SqlLike = { queryChunks?: unknown[] };
 type QueryConfig = { where?: unknown };
 type Condition = { key: string; op: "=" | "<="; value: unknown } | { key: string; op: "is null" };
-let nextFakeRowKey = 0;
-
 const tableKeys = new Map<unknown, (row: Row) => string>([
   [schema.adherenceStreaks, (row) => String(row.userId)],
   [schema.blobDeletionQueue, (row) => String(row.key)],
-  [schema.conversationMessages, (row) => String(row.__fakeKey)],
   [schema.customReminderTimes, (row) => String(row.userId)],
   [schema.exportBlobs, (row) => String(row.userId)],
   [schema.expiringKeys, (row) => String(row.key)],
-  [schema.memories, (row) => `${row.userId}:${row.key}`],
   [schema.oneOffReminders, (row) => String(row.id)],
   [schema.onboardingStates, (row) => String(row.userId)],
   [schema.phoneMappings, (row) => String(row.encryptedPhone)],
   [schema.products, (row) => String(row.id)],
   [schema.reminderRunIds, (row) => String(row.userId)],
+  [schema.routineExperiments, (row) => String(row.id)],
   [schema.routineEntries, (row) => String(row.id)],
   [schema.userImages, (row) => String(row.id)],
   [schema.users, (row) => String(row.id)],
@@ -80,17 +77,6 @@ function materialize(value: Row): Row {
   return out;
 }
 
-function materializeForTable(table: Table, value: Row): Row {
-  const row = materialize(value);
-  if (table === schema.conversationMessages) {
-    row.__fakeKey ??= `conversation:${nextFakeRowKey++}`;
-    row.createdAt ??= new Date();
-    row.compactedAt ??= null;
-    row.updatedAt ??= row.createdAt;
-  }
-  return row;
-}
-
 export function createFakeDb() {
   const stores = new Map<unknown, Map<string, Row>>();
 
@@ -115,8 +101,6 @@ export function createFakeDb() {
       rows.sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
     if (table === schema.oneOffReminders)
       rows.sort((a, b) => String(a.sendAt).localeCompare(String(b.sendAt)));
-    if (table === schema.conversationMessages)
-      rows.sort((a, b) => compareValues(a.createdAt ?? "", b.createdAt ?? ""));
     if (table === schema.routineEntries)
       rows.sort((a, b) => String(a.timestamp).localeCompare(String(b.timestamp)));
     return rows.map((row) => ({ ...row }));
@@ -134,9 +118,7 @@ export function createFakeDb() {
       _rows: undefined as Row[] | undefined,
       _doNothing: false,
       values(row: Row | Row[]) {
-        builder._rows = (Array.isArray(row) ? row : [row]).map((value) =>
-          materializeForTable(table, value),
-        );
+        builder._rows = (Array.isArray(row) ? row : [row]).map((value) => materialize(value));
         return builder;
       },
       onConflictDoUpdate(config: { set: Row }) {
@@ -199,16 +181,15 @@ export function createFakeDb() {
     query: {
       adherenceStreaks: tableQuery(schema.adherenceStreaks),
       blobDeletionQueue: tableQuery(schema.blobDeletionQueue),
-      conversationMessages: tableQuery(schema.conversationMessages),
       customReminderTimes: tableQuery(schema.customReminderTimes),
       exportBlobs: tableQuery(schema.exportBlobs),
       expiringKeys: tableQuery(schema.expiringKeys),
-      memories: tableQuery(schema.memories),
       oneOffReminders: tableQuery(schema.oneOffReminders),
       onboardingStates: tableQuery(schema.onboardingStates),
       phoneMappings: tableQuery(schema.phoneMappings),
       products: tableQuery(schema.products),
       reminderRunIds: tableQuery(schema.reminderRunIds),
+      routineExperiments: tableQuery(schema.routineExperiments),
       routineEntries: tableQuery(schema.routineEntries),
       userImages: tableQuery(schema.userImages),
       users: tableQuery(schema.users),

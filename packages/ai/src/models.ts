@@ -1,22 +1,13 @@
-import {
-  env,
-  resolveCompactionGatewayModelName,
-  resolveDefaultGatewayModelName,
-} from "@skintext/shared";
-import { gateway } from "ai";
+import type { MastraModelConfig } from "@mastra/core/llm";
+import * as shared from "@skintext/shared";
+import { toMastraModelName } from "./model-name";
 
-export function getDefaultGatewayModelName(): string {
-  return resolveDefaultGatewayModelName(env);
+export { toMastraModelName };
+
+export function getDefaultModelName(): MastraModelConfig {
+  return toMastraModelName(shared.resolveDefaultModelName(shared.env));
 }
 
-export function getCompactionGatewayModelName(): string {
-  return resolveCompactionGatewayModelName(env);
-}
-
-export function createDefaultGatewayModel() {
-  return gateway(getDefaultGatewayModelName());
-}
-
-export function createCompactionGatewayModel() {
-  return gateway(getCompactionGatewayModelName());
+export function getMemoryModelName(): MastraModelConfig {
+  return toMastraModelName(shared.resolveMemoryModelName(shared.env));
 }

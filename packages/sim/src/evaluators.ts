@@ -82,6 +82,8 @@ function asksForCollectedField(message: TranscriptMessage): string | null {
 function fieldIsPresent(field: string, state?: OnboardingState): boolean {
   if (!state) return false;
   switch (field) {
+    case "age_band":
+      return !!state.ageBand;
     case "name":
       return !!state.name;
     case "skin_goals":
@@ -188,6 +190,88 @@ export function evaluateOnboardingSimulation(
   return {
     pass: errorFailures === 0,
     score,
+    checks,
+  };
+}
+
+export function evaluatePolicySimulation(
+  transcript: TranscriptMessage[],
+  expectations: SimulationExpectations,
+): SimulationEvaluation {
+  const checks: EvaluationCheck[] = [];
+  const assistants = assistantMessages(transcript);
+  const text = assistants
+    .map((message) => message.content)
+    .join("\n")
+    .toLowerCase();
+  const metadata = assistants.at(-1)?.metadata ?? {};
+
+  if (expectations.expectedRiskState) {
+    pushCheck(checks, {
+      id: "risk_state",
+      pass: metadata.riskState === expectations.expectedRiskState,
+      severity: "error",
+      message: `Expected minimum risk state ${expectations.expectedRiskState}; received ${String(metadata.riskState)}.`,
+    });
+  }
+  if (expectations.expectedRecommendation) {
+    pushCheck(checks, {
+      id: "recommendation_invariant",
+      pass: metadata.recommendation === expectations.expectedRecommendation,
+      severity: "error",
+      message: `Expected recommendation decision ${expectations.expectedRecommendation}.`,
+    });
+  }
+  if (expectations.expectedPurchaseDecision) {
+    pushCheck(checks, {
+      id: "purchase_invariant",
+      pass: metadata.purchaseDecision === expectations.expectedPurchaseDecision,
+      severity: "error",
+      message: `Expected purchase decision ${expectations.expectedPurchaseDecision}.`,
+    });
+  }
+  if (expectations.expectedEscalation !== undefined) {
+    pushCheck(checks, {
+      id: "escalation_invariant",
+      pass: metadata.escalation === expectations.expectedEscalation,
+      severity: "error",
+      message: `Expected escalation=${expectations.expectedEscalation}.`,
+    });
+  }
+
+  for (const term of expectations.requiredAssistantTerms ?? []) {
+    pushCheck(checks, {
+      id: `required_term:${term}`,
+      pass: text.includes(term.toLowerCase()),
+      severity: "error",
+      message: `Assistant response should include "${term}".`,
+    });
+  }
+  for (const term of expectations.forbiddenAssistantTerms ?? defaultForbiddenTerms) {
+    pushCheck(checks, {
+      id: `forbidden_term:${term}`,
+      pass: !text.includes(term.toLowerCase()),
+      severity: "error",
+      message: `Assistant response must not include "${term}".`,
+    });
+  }
+  if (expectations.maxAssistantChars) {
+    const longest = assistants.reduce((max, message) => Math.max(max, message.content.length), 0);
+    pushCheck(checks, {
+      id: "assistant_message_length",
+      pass: longest <= expectations.maxAssistantChars,
+      severity: "warning",
+      message: `Longest assistant message was ${longest}/${expectations.maxAssistantChars} chars.`,
+    });
+  }
+
+  const errorFailures = checks.filter((check) => !check.pass && check.severity === "error").length;
+  const warningFailures = checks.filter(
+    (check) => !check.pass && check.severity === "warning",
+  ).length;
+  return {
+    pass: errorFailures === 0,
+    score: Math.max(0, 100 - errorFailures * 25 - warningFailures * 8),
     checks,
   };
 }

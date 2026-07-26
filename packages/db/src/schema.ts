@@ -3,11 +3,10 @@ import {
   boolean,
   index,
   integer,
-  jsonb,
   pgTable,
-  primaryKey,
   text,
   timestamp,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable(
@@ -18,6 +17,7 @@ export const users = pgTable(
     name: text("name").notNull(),
     locale: text("locale").notNull(),
     timezone: text("timezone").notNull(),
+    timezoneConfirmed: boolean("timezone_confirmed").notNull().default(false),
     country: text("country").notNull(),
     skinType: text("skin_type").notNull(),
     sensitivity: text("sensitivity").notNull(),
@@ -26,6 +26,12 @@ export const users = pgTable(
     allergies: text("allergies").notNull(),
     currentProducts: text("current_products").notNull(),
     routinePreference: text("routine_preference").notNull(),
+    ageBand: text("age_band"),
+    communicationStyle: text("communication_style").notNull().default("clear_expert"),
+    styleOfferState: text("style_offer_state").notNull().default("pending"),
+    photoRetentionConsentedAt: text("photo_retention_consented_at"),
+    photoRetentionConsentVersion: text("photo_retention_consent_version"),
+    photoRetentionOfferShownAt: text("photo_retention_offer_shown_at"),
     onboardingComplete: boolean("onboarding_complete").notNull(),
     consentedAt: text("consented_at"),
     consentVersion: text("consent_version"),
@@ -43,41 +49,6 @@ export const phoneMappings = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
   },
   (table) => [index("phone_mappings_user_id_idx").on(table.userId)],
-);
-
-export const memories = pgTable(
-  "memories",
-  {
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    key: text("key").notNull(),
-    value: text("value").notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
-  },
-  (table) => [
-    primaryKey({ columns: [table.userId, table.key] }),
-    index("memories_user_id_idx").on(table.userId),
-  ],
-);
-
-export const conversationMessages = pgTable(
-  "conversation_messages",
-  {
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    value: jsonb("value").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
-    compactedAt: timestamp("compacted_at", { withTimezone: true, mode: "date" }),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
-  },
-  (table) => [
-    index("conversation_messages_user_created_at_idx").on(table.userId, table.createdAt),
-    index("conversation_messages_active_user_created_at_idx")
-      .on(table.userId, table.createdAt)
-      .where(sql`${table.compactedAt} is null`),
-  ],
 );
 
 export const products = pgTable(
@@ -136,6 +107,8 @@ export const onboardingStates = pgTable(
       .primaryKey()
       .references(() => users.id, { onDelete: "cascade" }),
     name: text("name"),
+    ageBand: text("age_band"),
+    ageEligible: boolean("age_eligible"),
     timezoneConfirmed: boolean("timezone_confirmed"),
     timezone: text("timezone"),
     skinType: text("skin_type"),
@@ -154,6 +127,28 @@ export const onboardingStates = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
   },
   (table) => [index("onboarding_states_expires_at_idx").on(table.expiresAt)],
+);
+
+export const routineExperiments = pgTable(
+  "routine_experiments",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    status: text("status").notNull(),
+    reviewAt: text("review_at"),
+    value: text("value").notNull(),
+    createdAt: text("created_at").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("routine_experiments_user_created_at_idx").on(table.userId, table.createdAt),
+    index("routine_experiments_user_review_at_idx").on(table.userId, table.reviewAt),
+    uniqueIndex("routine_experiments_one_active_user_idx")
+      .on(table.userId)
+      .where(sql`${table.status} = 'active'`),
+  ],
 );
 
 export const adherenceStreaks = pgTable("adherence_streaks", {

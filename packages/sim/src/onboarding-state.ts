@@ -1,6 +1,6 @@
 import type { OnboardingState } from "@skintext/shared";
 
-export type LocalOnboardingField = "name" | "skin_goals" | "skin_profile" | "consent";
+export type LocalOnboardingField = "age_band" | "name" | "skin_goals" | "skin_profile" | "consent";
 
 function mergeList(existing?: readonly string[], incoming?: readonly string[]): string[] {
   return Array.from(
@@ -26,6 +26,7 @@ export function mergeOnboardingState(
 
 export function getMissingOnboardingFields(state: OnboardingState): LocalOnboardingField[] {
   const missing: LocalOnboardingField[] = [];
+  if (!state.ageBand) missing.push("age_band");
   if (!state.name) missing.push("name");
   if (!state.concerns?.length && !state.goals?.length) missing.push("skin_goals");
   if (!state.skinType && !state.sensitivity) missing.push("skin_profile");
@@ -41,6 +42,7 @@ export function summarizeOnboardingState(state?: OnboardingState): string {
   if (!state) return "none";
 
   const parts: string[] = [];
+  if (state.ageBand) parts.push(`ageBand=${state.ageBand}`);
   if (state.name) parts.push(`name=${state.name}`);
   if (state.skinType) parts.push(`skinType=${state.skinType}`);
   if (state.sensitivity) parts.push(`sensitivity=${state.sensitivity}`);

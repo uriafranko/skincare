@@ -1,21 +1,19 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { createSharedMock } from "./shared-mock";
-
-const createOneOffReminder = mock(() => Promise.resolve());
-const deleteCustomReminderTimes = mock(() => Promise.resolve());
-const getCustomReminderTimes = mock(() => Promise.resolve(null));
-const setCustomReminderTimes = mock(() => Promise.resolve());
-const setOneOffReminderWorkflowRunId = mock(() => Promise.resolve());
-const markOneOffReminderFailed = mock(() => Promise.resolve());
-
-mock.module("@skintext/db", () => ({
+import { RequestContext } from "@mastra/core/request-context";
+import {
+  cancelOneOffReminder,
   createOneOffReminder,
   deleteCustomReminderTimes,
   getCustomReminderTimes,
+  getOneOffReminder,
+  getUser,
+  listOneOffReminders,
+  markOneOffReminderFailed,
   setCustomReminderTimes,
   setOneOffReminderWorkflowRunId,
-  markOneOffReminderFailed,
-}));
+  updateUser,
+} from "./db-mock";
+import { createSharedMock } from "./shared-mock";
 
 mock.module("@skintext/shared", () =>
   createSharedMock({
@@ -36,20 +34,40 @@ mock.module("@skintext/shared", () =>
   }),
 );
 
-const { scheduleOneOffReminder } = await import("../tools/one-off-reminders");
-const { createSetRemindersTool, getRemindersTool } = await import("../tools/set-reminders");
+const {
+  cancelOneOffReminderTool,
+  listOneOffRemindersTool,
+  scheduleOneOffReminder,
+  scheduleOneOffReminderTool,
+} = await import("../tools/one-off-reminders");
+const { getRemindersTool, setRemindersTool } = await import("../tools/set-reminders");
+const { updateProfileTool } = await import("../tools/update-profile");
 
-function executeTool(tool: unknown, input: Record<string, unknown>) {
+function executeTool(
+  tool: unknown,
+  input: Record<string, unknown>,
+  runtime: Record<string, unknown> = {},
+) {
+  const requestContext = new RequestContext();
+  requestContext.set("runtime", {
+    userId: "usr_test",
+    timezone: "America/New_York",
+    agentContext: { userProfile: { timezoneConfirmed: true } },
+    ...runtime,
+  });
   return (
     tool as { execute: (args: Record<string, unknown>, options: unknown) => Promise<unknown> }
-  ).execute(input, {});
+  ).execute(input, { requestContext });
 }
 
 describe("scheduleOneOffReminder", () => {
   beforeEach(() => {
     createOneOffReminder.mockClear();
+    cancelOneOffReminder.mockClear();
     deleteCustomReminderTimes.mockClear();
     getCustomReminderTimes.mockClear();
+    getOneOffReminder.mockClear();
+    listOneOffReminders.mockClear();
     setCustomReminderTimes.mockClear();
     setOneOffReminderWorkflowRunId.mockClear();
     markOneOffReminderFailed.mockClear();
@@ -173,6 +191,113 @@ describe("scheduleOneOffReminder", () => {
     });
     expect(markOneOffReminderFailed).toHaveBeenCalledWith("usr_test", "reminder_test");
   });
+
+  test("requires a user-confirmed timezone for explicit local schedules", async () => {
+    const scheduleWorkflow = mock(() => Promise.resolve("run_123"));
+    const result = await executeTool(
+      scheduleOneOffReminderTool,
+      {
+        schedule: { type: "local_time", date: "2026-06-05", hour: 8, minute: 0 },
+        message: "Morning check-in.",
+      },
+      {
+        agentContext: { userProfile: { timezoneConfirmed: false } },
+        scheduleOneOffReminderWorkflow: scheduleWorkflow,
+      },
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        scheduled: false,
+        needsTimezoneConfirmation: true,
+      }),
+    );
+    expect(createOneOffReminder).not.toHaveBeenCalled();
+    expect(scheduleWorkflow).not.toHaveBeenCalled();
+  });
+});
+
+describe("one-off reminder management tools", () => {
+  beforeEach(() => {
+    cancelOneOffReminder.mockClear();
+    getOneOffReminder.mockClear();
+    listOneOffReminders.mockClear();
+  });
+
+  test("lists only the current user's pending reminders", async () => {
+    listOneOffReminders.mockResolvedValueOnce([
+      {
+        id: "reminder_pending",
+        userId: "usr_test",
+        sendAt: "2026-06-05T12:00:00.000Z",
+        timezone: "America/New_York",
+        kind: "custom",
+        message: "Check in.",
+        status: "scheduled",
+        createdAt: "2026-06-04T12:00:00.000Z",
+      },
+      {
+        id: "reminder_sent",
+        userId: "usr_test",
+        sendAt: "2026-06-04T12:00:00.000Z",
+        timezone: "America/New_York",
+        kind: "custom",
+        message: "Already sent.",
+        status: "sent",
+        createdAt: "2026-06-03T12:00:00.000Z",
+      },
+    ]);
+
+    const result = await executeTool(listOneOffRemindersTool, {});
+
+    expect(listOneOffReminders).toHaveBeenCalledWith("usr_test");
+    expect(result).toEqual({
+      reminders: [
+        expect.objectContaining({
+          id: "reminder_pending",
+          status: "scheduled",
+        }),
+      ],
+    });
+  });
+
+  test("cancels the user-scoped reminder and its sleeping workflow", async () => {
+    const reminder = {
+      id: "reminder_pending",
+      userId: "usr_test",
+      sendAt: "2026-06-05T12:00:00.000Z",
+      timezone: "America/New_York",
+      kind: "custom" as const,
+      message: "Check in.",
+      status: "scheduled" as const,
+      createdAt: "2026-06-04T12:00:00.000Z",
+      workflowRunId: "run_123",
+    };
+    getOneOffReminder.mockResolvedValueOnce(reminder);
+    cancelOneOffReminder.mockResolvedValueOnce({ ...reminder, status: "cancelled" });
+    const cancelWorkflow = mock(() => Promise.resolve(true));
+
+    const result = await executeTool(
+      cancelOneOffReminderTool,
+      { reminderId: "reminder_pending", userId: "usr_attacker" },
+      { cancelOneOffReminderWorkflow: cancelWorkflow },
+    );
+
+    expect(getOneOffReminder).toHaveBeenCalledWith("usr_test", "reminder_pending");
+    expect(cancelWorkflow).toHaveBeenCalledWith({
+      userId: "usr_test",
+      reminderId: "reminder_pending",
+      workflowRunId: "run_123",
+    });
+    expect(cancelOneOffReminder).toHaveBeenCalledWith("usr_test", "reminder_pending");
+    expect(result).toEqual(
+      expect.objectContaining({
+        cancelled: true,
+        reminderId: "reminder_pending",
+        workflowCancelled: true,
+      }),
+    );
+  });
 });
 
 describe("recurring reminder tools", () => {
@@ -184,13 +309,16 @@ describe("recurring reminder tools", () => {
 
   test("stores exact opt-in reminder times and syncs the workflow", async () => {
     const syncSchedule = mock(() => Promise.resolve("run_123"));
-    const tool = createSetRemindersTool(syncSchedule);
     const times = [
       { label: "morning", hour: 9, minute: 30 },
       { label: "evening", hour: 20, minute: 45 },
     ];
 
-    const result = await executeTool(tool, { userId: "usr_test", times });
+    const result = await executeTool(
+      setRemindersTool,
+      { times },
+      { syncRecurringReminderSchedule: syncSchedule },
+    );
 
     expect(setCustomReminderTimes).toHaveBeenCalledWith("usr_test", times);
     expect(deleteCustomReminderTimes).not.toHaveBeenCalled();
@@ -199,15 +327,26 @@ describe("recurring reminder tools", () => {
       updated: true,
       enabled: true,
       schedule: ["morning: 09:30", "evening: 20:45"],
+      timezone: "America/New_York",
       workflowRunId: "run_123",
     });
   });
 
+  test("ignores model-supplied user IDs and uses the trusted request context", async () => {
+    const times = [{ label: "morning", hour: 9, minute: 30 }];
+
+    await executeTool(setRemindersTool, { userId: "usr_attacker", times });
+
+    expect(setCustomReminderTimes).toHaveBeenCalledWith("usr_test", times);
+  });
+
   test("turns recurring reminders off with an empty schedule", async () => {
     const syncSchedule = mock(() => Promise.resolve(undefined));
-    const tool = createSetRemindersTool(syncSchedule);
-
-    const result = await executeTool(tool, { userId: "usr_test", enabled: false, times: [] });
+    const result = await executeTool(
+      setRemindersTool,
+      { enabled: false, times: [] },
+      { syncRecurringReminderSchedule: syncSchedule },
+    );
 
     expect(deleteCustomReminderTimes).toHaveBeenCalledWith("usr_test");
     expect(setCustomReminderTimes).not.toHaveBeenCalled();
@@ -216,6 +355,7 @@ describe("recurring reminder tools", () => {
       updated: true,
       enabled: false,
       schedule: [],
+      timezone: "America/New_York",
       workflowRunId: null,
     });
   });
@@ -223,8 +363,84 @@ describe("recurring reminder tools", () => {
   test("reports recurring reminders as disabled when no schedule exists", async () => {
     getCustomReminderTimes.mockResolvedValueOnce(null);
 
-    const result = await executeTool(getRemindersTool, { userId: "usr_test" });
+    const result = await executeTool(getRemindersTool, {});
 
-    expect(result).toEqual({ enabled: false, schedule: [] });
+    expect(result).toEqual({
+      enabled: false,
+      schedule: [],
+      timezone: "America/New_York",
+      timezoneConfirmed: true,
+    });
+  });
+
+  test("requires a user-confirmed timezone before enabling recurring reminders", async () => {
+    const result = await executeTool(
+      setRemindersTool,
+      { times: [{ label: "morning", hour: 9, minute: 30 }] },
+      { agentContext: { userProfile: { timezoneConfirmed: false } } },
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        updated: false,
+        needsTimezoneConfirmation: true,
+      }),
+    );
+    expect(setCustomReminderTimes).not.toHaveBeenCalled();
+  });
+});
+
+describe("timezone profile updates", () => {
+  beforeEach(() => {
+    getCustomReminderTimes.mockClear();
+    getUser.mockClear();
+    updateUser.mockClear();
+  });
+
+  test("validates and persists a user-stated IANA timezone as confirmed", async () => {
+    getUser.mockResolvedValueOnce({ id: "usr_test" });
+    getCustomReminderTimes.mockResolvedValueOnce([{ label: "morning", hour: 8, minute: 0 }]);
+    const syncSchedule = mock(() => Promise.resolve("run_123"));
+
+    const result = await executeTool(
+      updateProfileTool,
+      { timezone: "Asia/Jerusalem" },
+      {
+        agentContext: {
+          timezone: "America/New_York",
+          localDate: "2026-06-04",
+          userProfile: { timezone: "America/New_York", timezoneConfirmed: false },
+        },
+        syncRecurringReminderSchedule: syncSchedule,
+      },
+    );
+
+    expect(updateUser).toHaveBeenCalledWith("usr_test", {
+      timezone: "Asia/Jerusalem",
+      timezoneConfirmed: "true",
+    });
+    expect(syncSchedule).toHaveBeenCalledWith({ userId: "usr_test", enabled: true });
+    expect(result).toEqual(
+      expect.objectContaining({
+        updated: true,
+        changes: ["timezone: Asia/Jerusalem"],
+        timezone: "Asia/Jerusalem",
+        timezoneConfirmed: true,
+        recurringRemindersResynced: true,
+      }),
+    );
+  });
+
+  test("rejects an unvalidated city label", async () => {
+    getUser.mockResolvedValueOnce({ id: "usr_test" });
+
+    const result = await executeTool(updateProfileTool, { timezone: "Jerusalem" });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        updated: false,
+      }),
+    );
+    expect(updateUser).not.toHaveBeenCalled();
   });
 });

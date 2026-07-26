@@ -1,14 +1,14 @@
+import { createTool } from "@mastra/core/tools";
 import { getUser } from "@skintext/db";
-import { tool } from "ai";
 import { z } from "zod";
+import { getSkintextRuntime } from "../runtime";
 
-export const getUserProfile = tool({
+export const getUserProfile = createTool({
+  id: "get-user-profile",
   description:
-    "Get the user's skincare profile including skin type, sensitivity, concerns, goals, products, and preferences.",
-  inputSchema: z.object({
-    userId: z.string(),
-  }),
-  execute: async ({ userId }) => {
-    return await getUser(userId);
+    "Get the user's skincare profile including their active timezone and whether the user confirmed it, plus skin type, concerns, products, and preferences.",
+  inputSchema: z.object({}),
+  execute: async (_input, context) => {
+    return await getUser(getSkintextRuntime(context.requestContext).userId);
   },
 });

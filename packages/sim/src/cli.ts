@@ -5,6 +5,7 @@ import { dirname, resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { createOnboardingRuntime, resolvedRuntimeMode } from "./onboarding-runtime";
 import { createPersonaDriver } from "./personas";
+import { createPolicyRuntime } from "./policy-runtime";
 import { formatScenarioList, formatSimulationReport } from "./report";
 import { runSimulation } from "./runner";
 import { getScenario, scenarios } from "./scenarios";
@@ -65,12 +66,18 @@ async function runScenarios(options: CliOptions) {
 
   const results = [];
   for (const scenario of selected) {
-    const runtime = createOnboardingRuntime({
-      mode: options.system,
-      model: options.model,
-      locale: scenario.locale,
-      timezone: scenario.timezone,
-    });
+    const runtime =
+      scenario.area === "personality_safety"
+        ? createPolicyRuntime(scenario, {
+            mode: options.system,
+            model: options.model,
+          })
+        : createOnboardingRuntime({
+            mode: options.system,
+            model: options.model,
+            locale: scenario.locale,
+            timezone: scenario.timezone,
+          });
     const persona = createPersonaDriver(scenario, options.persona, options.model);
     results.push(
       await runSimulation(scenario, runtime, persona, {
@@ -99,12 +106,15 @@ async function runScenarios(options: CliOptions) {
 async function play(options: CliOptions) {
   const scenario = scenarioWithTask(getScenario(options.scenario), options.task);
   const mode = resolvedRuntimeMode(options.system);
-  const runtime = createOnboardingRuntime({
-    mode,
-    model: options.model,
-    locale: scenario.locale,
-    timezone: scenario.timezone,
-  });
+  const runtime =
+    scenario.area === "personality_safety"
+      ? createPolicyRuntime(scenario, { mode, model: options.model })
+      : createOnboardingRuntime({
+          mode,
+          model: options.model,
+          locale: scenario.locale,
+          timezone: scenario.timezone,
+        });
   const transcript: TranscriptMessage[] = [];
   const rl = createInterface({ input: process.stdin, output: process.stdout });
 

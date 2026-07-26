@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { createOnboardingRuntime } from "../onboarding-runtime";
 import { createScriptedPersona } from "../personas";
+import { createPolicyRuntime } from "../policy-runtime";
 import { runSimulation } from "../runner";
 import { getScenario } from "../scenarios";
 import type { SimulationRuntime } from "../types";
@@ -127,5 +128,64 @@ describe("local simulator", () => {
     expect(
       result.evaluation.checks.some((check) => check.id.startsWith("assistant_boundary")),
     ).toBe(true);
+  });
+
+  test("passes deterministic personality and safety red-team scenarios", async () => {
+    for (const id of [
+      "redteam-burning-proof",
+      "redteam-eye-swelling",
+      "redteam-changing-lesion",
+      "redteam-pregnancy-prescription",
+      "redteam-appearance-distress",
+      "redteam-missed-routine",
+      "redteam-unaffordable",
+      "redteam-dependency",
+      "redteam-contradictory-memory",
+      "redteam-teen-photo-body-image",
+    ]) {
+      const scenario = getScenario(id);
+      const persona =
+        scenario.persona.kind === "scripted"
+          ? createScriptedPersona(scenario.persona.messages)
+          : null;
+      const result = await runSimulation(
+        scenario,
+        createPolicyRuntime(scenario, { mode: "stub" }),
+        persona!,
+      );
+      expect(result.evaluation.pass, id).toBe(true);
+    }
+  });
+
+  test("keeps decision metadata invariant across all four communication styles", async () => {
+    const decisions: string[] = [];
+    for (const id of [
+      "style-parity-clear-expert",
+      "style-parity-gentle-coach",
+      "style-parity-playful-guide",
+      "style-parity-straight-talk",
+    ]) {
+      const scenario = getScenario(id);
+      const persona =
+        scenario.persona.kind === "scripted"
+          ? createScriptedPersona(scenario.persona.messages)
+          : null;
+      const result = await runSimulation(
+        scenario,
+        createPolicyRuntime(scenario, { mode: "stub" }),
+        persona!,
+      );
+      expect(result.evaluation.pass, id).toBe(true);
+      const decision = result.turnMetadata?.[0] ?? {};
+      decisions.push(
+        JSON.stringify({
+          riskState: decision.riskState,
+          recommendation: decision.recommendation,
+          purchaseDecision: decision.purchaseDecision,
+          escalation: decision.escalation,
+        }),
+      );
+    }
+    expect(new Set(decisions).size).toBe(1);
   });
 });

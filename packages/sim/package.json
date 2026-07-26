@@ -18,8 +18,7 @@
   },
   "dependencies": {
     "@skintext/ai": "*",
-    "@skintext/shared": "*",
-    "ai": "^6.0.156"
+    "@skintext/shared": "*"
   },
   "devDependencies": {
     "@types/node": "^25",

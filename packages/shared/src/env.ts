@@ -12,7 +12,7 @@ export const env = createEnv({
     DATABASE_URL: z.string().min(1),
     AI_GATEWAY_API_KEY: z.string().min(1),
     AI_GATEWAY_DEFAULT_MODEL: z.string().min(1).default(DEFAULT_AI_GATEWAY_MODEL),
-    AI_GATEWAY_COMPACTION_MODEL: z.string().min(1).optional(),
+    AI_GATEWAY_MEMORY_MODEL: z.string().min(1).optional(),
     ENCRYPTION_KEY: z.string().length(64),
     CRON_SECRET: z.string().min(1).optional(),
   },

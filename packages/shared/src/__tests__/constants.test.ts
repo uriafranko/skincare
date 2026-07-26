@@ -3,6 +3,7 @@ import {
   ADHERENCE_MILESTONES,
   CONSENT_VERSION,
   DAILY_SUMMARY_HOUR,
+  PHOTO_RETENTION_CONSENT_VERSION,
   ROUTINE_TIMES,
 } from "../constants";
 
@@ -19,7 +20,8 @@ describe("routine constants", () => {
   });
 
   test("has current consent version and adherence milestones", () => {
-    expect(CONSENT_VERSION).toBe("2026-06-04");
+    expect(CONSENT_VERSION).toBe("2026-07-26");
+    expect(PHOTO_RETENTION_CONSENT_VERSION).toBe("2026-07-26");
     expect(ADHERENCE_MILESTONES[7]).toContain("week");
   });
 });

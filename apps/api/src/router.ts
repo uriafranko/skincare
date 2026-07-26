@@ -4,7 +4,7 @@ import type { RequestLogger } from "evlog";
 import { handleMessage } from "@/handlers/message";
 import { handleOnboarding } from "@/handlers/onboarding";
 import { normalizeInboundImage } from "@/image";
-import { pruneExpiredUserImageBlobs, saveInboundUserImage } from "@/user-images";
+import { pruneExpiredUserImageBlobs } from "@/user-images";
 
 export async function routeMessage(
   log: RequestLogger,
@@ -62,22 +62,17 @@ export async function routeMessage(
       log.error(error as Error);
       log.set({ imagePruneError: true });
     });
-
-    try {
-      await saveInboundUserImage({
-        userId,
-        image: normalizedImage,
-        text,
-        messageId,
-        log,
-      });
-    } catch (error) {
-      log.error(error as Error);
-      log.set({ imageStorageError: true });
-    }
   }
 
   log.set({ route: "message" });
-  const reply = await handleMessage(log, user, rawPhone, text, imageUrl);
+  const reply = await handleMessage(
+    log,
+    user,
+    rawPhone,
+    text,
+    imageUrl,
+    normalizedImage ?? undefined,
+    messageId,
+  );
   return reply ? [reply] : [];
 }

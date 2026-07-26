@@ -1,6 +1,5 @@
 import type { OnboardingState } from "@skintext/shared";
-import { resolveDefaultGatewayModelName } from "@skintext/shared/model-config";
-import { gateway } from "ai";
+import { resolveDefaultModelName } from "@skintext/shared/model-config";
 import { isLocalOnboardingComplete, mergeOnboardingState } from "./onboarding-state";
 import { advanceStubOnboarding } from "./stub-onboarding";
 import type { RuntimeMode, SimulationRuntime } from "./types";
@@ -14,7 +13,7 @@ type ProcessLiveOnboardingMessage = (
     locale: string;
     complete?: boolean;
   },
-  model?: unknown,
+  generate?: (prompt: string) => Promise<Record<string, unknown>>,
 ) => Promise<{ extracted: Partial<OnboardingState>; reply: string }>;
 
 export interface OnboardingRuntimeOptions {
@@ -63,10 +62,13 @@ async function processLiveOnboardingMessage(
   modelName: string,
 ) {
   const moduleUrl = new URL("../../ai/src/onboarding.ts", import.meta.url).href;
-  const { processOnboardingMessage } = (await import(moduleUrl)) as {
+  const { createOnboardingGenerator, processOnboardingMessage } = (await import(moduleUrl)) as {
+    createOnboardingGenerator: (
+      modelName?: string,
+    ) => (prompt: string) => Promise<Record<string, unknown>>;
     processOnboardingMessage: ProcessLiveOnboardingMessage;
   };
-  return processOnboardingMessage(text, state, ctx, gateway(modelName));
+  return processOnboardingMessage(text, state, ctx, createOnboardingGenerator(modelName));
 }
 
 function createLiveOnboardingRuntime(options: OnboardingRuntimeOptions): SimulationRuntime {
@@ -74,7 +76,7 @@ function createLiveOnboardingRuntime(options: OnboardingRuntimeOptions): Simulat
     throw new Error("AI_GATEWAY_API_KEY is required for --system live.");
   }
 
-  const modelName = options.model ?? resolveDefaultGatewayModelName(process.env);
+  const modelName = options.model ?? resolveDefaultModelName(process.env);
   let state: OnboardingState = {};
 
   return {

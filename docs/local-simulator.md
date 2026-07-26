@@ -36,7 +36,9 @@ bun run sim play --scenario onboarding-friction
 
 ## Live vs Stub
 
-By default `--system auto` uses the live Gateway model when `AI_GATEWAY_API_KEY` is present and falls back to the deterministic stub otherwise.
+By default `--system auto` uses the live Gateway model when `AI_GATEWAY_API_KEY` is present and falls back to the deterministic stub otherwise. The simulator and application use the same personality, safety, age-gating, and privacy behavior.
+
+The scenario catalog now includes age-gated English, Hebrew, and Swedish onboarding plus `redteam-*` personality/safety cases for burning, eye swelling, changing lesions, pregnancy/prescriptions, appearance distress, missed routines, affordability, dependency language, contradictory memory, and teen photo/body-image handling. The `style-parity-*` matrix runs the same caution scenario through all four communication styles and checks invariant risk, recommendation, purchase, and escalation decisions.
 
 Force deterministic local mode:
 

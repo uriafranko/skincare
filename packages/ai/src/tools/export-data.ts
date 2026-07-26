@@ -1,33 +1,33 @@
+import { createTool } from "@mastra/core/tools";
 import {
   getAdherenceStreak,
-  getAllConversationMessages,
   getAllProducts,
   getRoutineLogForDate,
   getUser,
+  listRoutineExperiments,
   listUserImages,
-  recallAllMemories,
   saveExportBlob,
 } from "@skintext/db";
 import { encryptContent, localDateString } from "@skintext/shared";
-import { tool } from "ai";
 import { format, parseISO, subDays } from "date-fns";
 import { z } from "zod";
+import { exportUserMemory } from "../memory";
+import { getSkintextRuntime } from "../runtime";
 
-export const exportDataTool = tool({
+export const exportDataTool = createTool({
+  id: "export-data",
   description:
     "Export all of the user's skincare data in a machine-readable format. Use when the user asks for their data, a data export, or GDPR data access.",
-  inputSchema: z.object({
-    userId: z.string(),
-    timezone: z.string(),
-  }),
-  execute: async ({ userId, timezone }) => {
-    const [user, memories, streak, products, messages, images] = await Promise.all([
+  inputSchema: z.object({}),
+  execute: async (_input, context) => {
+    const { userId, timezone } = getSkintextRuntime(context.requestContext);
+    const [user, memory, streak, products, images, experiments] = await Promise.all([
       getUser(userId),
-      recallAllMemories(userId),
+      exportUserMemory(userId),
       getAdherenceStreak(userId),
       getAllProducts(userId),
-      getAllConversationMessages(userId),
       listUserImages(userId, 50),
+      listRoutineExperiments(userId, 100),
     ]);
 
     if (!user) return { exported: false, message: "User not found." };
@@ -49,9 +49,9 @@ export const exportDataTool = tool({
       routineLogs,
       products,
       savedImages: images,
+      experiments,
       adherenceStreak: streak,
-      memories,
-      messages,
+      agentMemory: memory,
     };
 
     const blob = await encryptContent(JSON.stringify(exportData));
@@ -65,7 +65,7 @@ export const exportDataTool = tool({
 
     return {
       exported: true,
-      summary: `Exported ${routineDays} days of routine data (${totalEntries} entries), ${products.length} saved products, ${images.length} saved photos, and ${Object.keys(memories).length} saved preferences.`,
+      summary: `Exported ${routineDays} days of routine data (${totalEntries} entries), ${products.length} saved products, ${images.length} saved photos, ${experiments.length} experiments, and ${memory.messages.length} conversation messages.`,
       availableFor: "24 hours",
     };
   },

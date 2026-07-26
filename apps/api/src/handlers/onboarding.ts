@@ -1,6 +1,7 @@
-import { createDefaultGatewayModel, processOnboardingMessage } from "@skintext/ai";
+import { processOnboardingMessage } from "@skintext/ai";
 import {
   createUser,
+  deleteAllUserData,
   deleteOnboardingState,
   getOnboardingState,
   saveProduct,
@@ -11,8 +12,8 @@ import {
 import type { OnboardingState } from "@skintext/shared";
 import { CONSENT_VERSION, generateId, isOnboardingComplete } from "@skintext/shared";
 import type { RequestLogger } from "evlog";
-import { createAILogger } from "evlog/ai";
 import { start } from "workflow/api";
+import { rejectUnder16PendingOnboarding } from "@/onboarding-eligibility";
 import { reminderLoop } from "../../workflows/reminder-loop";
 
 function mergeList(existing?: readonly string[], incoming?: readonly string[]): string[] {
@@ -84,26 +85,34 @@ export async function handleOnboarding(
 
   if (!state.timezone && timezone) {
     state.timezone = timezone;
-    state.timezoneConfirmed = true;
   }
-
-  const ai = createAILogger(log);
-  const model = ai.wrap(createDefaultGatewayModel());
 
   log.set({ onboarding: { isFirstMessage, stateFields: Object.keys(state).length } });
 
-  const { extracted, reply } = await processOnboardingMessage(
-    text,
-    state,
-    {
-      isFirstMessage,
-      timezone,
-      locale,
-    },
-    model,
-  );
+  const { extracted: modelExtracted, reply } = await processOnboardingMessage(text, state, {
+    isFirstMessage,
+    timezone,
+    locale,
+  });
+  const extracted =
+    !state.ageBand && !modelExtracted.ageBand && modelExtracted.ageEligible !== false
+      ? {
+          detectedLocale: modelExtracted.detectedLocale,
+        }
+      : modelExtracted;
 
   log.set({ onboarding: { extractedFields: Object.keys(extracted) } });
+
+  if (modelExtracted.ageEligible === false) {
+    log.set({ onboarding: { ageEligible: false, accountDeleted: true } });
+    const rejected = await rejectUnder16PendingOnboarding({
+      extracted: modelExtracted,
+      userId,
+      reply,
+      deletePendingUser: deleteAllUserData,
+    });
+    if (rejected) return rejected;
+  }
 
   const merged = mergeOnboardingState(state, extracted);
   const diff: Partial<OnboardingState> = {};
@@ -125,17 +134,12 @@ export async function handleOnboarding(
   if (isOnboardingComplete(merged)) {
     log.set({ onboarding: { complete: true } });
 
-    const { reply: welcomeReply } = await processOnboardingMessage(
-      text,
-      merged,
-      {
-        isFirstMessage: false,
-        timezone,
-        locale,
-        complete: true,
-      },
-      model,
-    );
+    const { reply: welcomeReply } = await processOnboardingMessage(text, merged, {
+      isFirstMessage: false,
+      timezone,
+      locale,
+      complete: true,
+    });
 
     const reminderTimes = buildReminderTimes(merged);
     const currentProducts = merged.currentProducts ?? [];
@@ -144,6 +148,7 @@ export async function handleOnboarding(
       name: merged.name!,
       locale: merged.detectedLocale ?? locale,
       timezone: merged.timezone!,
+      timezoneConfirmed: merged.timezoneConfirmed === true,
       country,
       skinType: merged.skinType ?? "unsure",
       sensitivity: merged.sensitivity ?? "unsure",
@@ -152,6 +157,12 @@ export async function handleOnboarding(
       allergies: [...(merged.allergies ?? [])],
       currentProducts: [...(merged.currentProducts ?? [])],
       routinePreference: merged.routinePreference ?? "simple",
+      ageBand: merged.ageBand ?? null,
+      communicationStyle: "clear_expert",
+      styleOfferState: "pending",
+      photoRetentionConsentedAt: null,
+      photoRetentionConsentVersion: null,
+      photoRetentionOfferShownAt: null,
       onboardingComplete: true,
       consentedAt: new Date().toISOString(),
       consentVersion: CONSENT_VERSION,

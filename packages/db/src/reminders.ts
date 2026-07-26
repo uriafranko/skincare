@@ -155,6 +155,9 @@ export async function cancelOneOffReminder(
   userId: string,
   reminderId: string,
 ): Promise<OneOffReminder | null> {
+  const existing = await getOneOffReminder(userId, reminderId);
+  if (existing?.status !== "scheduled") return existing;
+
   const now = new Date().toISOString();
   return updateOneOffReminder(userId, reminderId, {
     status: "cancelled",

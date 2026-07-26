@@ -3,7 +3,9 @@ export function createSharedMock(overrides: Record<string, unknown> = {}) {
 
   return {
     ADHERENCE_MILESTONES: {},
-    CONSENT_VERSION: "2026-06-04",
+    CONSENT_VERSION: "2026-07-26",
+    PHOTO_RETENTION_CONSENT_VERSION: "2026-07-26",
+    PERSONALITY_POLICY_VERSION: "personality-v1",
     DAILY_SUMMARY_HOUR: 22,
     DEFAULT_AI_GATEWAY_MODEL: defaultGatewayModel,
     ROUTINE_TIMES: [
@@ -21,7 +23,9 @@ export function createSharedMock(overrides: Record<string, unknown> = {}) {
     }),
     encrypt: async (s: string) => `enc:${s}`,
     encryptContent: async (s: string) => `enc:${s}`,
-    env: {},
+    env: {
+      DATABASE_URL: "postgresql://test:test@localhost:5432/test",
+    },
     generateId: () => "test_id",
     getLocaleName: (locale: string) => {
       const names: Record<string, string> = { en: "English", he: "Hebrew", sv: "Swedish" };
@@ -30,6 +34,7 @@ export function createSharedMock(overrides: Record<string, unknown> = {}) {
     getTimezoneCity: (timezone: string) =>
       timezone.split("/").pop()?.replace(/_/g, " ") ?? timezone,
     isDayOfWeek: () => true,
+    isValidTimeZone: (timezone: string) => timezone === "UTC" || timezone.includes("/"),
     isOnboardingComplete: () => true,
     localDateString: () => "2026-06-04",
     localDateTimeToDate: (date: string, hour: number, minute: number, timezone: string) => {
@@ -43,14 +48,14 @@ export function createSharedMock(overrides: Record<string, unknown> = {}) {
     },
     localHour: () => 12,
     markRead: async () => {},
-    resolveCompactionGatewayModelName: (source: {
+    resolveMemoryModelName: (source: {
       AI_GATEWAY_DEFAULT_MODEL?: string;
-      AI_GATEWAY_COMPACTION_MODEL?: string;
+      AI_GATEWAY_MEMORY_MODEL?: string;
     }) =>
-      source.AI_GATEWAY_COMPACTION_MODEL?.trim() ||
+      source.AI_GATEWAY_MEMORY_MODEL?.trim() ||
       source.AI_GATEWAY_DEFAULT_MODEL?.trim() ||
       defaultGatewayModel,
-    resolveDefaultGatewayModelName: (source: { AI_GATEWAY_DEFAULT_MODEL?: string }) =>
+    resolveDefaultModelName: (source: { AI_GATEWAY_DEFAULT_MODEL?: string }) =>
       source.AI_GATEWAY_DEFAULT_MODEL?.trim() || defaultGatewayModel,
     sendImageFile: async () => {},
     sendImageMessage: async () => {},

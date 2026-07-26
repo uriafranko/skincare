@@ -3,6 +3,8 @@ export function createSharedMock(overrides: Record<string, unknown> = {}) {
     ADHERENCE_MILESTONES: {},
     CONSENT_VERSION: "2026-06-04",
     DAILY_SUMMARY_HOUR: 22,
+    PERSONALITY_POLICY_VERSION: "personality-v1",
+    PHOTO_RETENTION_CONSENT_VERSION: "2026-07-26",
     ROUTINE_TIMES: [
       { label: "morning", hour: 8, minute: 0, emoji: "sun" },
       { label: "evening", hour: 21, minute: 0, emoji: "moon" },
@@ -27,6 +29,7 @@ export function createSharedMock(overrides: Record<string, unknown> = {}) {
     getTimezoneCity: (timezone: string) =>
       timezone.split("/").pop()?.replace(/_/g, " ") ?? timezone,
     isDayOfWeek: () => true,
+    isValidTimeZone: (timezone: string) => timezone === "UTC" || timezone.includes("/"),
     isOnboardingComplete: () => true,
     localDateString: () => "2026-06-04",
     localDateTimeToDate: (date: string, hour: number, minute: number, timezone: string) => {

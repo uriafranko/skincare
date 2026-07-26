@@ -1,6 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
 import { use } from "react";
-import { BottomCta } from "@/components/bottom-cta";
 import { ChatShowcase } from "@/components/chat-showcase";
 import { Faq } from "@/components/faq";
 import { Footer } from "@/components/footer";
@@ -22,7 +21,6 @@ export default function Home({ params }: Props) {
         <Hero />
         <ChatShowcase />
         <Faq />
-        <BottomCta />
       </main>
       <Footer />
     </>

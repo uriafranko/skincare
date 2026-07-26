@@ -1,18 +1,27 @@
-import { getAllProducts, getProduct, saveProduct, saveRoutineEntry } from "@skintext/db";
+import { createTool } from "@mastra/core/tools";
+import {
+  deleteAllProducts,
+  deleteProduct,
+  getAllProducts,
+  getProduct,
+  saveProduct,
+  saveRoutineEntry,
+} from "@skintext/db";
 import { localDateString } from "@skintext/shared";
-import { tool } from "ai";
 import { z } from "zod";
+import { getSkintextRuntime } from "../runtime";
 import { productInputSchema, routineSlotSchema } from "./schemas";
 
-export const saveProductTool = tool({
+export const saveProductTool = createTool({
+  id: "save-product",
   description:
     "Save a skincare product for future routine logging. Use this after reading a product label or when the user tells you a product they use.",
   inputSchema: z.object({
-    userId: z.string(),
     product: productInputSchema,
     source: z.enum(["photo", "text", "manual"]),
   }),
-  execute: async ({ userId, product, source }) => {
+  execute: async ({ product, source }, context) => {
+    const { userId } = getSkintextRuntime(context.requestContext);
     const id = `product_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     await saveProduct({
       id,
@@ -30,12 +39,12 @@ export const saveProductTool = tool({
   },
 });
 
-export const listProductsTool = tool({
+export const listProductsTool = createTool({
+  id: "list-products",
   description: "List all saved skincare products for the user.",
-  inputSchema: z.object({
-    userId: z.string(),
-  }),
-  execute: async ({ userId }) => {
+  inputSchema: z.object({}),
+  execute: async (_input, context) => {
+    const { userId } = getSkintextRuntime(context.requestContext);
     const products = await getAllProducts(userId);
     if (products.length === 0) {
       return { products: [], message: "No products saved yet." };
@@ -44,12 +53,47 @@ export const listProductsTool = tool({
   },
 });
 
-export const logProductUseTool = tool({
+export const deleteProductTool = createTool({
+  id: "delete-saved-product",
+  description: "Delete one saved skincare product after the user clearly asks to forget it.",
+  inputSchema: z.object({
+    productId: z.string(),
+  }),
+  execute: async ({ productId }, context) => {
+    const { userId } = getSkintextRuntime(context.requestContext);
+    const product = await getProduct(userId, productId);
+    if (!product) return { deleted: false, message: "Saved product not found." };
+    await deleteProduct(userId, productId);
+    return { deleted: true, productId, name: product.name };
+  },
+});
+
+export const deleteAllProductsTool = createTool({
+  id: "delete-all-saved-products",
+  description: "Delete all saved skincare products. Require explicit confirmation.",
+  inputSchema: z.object({
+    confirmed: z.boolean(),
+  }),
+  execute: async ({ confirmed }, context) => {
+    if (!confirmed) {
+      return {
+        deleted: false,
+        warning:
+          "This permanently deletes every saved product but does not delete routine logs or conversation history. Ask the user to confirm.",
+      };
+    }
+    const { userId } = getSkintextRuntime(context.requestContext);
+    const products = await getAllProducts(userId);
+    await deleteAllProducts(userId);
+    return { deleted: true, count: products.length };
+  },
+});
+
+export const logProductUseTool = createTool({
+  id: "log-product-use",
   description:
     "Log a saved or named skincare product as used in a morning/evening/custom routine slot.",
   inputSchema: z.object({
-    userId: z.string(),
-    timezone: z.string(),
     slot: routineSlotSchema,
     productId: z.string().optional().describe("Saved product ID, if available"),
     productName: z.string().optional().describe("Product name if not saved yet"),
@@ -57,16 +101,8 @@ export const logProductUseTool = tool({
     reaction: z.string().optional(),
     notes: z.string().optional(),
   }),
-  execute: async ({
-    userId,
-    timezone,
-    slot,
-    productId,
-    productName,
-    completed,
-    reaction,
-    notes,
-  }) => {
+  execute: async ({ slot, productId, productName, completed, reaction, notes }, context) => {
+    const { userId, timezone } = getSkintextRuntime(context.requestContext);
     const product = productId ? await getProduct(userId, productId) : null;
     const name = product?.name ?? productName;
     if (!name) {

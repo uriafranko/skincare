@@ -1,5 +1,5 @@
-import { resolveDefaultGatewayModelName } from "@skintext/shared/model-config";
-import { gateway, generateText } from "ai";
+import { createTextGenerator } from "@skintext/ai/text-generator";
+import { resolveDefaultModelName } from "@skintext/shared/model-config";
 import type { PersonaDriver, SimulationScenario, TranscriptMessage } from "./types";
 
 function formatTranscript(transcript: TranscriptMessage[]): string {
@@ -34,7 +34,12 @@ export function createModelPersona(
     throw new Error("AI_GATEWAY_API_KEY is required for --persona model.");
   }
 
-  const modelName = options.model ?? resolveDefaultGatewayModelName(process.env);
+  const modelName = options.model ?? resolveDefaultModelName(process.env);
+  const generate = createTextGenerator({
+    id: `skintext-simulator-persona-${scenario.id}`,
+    instructions: "Simulate the user in a Skintext onboarding conversation.",
+    model: modelName,
+  });
   let usedOpening = false;
 
   return {
@@ -51,9 +56,8 @@ export function createModelPersona(
         return opening;
       }
 
-      const result = await generateText({
-        model: gateway(modelName),
-        prompt: `You are simulating a real user for local Skintext QA.
+      const text = (
+        await generate(`You are simulating a real user for local Skintext QA.
 
 Task under test: ${scenario.task}
 
@@ -73,10 +77,9 @@ ${formatTranscript(ctx.transcript)}
 Latest known onboarding state:
 ${JSON.stringify(ctx.state ?? {}, null, 2)}
 
-Next user text:`,
-      });
+Next user text:`)
+      ).trim();
 
-      const text = result.text.trim();
       if (!text || text.includes("[[DONE]]")) return null;
       return text.replace(/^["']|["']$/g, "").trim();
     },

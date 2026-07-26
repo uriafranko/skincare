@@ -21,7 +21,7 @@ export function IMessageButton({
   return (
     <a
       href={smsHref}
-      className={`relative inline-flex items-center gap-3 border border-primary/70 bg-[linear-gradient(180deg,#3a3633_0%,#2c2825_100%)] text-center text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18),inset_0_-10px_24px_rgba(255,255,255,0.04),0_6px_16px_rgba(0,0,0,0.22)] transition-transform duration-150 hover:scale-[1.01] hover:bg-[linear-gradient(180deg,#443f3b_0%,#352f2c_100%)] ${compact ? "min-h-10 rounded-[14px] px-3.5 py-1.5" : "min-h-14 rounded-[18px] py-2 pr-4.5 pl-3"} ${className}`}
+      className={`relative inline-flex items-center gap-3 border border-primary/75 bg-[linear-gradient(180deg,#373431_0%,#292725_100%)] text-center text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_8px_22px_rgba(32,35,33,0.16)] transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_12px_26px_rgba(32,35,33,0.2)] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-primary ${compact ? "min-h-10 rounded-[14px] px-3.5 py-1.5" : "min-h-14 rounded-[18px] py-2 pr-4.5 pl-3"} ${className}`}
     >
       {showIcon ? (
         <span

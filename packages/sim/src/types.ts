@@ -1,6 +1,6 @@
-import type { OnboardingState } from "@skintext/shared";
+import type { CommunicationStyle, OnboardingState, SkintextRiskState } from "@skintext/shared";
 
-export type SimulationArea = "onboarding";
+export type SimulationArea = "onboarding" | "personality_safety";
 export type RuntimeMode = "auto" | "live" | "stub";
 export type PersonaMode = "scripted" | "model";
 export type TranscriptRole = "user" | "assistant";
@@ -10,6 +10,7 @@ export interface TranscriptMessage {
   content: string;
   turn: number;
   state?: OnboardingState;
+  metadata?: Record<string, unknown>;
 }
 
 export interface SimulationExpectations {
@@ -19,6 +20,11 @@ export interface SimulationExpectations {
   requiredFields?: string[];
   forbiddenAssistantTerms?: string[];
   addressUserByName?: boolean;
+  expectedRiskState?: SkintextRiskState;
+  expectedRecommendation?: string;
+  expectedPurchaseDecision?: "none" | "optional" | "recommended";
+  expectedEscalation?: boolean;
+  requiredAssistantTerms?: string[];
 }
 
 export interface ScriptedPersonaConfig {
@@ -44,6 +50,8 @@ export interface SimulationScenario {
   timezone: string;
   persona: PersonaConfig;
   expectations: SimulationExpectations;
+  communicationStyle?: CommunicationStyle;
+  ageBand?: "16_17" | "18_plus";
   maxTurns?: number;
 }
 
@@ -101,4 +109,5 @@ export interface SimulationResult {
   finalState?: OnboardingState;
   complete: boolean;
   evaluation: SimulationEvaluation;
+  turnMetadata?: Record<string, unknown>[];
 }

@@ -1,6 +1,16 @@
 import { TZDate } from "@date-fns/tz";
 import { addDays, format, getHours, isAfter, set } from "date-fns";
 
+export function isValidTimeZone(timezone: string): boolean {
+  if (!timezone.trim()) return false;
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: timezone }).format();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function nextLocalTime(hour: number, minute: number, tz: string): Date {
   const now = new TZDate(new Date(), tz);
   let target = set(now, { hours: hour, minutes: minute, seconds: 0, milliseconds: 0 });

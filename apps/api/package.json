@@ -15,7 +15,6 @@
     "@skintext/db": "*",
     "@skintext/shared": "*",
     "@vercel/blob": "^2.4.0",
-    "ai": "^6.0.156",
     "evlog": "^2.11.1",
     "files-sdk": "^1.8.0",
     "heic-convert": "^2.1.0",

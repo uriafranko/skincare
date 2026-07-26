@@ -1,99 +1,164 @@
-import type { LanguageModelV3 } from "@ai-sdk/provider";
-import { type ModelMessage, stepCountIs, type Tool, ToolLoopAgent } from "ai";
-import { createRescueCompactionPrepareStep } from "./compaction";
-import { createCompactionGatewayModel, createDefaultGatewayModel } from "./models";
-import { createDeleteAccountTool, type DeleteAccountData } from "./tools/delete-account";
+import { Agent } from "@mastra/core/agent";
+import { Mastra } from "@mastra/core/mastra";
+import { deleteUserMemory, mastraStorage, skintextMemory } from "./memory";
+import { getDefaultModelName } from "./models";
+import { buildSkintextSystemPrompt } from "./prompts";
+import {
+  createSkintextRequestContext,
+  getSkintextRuntime,
+  type SkintextRuntime,
+  skintextThreadId,
+} from "./runtime";
+import { deleteAccountTool } from "./tools/delete-account";
+import {
+  closeExperimentTool,
+  getActiveExperimentTool,
+  listExperimentsTool,
+  startExperimentTool,
+} from "./tools/experiments";
 import { exportDataTool } from "./tools/export-data";
 import { getUserProfile } from "./tools/get-profile";
 import {
-  createScheduleOneOffReminderTool,
-  type ScheduleOneOffReminderWorkflow,
+  cancelOneOffReminderTool,
+  listOneOffRemindersTool,
+  scheduleOneOffReminderTool,
 } from "./tools/one-off-reminders";
-import { listProductsTool, logProductUseTool, saveProductTool } from "./tools/products";
-import { recallMemoryTool } from "./tools/recall-memory";
+import {
+  clearConversationHistoryTool,
+  deleteSavedPhotosTool,
+  getPersonalizationSummaryTool,
+  saveCurrentPhotoTool,
+  setPhotoRetentionTool,
+} from "./tools/privacy";
+import {
+  deleteAllProductsTool,
+  deleteProductTool,
+  listProductsTool,
+  logProductUseTool,
+  saveProductTool,
+} from "./tools/products";
 import {
   deleteRoutineEntryTool,
   getTodayRoutineLogTool,
   getWeeklyRoutineLogTool,
   logRoutineStepTool,
 } from "./tools/routine";
-import { saveMemoryTool } from "./tools/save-memory";
-import {
-  createSetRemindersTool,
-  getRemindersTool,
-  type RecurringReminderScheduleSync,
-} from "./tools/set-reminders";
+import { sendUiMessageTool } from "./tools/send-ui-message";
+import { getRemindersTool, setRemindersTool } from "./tools/set-reminders";
 import { updateProfileTool } from "./tools/update-profile";
-import {
-  createSendUserImageTool,
-  listUserImagesTool,
-  type SendUserImage,
-} from "./tools/user-images";
+import { listUserImagesTool, sendUserImageTool } from "./tools/user-images";
 
-export interface AgentSecurityContext {
-  userId: string;
-  timezone: string;
+const coreTools = {
+  logRoutineStep: logRoutineStepTool,
+  deleteRoutineEntry: deleteRoutineEntryTool,
+  getTodayRoutineLog: getTodayRoutineLogTool,
+  getWeeklyRoutineLog: getWeeklyRoutineLogTool,
+  saveProduct: saveProductTool,
+  deleteProduct: deleteProductTool,
+  deleteAllProducts: deleteAllProductsTool,
+  listProducts: listProductsTool,
+  logProductUse: logProductUseTool,
+  getUserProfile,
+  updateProfile: updateProfileTool,
+  setReminders: setRemindersTool,
+  getReminders: getRemindersTool,
+  listOneOffReminders: listOneOffRemindersTool,
+  cancelOneOffReminder: cancelOneOffReminderTool,
+  exportData: exportDataTool,
+  deleteAccount: deleteAccountTool,
+  listUserImages: listUserImagesTool,
+  startExperiment: startExperimentTool,
+  getActiveExperiment: getActiveExperimentTool,
+  listExperiments: listExperimentsTool,
+  closeExperiment: closeExperimentTool,
+  getPersonalizationSummary: getPersonalizationSummaryTool,
+  clearConversationHistory: clearConversationHistoryTool,
+  setPhotoRetention: setPhotoRetentionTool,
+};
+
+export const skintextAgent = new Agent({
+  id: "skintext-agent",
+  name: "Skintext",
+  model: getDefaultModelName(),
+  memory: skintextMemory,
+  instructions: ({ requestContext }) =>
+    buildSkintextSystemPrompt(getSkintextRuntime(requestContext).agentContext),
+  tools: ({ requestContext }) => {
+    const runtime = getSkintextRuntime(requestContext);
+    return {
+      ...coreTools,
+      ...(runtime.sendUiMessage ? { sendUiMessage: sendUiMessageTool } : {}),
+      ...(runtime.sendUserImage ? { sendUserImage: sendUserImageTool } : {}),
+      ...(runtime.saveCurrentPhoto ? { saveCurrentPhoto: saveCurrentPhotoTool } : {}),
+      ...(runtime.deleteSavedPhotos ? { deleteSavedPhotos: deleteSavedPhotosTool } : {}),
+      ...(runtime.scheduleOneOffReminderWorkflow
+        ? { scheduleOneOffReminder: scheduleOneOffReminderTool }
+        : {}),
+    };
+  },
+});
+
+export const mastra = new Mastra({
+  storage: mastraStorage,
+  agents: { skintextAgent },
+});
+
+export interface RunSkintextAgentInput {
+  text: string;
+  imageUrl?: string;
+  hasImage?: boolean;
 }
 
-function withContext<T extends Tool>(t: T, ctx: AgentSecurityContext): T {
-  return {
-    ...t,
-    execute: (args: Record<string, unknown>, options: unknown) =>
-      t.execute!({ ...args, userId: ctx.userId, timezone: ctx.timezone }, options as never),
-  } as T;
-}
-
-interface AgentOptions extends AgentSecurityContext {
-  model?: LanguageModelV3;
-  compactionModel?: LanguageModelV3;
-  scheduleOneOffReminderWorkflow?: ScheduleOneOffReminderWorkflow;
-  syncRecurringReminderSchedule?: RecurringReminderScheduleSync;
-  sendUserImage?: SendUserImage;
-  deleteAccountData?: DeleteAccountData;
-}
-
-export function createSkintextAgent(systemPrompt: string, ctx: AgentOptions) {
-  const model = ctx.model ?? createDefaultGatewayModel();
-  const tools: Record<string, Tool> = {
-    logRoutineStep: withContext(logRoutineStepTool, ctx),
-    deleteRoutineEntry: withContext(deleteRoutineEntryTool, ctx),
-    getTodayRoutineLog: withContext(getTodayRoutineLogTool, ctx),
-    getWeeklyRoutineLog: withContext(getWeeklyRoutineLogTool, ctx),
-    saveProduct: withContext(saveProductTool, ctx),
-    listProducts: withContext(listProductsTool, ctx),
-    logProductUse: withContext(logProductUseTool, ctx),
-    getUserProfile: withContext(getUserProfile, ctx),
-    updateProfile: withContext(updateProfileTool, ctx),
-    setReminders: withContext(createSetRemindersTool(ctx.syncRecurringReminderSchedule), ctx),
-    getReminders: withContext(getRemindersTool, ctx),
-    exportData: withContext(exportDataTool, ctx),
-    deleteAccount: withContext(createDeleteAccountTool(ctx.deleteAccountData), ctx),
-    saveMemory: withContext(saveMemoryTool, ctx),
-    recallMemory: withContext(recallMemoryTool, ctx),
-    listUserImages: withContext(listUserImagesTool, ctx),
-  };
-
-  if (ctx.sendUserImage) {
-    tools.sendUserImage = withContext(createSendUserImageTool(ctx.sendUserImage), ctx);
+function buildUserMessage({ text, imageUrl }: RunSkintextAgentInput) {
+  if (!imageUrl) {
+    return text;
   }
+  const imageMarker = text
+    ? `${text}\n\n[User attached a skincare/product photo]`
+    : "[User sent a skincare/product photo]";
 
-  if (ctx.scheduleOneOffReminderWorkflow) {
-    tools.scheduleOneOffReminder = withContext(
-      createScheduleOneOffReminderTool(ctx.scheduleOneOffReminderWorkflow),
-      ctx,
-    );
-  }
+  return [
+    {
+      role: "user" as const,
+      content: [
+        { type: "text" as const, text: imageMarker },
+        { type: "image" as const, image: imageUrl },
+      ],
+    },
+  ];
+}
 
-  return new ToolLoopAgent({
-    model,
-    instructions: systemPrompt,
-    tools,
-    stopWhen: stepCountIs(8),
-    prepareStep: createRescueCompactionPrepareStep({
-      model: ctx.compactionModel ?? createCompactionGatewayModel(),
-      systemPrompt,
-    }),
+export async function runSkintextAgent(input: RunSkintextAgentInput, runtime: SkintextRuntime) {
+  const agent = mastra.getAgent("skintextAgent");
+  const result = await agent.generate(buildUserMessage(input), {
+    requestContext: createSkintextRequestContext(runtime),
+    memory: {
+      thread: skintextThreadId(runtime.userId),
+      resource: runtime.userId,
+      ...(input.hasImage ? { options: { readOnly: true } } : {}),
+    },
+    maxSteps: 15,
   });
-}
 
-export type { ModelMessage };
+  if (input.hasImage && !runtime.accountDeleted && !runtime.clearMemoryAfterRun) {
+    if (
+      runtime.photoRetentionEnabled &&
+      runtime.agentContext.userProfile?.ageBand !== "16_17" &&
+      runtime.saveCurrentPhoto &&
+      !runtime.currentPhotoSaved &&
+      !runtime.skipCurrentPhotoRetention
+    ) {
+      try {
+        runtime.currentPhotoSaved = await runtime.saveCurrentPhoto();
+      } catch (error) {
+        runtime.photoSaveError = error instanceof Error ? error.message : String(error);
+      }
+    }
+  }
+
+  if (runtime.accountDeleted || runtime.clearMemoryAfterRun) {
+    await deleteUserMemory(runtime.userId);
+  }
+
+  return result;
+}

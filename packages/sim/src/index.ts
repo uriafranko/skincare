@@ -1,4 +1,4 @@
-export { evaluateOnboardingSimulation } from "./evaluators";
+export { evaluateOnboardingSimulation, evaluatePolicySimulation } from "./evaluators";
 export {
   createOnboardingRuntime,
   type OnboardingRuntimeOptions,
@@ -16,9 +16,19 @@ export {
   createScriptedPersona,
   type ModelPersonaOptions,
 } from "./personas";
+export {
+  createPolicyRuntime,
+  type PolicyRuntimeOptions,
+  policyDecisionForScenario,
+} from "./policy-runtime";
 export { formatScenarioList, formatSimulationReport } from "./report";
 export { type RunSimulationOptions, runSimulation } from "./runner";
-export { getScenario, onboardingScenarios, scenarios } from "./scenarios";
+export {
+  getScenario,
+  onboardingScenarios,
+  personalitySafetyScenarios,
+  scenarios,
+} from "./scenarios";
 export { advanceStubOnboarding, buildStubReply, extractStubOnboarding } from "./stub-onboarding";
 export type {
   EvaluationCheck,

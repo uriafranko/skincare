@@ -6,8 +6,8 @@ Skintext is a Bun/Turborepo monorepo for an iMessage skincare routine assistant.
 
 - `apps/api`: Hono/Nitro API, Sendblue webhook routing, onboarding, returning-user messages, reminder workflows.
 - `apps/web`: Next.js public web app.
-- `packages/ai`: Prompts, onboarding extraction/replies, agent setup, tools, compaction.
-- `packages/db`: Drizzle/Neon data layer for users, messages, onboarding state, products, routine logs, reminders.
+- `packages/ai`: Mastra agents, Postgres-backed observational memory, prompts, onboarding, and tools.
+- `packages/db`: Drizzle/Neon data layer for users, onboarding state, products, routine logs, and reminders.
 - `packages/shared`: Shared types, env validation, locale/timezone helpers, constants, crypto.
 - `packages/sim`: Local onboarding simulator.
 - `docs/local-simulator.md`: Simulator workflow reference.
@@ -22,6 +22,8 @@ Do not `source .env`. The root `.env` can contain shell metacharacters, so shell
 Root `.env` contains `AI_GATEWAY_API_KEY`. Some isolated tests import shared env validation and may also require Sendblue variables; use dummy Sendblue values only for tests that do not exercise Sendblue behavior.
 
 `packages/db` uses Drizzle's Neon HTTP driver. Do not use `db.transaction()`; it throws at runtime. Use `db.batch()` or separate statements.
+
+Mastra stores agent threads, messages, and observations in the `mastra` schema of the same Postgres database. Keep business data in `packages/db`; do not reintroduce custom conversation or memory tables.
 
 ## Common Commands
 

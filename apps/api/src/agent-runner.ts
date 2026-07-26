@@ -1,85 +1,54 @@
 import type {
+  CancelOneOffReminderWorkflow,
   DeleteAccountData,
-  ModelMessage,
+  DeleteSavedPhotos,
   RecurringReminderScheduleSync,
+  SaveCurrentPhoto,
   ScheduleOneOffReminderWorkflow,
+  SendUiMessage,
   SendUserImage,
+  SkintextRuntime,
 } from "@skintext/ai";
 import {
-  annotateLastAssistantMessageUsage,
-  buildSkintextSystemPrompt,
-  compactMessagesIfNeeded,
-  createCompactionGatewayModel,
-  createDefaultGatewayModel,
-  createSkintextAgent,
-  DEFAULT_COMPACTION_RESERVE_TOKENS,
-  isCompactionSummaryMessage,
-  stripInternalMessageMetadata,
+  deriveMinimumRiskState,
+  runSkintextAgent,
+  saveSanitizedImageTurn,
+  shouldOfferCommunicationStyle,
+  shouldOfferPhotoRetention,
+  USER_REMINDER_OPEN_TAG,
 } from "@skintext/ai";
 import {
-  appendConversationMessages,
-  type ConversationMessageRecord,
-  compactConversationMessages,
+  getActiveRoutineExperiment,
   getAdherenceStreak,
   getAllProducts,
-  getConversationMessageRecords,
-  recallAllMemories,
+  updateUser,
 } from "@skintext/db";
 import type { AgentContext, UserProfile } from "@skintext/shared";
-import { getLocaleName, localDateString } from "@skintext/shared";
-import { pruneMessages } from "ai";
+import { getLocaleName, localDateString, PERSONALITY_POLICY_VERSION } from "@skintext/shared";
 import type { RequestLogger } from "evlog";
-import { createAILogger } from "evlog/ai";
 
 export interface RunAgentMessageOptions {
   imageUrl?: string;
   hasImage?: boolean;
+  sendUiMessage?: SendUiMessage;
   sendUserImage?: SendUserImage;
+  saveCurrentPhoto?: SaveCurrentPhoto;
+  deleteSavedPhotos?: DeleteSavedPhotos;
   deleteAccountData?: DeleteAccountData;
   scheduleOneOffReminderWorkflow?: ScheduleOneOffReminderWorkflow;
+  cancelOneOffReminderWorkflow?: CancelOneOffReminderWorkflow;
   syncRecurringReminderSchedule?: RecurringReminderScheduleSync;
 }
 
-function buildUserMessage(text: string, imageUrl?: string, hasImage?: boolean): ModelMessage {
-  if (imageUrl) {
-    return {
-      role: "user",
-      content: [
-        {
-          type: "text",
-          text: text
-            ? `${text}\n\n[User attached a skincare/product photo]`
-            : "[User sent a skincare/product photo]",
-        },
-        { type: "image", image: imageUrl },
-      ],
-    };
+function photoSaveFailureReply(locale: string): string {
+  const language = locale.toLowerCase();
+  if (language.startsWith("he")) {
+    return "לא הצלחתי לשמור את התמונה למעקב. היא עדיין שימשה לתשובה הזאת, אבל לא נשמרה.";
   }
-
-  if (hasImage) {
-    return {
-      role: "user",
-      content: text
-        ? `${text}\n\n[User attached a skincare/product photo]`
-        : "[User sent a skincare/product photo]",
-    };
+  if (language.startsWith("sv")) {
+    return "Jag kunde inte spara bilden för uppföljning. Den användes fortfarande för det här svaret, men sparades inte.";
   }
-
-  return { role: "user", content: text };
-}
-
-function selectCompactionCutoff(
-  records: ConversationMessageRecord<ModelMessage>[],
-  compactedMessages: ModelMessage[],
-): Date | null {
-  const firstMessage = compactedMessages[0];
-  if (!firstMessage || !isCompactionSummaryMessage(firstMessage)) return null;
-
-  const recentMessageCount = compactedMessages.length - 1;
-  const cutoff = Math.max(0, records.length - recentMessageCount);
-  const compactedRecord = records[cutoff - 1];
-
-  return compactedRecord?.createdAt ?? null;
+  return "I couldn't save the photo for tracking. It was still used for this reply, but it wasn't retained.";
 }
 
 // Single main-agent entrypoint for inbound user texts and scheduled reminder events.
@@ -89,140 +58,127 @@ export async function runAgentMessage(
   text: string,
   options: RunAgentMessageOptions = {},
 ): Promise<string | null> {
-  const userId = user.id;
-  const [historyRecords, memories, streak, products] = await Promise.all([
-    getConversationMessageRecords<ModelMessage>(userId),
-    recallAllMemories(userId),
-    getAdherenceStreak(userId),
-    getAllProducts(userId),
+  const [streak, products, activeExperiment] = await Promise.all([
+    getAdherenceStreak(user.id),
+    getAllProducts(user.id),
+    getActiveRoutineExperiment(user.id),
   ]);
-  const conversationHistory = historyRecords.map((record) => record.value);
-
-  const now = new Date();
-  const localDate = localDateString(user.timezone, now);
-
+  const localDate = localDateString(user.timezone);
   const hasImage = options.hasImage ?? !!options.imageUrl;
+  const isScheduledEvent = text.includes(USER_REMINDER_OPEN_TAG);
+  const riskState = deriveMinimumRiskState(text);
+  const shouldOfferStyle = shouldOfferCommunicationStyle({
+    text,
+    hasImage,
+    isScheduledEvent,
+    riskState,
+    offerState: user.styleOfferState,
+  });
+  const offerPhotoRetention = shouldOfferPhotoRetention({
+    text,
+    hasImage,
+    riskState,
+    ageBand: user.ageBand,
+    consented: !!user.photoRetentionConsentedAt,
+    offerShown: !!user.photoRetentionOfferShownAt,
+  });
+
   log.set({
-    user: { name: user.name, locale: user.locale, timezone: user.timezone },
     context: {
-      localDate,
       hasImage,
-      historyLength: conversationHistory.length,
-      streak: streak.current,
+      policyVersion: PERSONALITY_POLICY_VERSION,
+      riskState,
+      communicationStyle: user.communicationStyle,
+      ageBand: user.ageBand,
+      activeExperiment: !!activeExperiment,
     },
   });
 
-  const ctx: AgentContext = {
-    userId,
+  const agentContext: AgentContext = {
+    userId: user.id,
     userName: user.name,
     localeName: getLocaleName(user.locale),
     locale: user.locale,
     timezone: user.timezone,
     localDate,
     userProfile: user,
-    memories: Object.keys(memories).length > 0 ? memories : null,
+    riskState,
+    shouldOfferStyle,
+    shouldOfferPhotoRetention: offerPhotoRetention,
+    hasImage,
+    isScheduledEvent,
+    activeExperiment,
     streak: streak.current > 0 ? streak.current : null,
     products,
   };
-
-  const ai = createAILogger(log, { toolInputs: { maxLength: 200 } });
-  const model = ai.wrap(createDefaultGatewayModel());
-  const compactionModel = ai.wrap(createCompactionGatewayModel());
-
-  const systemPrompt = buildSkintextSystemPrompt(ctx);
-  const userMessage = buildUserMessage(text, options.imageUrl, hasImage);
-  const userRecords = await appendConversationMessages<ModelMessage>(userId, [userMessage]);
-
-  const agent = createSkintextAgent(systemPrompt, {
-    userId,
+  const runtime: SkintextRuntime = {
+    userId: user.id,
     timezone: user.timezone,
-    model,
-    compactionModel,
+    inputText: text,
+    hasImage,
+    isScheduledEvent,
+    agentContext,
+    sendUiMessage: options.sendUiMessage,
     sendUserImage: options.sendUserImage,
+    saveCurrentPhoto: options.saveCurrentPhoto,
+    deleteSavedPhotos: options.deleteSavedPhotos,
     deleteAccountData: options.deleteAccountData,
     scheduleOneOffReminderWorkflow: options.scheduleOneOffReminderWorkflow,
+    cancelOneOffReminderWorkflow: options.cancelOneOffReminderWorkflow,
     syncRecurringReminderSchedule: options.syncRecurringReminderSchedule,
-  });
-
-  const allMessages: ModelMessage[] = [...conversationHistory, userMessage];
-  const allMessageRecords = [...historyRecords, ...userRecords];
-  const preRunCompaction = await compactMessagesIfNeeded(allMessages, {
-    model: compactionModel,
-    systemPrompt,
-    reserveTokens: DEFAULT_COMPACTION_RESERVE_TOKENS,
-  });
-
-  const compactionLog = {
-    phase: "pre-run",
-    compacted: preRunCompaction.compacted,
-    tokensBefore: preRunCompaction.tokensBefore,
-    estimatedTokens: preRunCompaction.usageEstimate.estimatedTokens,
-    usageTokens: preRunCompaction.usageEstimate.usageTokens,
-    trailingTokens: preRunCompaction.usageEstimate.trailingTokens,
-    thresholdTokens: preRunCompaction.thresholdTokens,
-    reserveTokens: preRunCompaction.reserveTokens,
-    imageCount: preRunCompaction.usageEstimate.imageCount,
-    imageTokens: preRunCompaction.usageEstimate.imageTokens,
-    imagePayloadBytes: preRunCompaction.usageEstimate.imagePayloadBytes,
-    imageDataUrls: preRunCompaction.usageEstimate.imageDataUrlCount,
-    imageRemoteUrls: preRunCompaction.usageEstimate.imageRemoteUrlCount,
+    photoRetentionEnabled: user.ageBand !== "16_17" && !!user.photoRetentionConsentedAt,
   };
 
-  if (preRunCompaction.error) {
-    const error =
-      preRunCompaction.error instanceof Error
-        ? preRunCompaction.error.message
-        : String(preRunCompaction.error);
-    log.set({
-      compaction: {
-        ...compactionLog,
-        compacted: false,
-        error,
-      },
-    });
-  } else {
-    log.set({
-      compaction: compactionLog,
-    });
+  const result = await runSkintextAgent({ text, imageUrl: options.imageUrl, hasImage }, runtime);
+  if (shouldOfferStyle && result.text && user.styleOfferState === "pending") {
+    await updateUser(user.id, { styleOfferState: "shown" });
+    user.styleOfferState = "shown";
   }
-
-  const baseMessages = preRunCompaction.messages;
-  const summaryMessage = baseMessages[0];
-  const compactionCutoff = selectCompactionCutoff(allMessageRecords, baseMessages);
-  if (
-    preRunCompaction.compacted &&
-    summaryMessage &&
-    isCompactionSummaryMessage(summaryMessage) &&
-    compactionCutoff
-  ) {
-    await compactConversationMessages(userId, compactionCutoff, summaryMessage);
+  if (offerPhotoRetention && result.text) {
+    const offeredAt = new Date().toISOString();
+    await updateUser(user.id, { photoRetentionOfferShownAt: offeredAt });
+    user.photoRetentionOfferShownAt = offeredAt;
   }
-
-  const messages = pruneMessages({
-    messages: stripInternalMessageMetadata(baseMessages),
-    emptyMessages: "remove",
-  });
-
-  const result = await agent.generate({ messages });
   log.set({
     usage: {
-      inputTokens: result.usage.inputTokens,
-      outputTokens: result.usage.outputTokens,
-      totalTokens: result.usage.totalTokens,
-      cacheReadTokens: result.usage.inputTokenDetails?.cacheReadTokens,
-      cacheWriteTokens: result.usage.inputTokenDetails?.cacheWriteTokens,
+      inputTokens: result.totalUsage.inputTokens,
+      outputTokens: result.totalUsage.outputTokens,
+      totalTokens: result.totalUsage.totalTokens,
+      cacheReadTokens: result.totalUsage.cachedInputTokens,
+      cacheWriteTokens: result.totalUsage.cacheCreationInputTokens,
+    },
+    agent: {
+      runId: result.runId,
+      traceId: result.traceId,
+      steps: result.steps.length,
+    },
+    personality: {
+      policyVersion: PERSONALITY_POLICY_VERSION,
+      style: user.communicationStyle,
+      riskState,
+      ageBand: user.ageBand,
+      activeExperiment: !!activeExperiment,
+      photoRetentionEnabled: runtime.photoRetentionEnabled ?? false,
+      photoRetained: !!runtime.currentPhotoSaved,
+      photoRetentionError: !!runtime.photoSaveError,
     },
   });
 
-  const responseMessages = annotateLastAssistantMessageUsage(
-    result.response.messages as ModelMessage[],
-    result.usage,
-    {
-      systemPrompt,
-      estimatedInputTokens: preRunCompaction.tokensBefore,
-    },
-  );
-  await appendConversationMessages(userId, responseMessages);
-
-  return result.text || null;
+  if (!result.text) return null;
+  const reply = runtime.photoSaveError
+    ? `${result.text}\n\n${photoSaveFailureReply(user.locale)}`
+    : result.text;
+  if (hasImage && !runtime.accountDeleted && !runtime.clearMemoryAfterRun) {
+    try {
+      await saveSanitizedImageTurn({
+        resourceId: user.id,
+        userText: text,
+        assistantText: reply,
+      });
+    } catch (error) {
+      log.error(error as Error);
+      log.set({ personality: { sanitizedHistorySaved: false } });
+    }
+  }
+  return reply;
 }

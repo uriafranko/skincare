@@ -52,9 +52,11 @@
       "!**/dist",
       "!**/.turbo",
       "!**/.swc",
+      "!**/.agents",
       "!**/*.tsbuildinfo",
       "!**/bun.lock",
-      "!**/*.css"
+      "!**/*.css",
+      "!packages/db/drizzle/meta"
     ]
   }
 }

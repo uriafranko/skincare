@@ -1,4 +1,5 @@
 import type {
+  AgeBand,
   OnboardingState,
   RoutinePreference,
   SensitivityLevel,
@@ -35,6 +36,8 @@ export async function getOnboardingState(userId: string): Promise<OnboardingStat
   }
 
   const result: OnboardingState = {};
+  if (d.ageBand) result.ageBand = String(d.ageBand) as AgeBand;
+  if (d.ageEligible === true) result.ageEligible = true;
   if (d.name) result.name = await decrypt(String(d.name));
   if (d.timezoneConfirmed === true) result.timezoneConfirmed = true;
   if (d.timezone) result.timezone = String(d.timezone);
@@ -66,6 +69,12 @@ export async function setOnboardingState(
     const value = Array.isArray(v) ? JSON.stringify(v) : String(v);
     const stored = encryptedFields.has(k) ? await encryptContent(value) : value;
     switch (k) {
+      case "ageBand":
+        flat.ageBand = stored;
+        break;
+      case "ageEligible":
+        flat.ageEligible = v === true;
+        break;
       case "name":
         flat.name = stored;
         break;

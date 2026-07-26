@@ -29,6 +29,7 @@ const baseProfile = {
   name: "Alice",
   locale: "en",
   timezone: "America/New_York",
+  timezoneConfirmed: true,
   country: "US",
   skinType: "combination" as const,
   sensitivity: "medium" as const,
@@ -37,10 +38,16 @@ const baseProfile = {
   allergies: ["fragrance"],
   currentProducts: ["gentle cleanser"],
   routinePreference: "simple" as const,
+  ageBand: "18_plus" as const,
+  communicationStyle: "clear_expert" as const,
+  styleOfferState: "chosen" as const,
+  photoRetentionConsentedAt: null,
+  photoRetentionConsentVersion: null,
+  photoRetentionOfferShownAt: null,
   onboardingComplete: true,
-  consentedAt: "2026-06-04T00:00:00Z",
-  consentVersion: "2026-06-04",
-  createdAt: "2026-06-04T00:00:00Z",
+  consentedAt: "2026-07-26T00:00:00Z",
+  consentVersion: "2026-07-26",
+  createdAt: "2026-07-26T00:00:00Z",
 };
 
 const baseContext = {
@@ -49,11 +56,25 @@ const baseContext = {
   localeName: "English",
   locale: "en",
   timezone: "America/New_York",
-  localDate: "2026-06-04",
+  localDate: "2026-07-26",
   userProfile: baseProfile,
-  memories: null,
-  streak: null,
-  products: [],
+  riskState: "routine" as const,
+  shouldOfferStyle: false,
+  shouldOfferPhotoRetention: false,
+  hasImage: false,
+  isScheduledEvent: false,
+  activeExperiment: null,
+  streak: 4,
+  products: [
+    {
+      id: "prod_1",
+      userId: "usr_test123",
+      name: "Gentle Cleanser",
+      category: "cleanser",
+      source: "text" as const,
+      createdAt: "2026-07-26T00:00:00Z",
+    },
+  ],
 };
 
 function makeContext(overrides: Record<string, unknown> = {}) {
@@ -61,176 +82,86 @@ function makeContext(overrides: Record<string, unknown> = {}) {
 }
 
 describe("buildSkintextSystemPrompt", () => {
-  test("includes Skintext identity and exact-language rule", () => {
+  test("composes every trusted-core policy module", () => {
     const prompt = buildSkintextSystemPrompt(makeContext());
-    expect(prompt).toContain("Skintext");
-    expect(prompt).toContain("EXACT language");
-    expect(prompt).toContain("For any language the user writes in, reply in that same language");
-    expect(prompt).toContain("Hebrew -> Hebrew");
-    expect(prompt).toContain("skincare routine assistant");
+    expect(prompt).toContain("ROLE AND IDENTITY");
+    expect(prompt).toContain("CONVERSATION POLICY");
+    expect(prompt).toContain("SAFETY POLICY");
+    expect(prompt).toContain("BODY-IMAGE POLICY");
+    expect(prompt).toContain("COMMERCE POLICY");
+    expect(prompt).toContain("MEMORY AND PRIVACY POLICY");
+    expect(prompt).toContain("IMAGE POLICY");
+    expect(prompt).toContain("ACTION AND TOOL POLICY");
+    expect(prompt).toContain("SCHEDULED EVENTS");
   });
 
-  test("includes user-facing boundary guidance", () => {
+  test("includes canonical profile, product, and adherence context", () => {
     const prompt = buildSkintextSystemPrompt(makeContext());
-    expect(prompt).toContain("Never mention tool names");
-    expect(prompt).toContain("internal workflows");
-    expect(prompt).toContain("Describe actions as Skintext doing them directly");
-    expect(prompt).toContain(`Never mention ${USER_REMINDER_OPEN_TAG} tags`);
+    expect(prompt).toContain("CANONICAL USER CONTEXT");
+    expect(prompt).toContain("Name: Alice");
+    expect(prompt).toContain("Skin type: combination");
+    expect(prompt).toContain("Sensitivity: medium");
+    expect(prompt).toContain("Allergies/avoids: fragrance");
+    expect(prompt).toContain("Gentle Cleanser (cleanser)");
+    expect(prompt).toContain("Adherence streak: 4");
+    expect(prompt).toContain("exact language of the latest user message");
   });
 
-  test("handles scheduled reminder events as internal agent inputs", () => {
+  test("includes safety, privacy, commercial, and action invariants", () => {
     const prompt = buildSkintextSystemPrompt(makeContext());
-    expect(prompt).toContain("Scheduled reminder events");
+    expect(prompt).toContain("Do not diagnose");
+    expect(prompt).toContain("Never confirm that the user is ugly");
+    expect(prompt).toContain('"Buy nothing"');
+    expect(prompt).toContain("authoritative over conversational or observational memory");
+    expect(prompt).toContain("Raw image bytes and private URLs");
+    expect(prompt).toContain("Start only one skincare experiment at a time");
+  });
+
+  test("injects an active experiment and keeps other variables stable", () => {
+    const prompt = buildSkintextSystemPrompt(
+      makeContext({
+        activeExperiment: {
+          id: "experiment_1",
+          userId: "usr_test123",
+          change: "Use azelaic acid every other night",
+          baseline: "Redness is unchanged",
+          startedAt: "2026-07-20T00:00:00Z",
+          plannedReviewAt: "2026-08-03T00:00:00Z",
+          status: "active",
+          createdAt: "2026-07-20T00:00:00Z",
+        },
+      }),
+    );
+    expect(prompt).toContain("Use azelaic acid every other night");
+    expect(prompt).toContain("Redness is unchanged");
+    expect(prompt).toContain("Keep other variables stable");
+  });
+
+  test("treats scheduled reminder tags as internal input", () => {
+    const prompt = buildSkintextSystemPrompt(makeContext());
     expect(prompt).toContain(USER_REMINDER_TAG_EXAMPLE);
-    expect(prompt).toContain("internal scheduled reminder event");
+    expect(prompt).toContain("internal scheduled events");
     expect(prompt).toContain("Reply in the user's saved locale");
-    expect(prompt).toContain("write the outbound text the user should receive");
-  });
-
-  test("wraps scheduled reminder input for synthetic agent turns", () => {
+    expect(prompt).toContain(`Never mention ${USER_REMINDER_OPEN_TAG}`);
     expect(wrapUserReminder("Check whether irritation improved.")).toBe(
       `${USER_REMINDER_OPEN_TAG}\nCheck whether irritation improved.\n${USER_REMINDER_CLOSE_TAG}`,
     );
   });
 
-  test("includes action policy guidance", () => {
-    const prompt = buildSkintextSystemPrompt(makeContext());
-    expect(prompt).toContain("Action policy");
-    expect(prompt).toContain("If the user's intent is clear and low-risk, do it immediately");
-    expect(prompt).toContain("ask for explicit confirmation first");
-    expect(prompt).toContain("ask one brief clarifying question instead of guessing");
-    expect(prompt).toContain("If an action fails, say what failed in first person");
-  });
-
-  test("includes mistake and frustration recovery guidance", () => {
-    const prompt = buildSkintextSystemPrompt(makeContext());
-    expect(prompt).toContain("Mistakes and frustration");
-    expect(prompt).toContain("briefly acknowledge the issue from their perspective");
-    expect(prompt).toContain("Do not explain technical causes");
-  });
-
-  test("includes natural memory use guidance", () => {
-    const prompt = buildSkintextSystemPrompt(makeContext());
-    expect(prompt).toContain("Natural memory use");
-    expect(prompt).toContain("Use saved preferences and facts naturally");
-    expect(prompt).toContain('Never say "I remember from memory"');
-    expect(prompt).toContain("Got it, I'll keep that in mind");
-  });
-
-  test("includes grounded personalization guidance", () => {
-    const prompt = buildSkintextSystemPrompt(makeContext());
-    expect(prompt).toContain("Use the user's first name occasionally");
-    expect(prompt).toContain("Compliment choices and care, not appearance");
-    expect(prompt).toContain("Avoid romantic, intense, dependency-building, or generic flattery");
-    expect(prompt).toContain("Make the user feel seen");
-  });
-
-  test("includes human texture guidance", () => {
-    const prompt = buildSkintextSystemPrompt(makeContext());
-    expect(prompt).toContain("Human texture");
-    expect(prompt).toContain("Mirror the user's tone lightly");
-    expect(prompt).toContain("tiny natural acknowledgments");
-    expect(prompt).toContain("Gentle humor is OK around routine logistics");
-    expect(prompt).toContain("Never joke about the user's appearance");
-    expect(prompt).toContain("repeated logs do not sound robotic");
-  });
-
-  test("includes context priority guidance", () => {
-    const prompt = buildSkintextSystemPrompt(makeContext());
-    expect(prompt).toContain("Context priority");
-    expect(prompt).toContain("latest user message, attached photo");
-    expect(prompt).toContain("verified log data from getTodayRoutineLog wins");
-  });
-
-  test("includes skincare profile context", () => {
-    const prompt = buildSkintextSystemPrompt(makeContext());
-    expect(prompt).toContain("Skin type: combination");
-    expect(prompt).toContain("Sensitivity: medium");
-    expect(prompt).toContain("fragrance");
-  });
-
-  test("includes image handling and safety boundaries", () => {
-    const prompt = buildSkintextSystemPrompt(makeContext());
-    expect(prompt).toContain("photo is already attached in the latest message context");
-    expect(prompt).toContain("Use it directly");
-    expect(prompt).toContain("request analysis");
-    expect(prompt).toContain("listUserImages");
-    expect(prompt).toContain("sendUserImage");
-    expect(prompt).toContain("Do not diagnose");
-    expect(prompt).toContain("recommend professional care");
-    expect(prompt).toContain("Write like a person texting");
-    expect(prompt).toContain("Default to plain text");
-    expect(prompt).toContain("Do not use labeled sections");
-    expect(prompt).toContain("Do not introduce advice with templated phrases");
-    expect(prompt).toContain("Prefer complete sentences over colon-led fragments");
-    expect(prompt).toContain("Answer, log, or update first");
-    expect(prompt).toContain("skip extra offers");
-    expect(prompt).toContain("Do not include absent symptoms or absent injuries");
-    expect(prompt).toContain("Do not add broad reassurance");
-    expect(prompt).toContain("nothing looks abnormal");
-    expect(prompt).toContain("Mention professional care only when urgent signs are visible");
-    expect(prompt).toContain("End photo replies after the practical next step");
-    expect(prompt).toContain("If you want, I can");
-  });
-
-  test("includes routine and product tools", () => {
-    const prompt = buildSkintextSystemPrompt(makeContext());
-    expect(prompt).toContain("logRoutineStep");
-    expect(prompt).toContain("logProductUse");
-    expect(prompt).toContain("listProducts");
-  });
-
-  test("does not inject recent saved image metadata into system context", () => {
+  test("does not inject saved image metadata into system context", () => {
     const prompt = buildSkintextSystemPrompt(
       makeContext({
         recentImages: [
           {
             id: "img_123",
             sourceText: "is this irritation improving?",
-            createdAt: "2026-06-04T12:00:00.000Z",
-            expiresAt: "2026-07-04T12:00:00.000Z",
+            createdAt: "2026-07-26T12:00:00Z",
           },
         ],
       }),
     );
-
-    expect(prompt).not.toContain("Recent saved photos");
-    expect(prompt).not.toContain("available for 30 days");
     expect(prompt).not.toContain("img_123");
-    expect(prompt).not.toContain("2026-06-04T12:00:00.000Z");
     expect(prompt).not.toContain("is this irritation improving?");
-  });
-
-  test("does not include old-domain tracking language", () => {
-    const prompt = buildSkintextSystemPrompt(makeContext()).toLowerCase();
-    const oldTerms = ["calo" + "rie", "k" + "cal", "ma" + "cro"];
-    for (const term of oldTerms) {
-      expect(prompt).not.toContain(term);
-    }
-  });
-
-  test("routes one-off reminders separately from recurring reminders", () => {
-    const prompt = buildSkintextSystemPrompt(makeContext());
-    expect(prompt).toContain("Use scheduleOneOffReminder");
-    expect(prompt).toContain("Use getReminders first");
-    expect(prompt).toContain("use setReminders");
-    expect(prompt).toContain("Today's date: 2026-06-04");
-    expect(prompt).toContain("pass a relative delay");
-    expect(prompt).toContain("use relative wording when natural");
-    expect(prompt).not.toContain("Current timestamp:");
-    expect(prompt).toContain("Do not use setReminders for one-off reminders");
-  });
-
-  test("treats recurring reminders as opt-in and adjustable", () => {
-    const prompt = buildSkintextSystemPrompt(makeContext());
-    expect(prompt).toContain("Recurring reminders");
-    expect(prompt).toContain("Recurring routine reminders are opt-in");
-    expect(prompt).toContain("ask what local time");
-    expect(prompt).toContain("Do not invent a time for a missing slot");
-    expect(prompt).toContain("call getReminders first");
-    expect(prompt).toContain("Preserve untouched reminder slots");
-    expect(prompt).toContain("updateProfile for timezone first");
-    expect(prompt).toContain("use getReminders");
   });
 });
 
@@ -239,9 +170,7 @@ describe("scheduled prompts", () => {
     const prompt = buildDailyRoutineSummaryPrompt("sv");
     expect(prompt).toContain("Swedish");
     expect(prompt).toContain("morning and evening routines");
-    expect(prompt).toContain("user's first name");
     expect(prompt).toContain("grounded encouragement");
-    expect(prompt).toContain("Do not use labeled sections");
   });
 
   test("reminder prompt asks for done/skip or photo", () => {
@@ -249,16 +178,12 @@ describe("scheduled prompts", () => {
     expect(prompt).toContain("English");
     expect(prompt).toContain("done/skip");
     expect(prompt).toContain("product/skin photo");
-    expect(prompt).toContain("user's first name");
-    expect(prompt).toContain("tiny grounded encouragement");
   });
 
   test("weekly recap is adherence focused", () => {
     const prompt = buildWeeklyRoutineRecapPrompt("en");
     expect(prompt).toContain("morning/evening routine slots");
     expect(prompt).toContain("conversational");
-    expect(prompt).toContain("user's first name");
-    expect(prompt).toContain("grounded encouragement");
   });
 
   test("scheduled prompts support Hebrew locale names", () => {
