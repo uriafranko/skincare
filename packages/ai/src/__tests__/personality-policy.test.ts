@@ -157,4 +157,14 @@ describe("personality v1 policies", () => {
     expect(prompt).toContain("Keep other variables stable");
     expect(buildConversationPolicy(ctx)).toContain("one to three prioritized actions");
   });
+
+  test("matches the user's live language and conversational voice without caricature", () => {
+    const policy = buildConversationPolicy(context());
+    expect(policy).toContain("latest message as the primary voice reference");
+    expect(policy).toContain("if they naturally code-switch");
+    expect(policy).toContain("slang level");
+    expect(policy).toContain("capitalization, punctuation, and emoji use");
+    expect(policy).toContain("never force or invent slang");
+    expect(policy).toContain("safety, accuracy, and boundaries always win");
+  });
 });

@@ -1,16 +1,25 @@
 import { readFileSync } from "node:fs";
-import { createRequire } from "node:module";
+import inter400Path from "@fontsource/inter/files/inter-latin-400-normal.woff";
+import inter500Path from "@fontsource/inter/files/inter-latin-500-normal.woff";
+import inter600Path from "@fontsource/inter/files/inter-latin-600-normal.woff";
+import inter700Path from "@fontsource/inter/files/inter-latin-700-normal.woff";
 import { Attachment, Divider, Heading, Row, Section, Text } from "@message-ui/components";
 import { createElement, type ReactNode } from "react";
 import satori from "satori";
 
 const CARD_WIDTH = 420;
 const PNG_SCALE = 2;
-const require = createRequire(import.meta.url);
 
-const fonts = ([400, 500, 600, 700] as const).map((weight) => ({
+const fonts = [
+  [400, inter400Path],
+  [500, inter500Path],
+  [600, inter600Path],
+  [700, inter700Path],
+] as const;
+
+const satoriFonts = fonts.map(([weight, source]) => ({
   name: "Inter",
-  data: readFileSync(require.resolve(`@fontsource/inter/files/inter-latin-${weight}-normal.woff`)),
+  data: typeof source === "string" ? readFileSync(source) : Buffer.from(source),
   weight,
   style: "normal" as const,
 }));
@@ -298,7 +307,7 @@ export async function renderMessageCard(input: MessageCardInput): Promise<Render
   const svg = await satori(cardElement(input, height) as Parameters<typeof satori>[0], {
     width: CARD_WIDTH,
     height,
-    fonts,
+    fonts: satoriFonts,
   });
 
   return {

@@ -6,6 +6,7 @@ export default defineConfig({
   alias: {
     "@": "./src",
   },
+  traceDeps: ["@fontsource/inter"],
   routes: {
     "/**": "./src/index.ts",
   },

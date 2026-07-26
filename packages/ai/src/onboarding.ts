@@ -280,6 +280,9 @@ EXTRACTION INSTRUCTIONS:
 
 REPLY INSTRUCTIONS:
 - Write a short, casual iMessage-style reply.
+- Treat the user's latest message as the voice reference. Reply in the same language and follow their natural language mix if they code-switch.
+- Match their formality, confidently understood regional phrasing, slang level, rhythm, directness, energy, capitalization, punctuation, and emoji use.
+- Use slang only when you understand it and it fits naturally. Do not force slang, caricature a dialect, copy obvious typos, or mirror slurs or abusive language.
 - Prefer one bubble. Use a second bubble only when the reply has two distinct thoughts.
 - Avoid paragraph breaks in onboarding unless the reply is over 240 characters.
 - Do NOT repeat or echo every detail back. Just move on to what's next.

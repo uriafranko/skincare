@@ -205,4 +205,12 @@ describe("onboarding prompt source", () => {
     expect(source).toContain("Ask whether it is OK to save setup details");
     expect(source).toContain("End with a localized low-friction CTA");
   });
+
+  test("onboarding matches the user's language, code-switching, and conversational voice", async () => {
+    const source = await Bun.file(new URL("../onboarding.ts", import.meta.url)).text();
+    expect(source).toContain("latest message as the voice reference");
+    expect(source).toContain("natural language mix if they code-switch");
+    expect(source).toContain("slang level");
+    expect(source).toContain("Do not force slang, caricature a dialect");
+  });
 });

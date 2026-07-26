@@ -11,3 +11,4 @@ apps/*/.vercel/
 .DS_Store
 .workflow-data/
 .swc
+.vercel
