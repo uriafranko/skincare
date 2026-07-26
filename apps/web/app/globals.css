@@ -31,6 +31,23 @@
   }
 }
 
+@keyframes guide-hop {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  42% {
+    transform: translateY(-9px) rotate(-2deg);
+  }
+  72% {
+    transform: translateY(-2px) rotate(1deg);
+  }
+}
+
+.animate-guide-hop {
+  animation: guide-hop 0.52s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
 html {
   scroll-behavior: smooth;
 }

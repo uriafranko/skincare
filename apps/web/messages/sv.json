@@ -19,9 +19,18 @@
     "socialProof": "Byggt för kort, praktisk iMessage-hjälp",
     "conversationLabel": "iMessage",
     "userMessage": "Jag byter hela tiden produkter. Var börjar jag?",
-    "assistantMessage": "Med mindre. Behåll rengöring och fuktkräm i två veckor.",
-    "assistantFollowup": "Om huden känns bra väljer vi ett nästa steg tillsammans.",
-    "privacyNote": "Minns bara det du vill · Radera när du vill"
+    "assistantMessage": "Börja med mindre: rengöring och fuktkräm i två veckor.",
+    "assistantFollowup": "Om huden känns bra väljer vi ett nästa steg.",
+    "privacyNote": "Minns bara det du vill · Radera när du vill",
+    "guideLabel": "Animerad hudvårdsguide från Skintext"
+  },
+  "Guide": {
+    "toggleLabel": "Visa ett annat tips från Skintexts guide",
+    "tips": {
+      "start": "Börja enkelt. Behåll det som fungerar.",
+      "memory": "Din rutin kan ändras. Ditt minne förblir ditt.",
+      "questions": "Frågor är välkomna. Jag håller svaret tydligt."
+    }
   },
   "IMessageButton": {
     "label": "Skriv till Skintext i Meddelanden",

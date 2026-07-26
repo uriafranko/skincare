@@ -5,7 +5,7 @@ export function Footer() {
   const t = useTranslations("Footer");
 
   return (
-    <footer className="w-full border-t border-border/80 py-8">
+    <footer id="site-footer" className="w-full border-t border-border/80 py-8">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-5 px-5 text-center sm:flex-row sm:px-6 sm:text-left">
         <div>
           <p className="font-body text-[15px] font-semibold tracking-[-0.02em] text-primary">

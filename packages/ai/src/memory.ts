@@ -9,6 +9,7 @@ export const mastraStorage = new PostgresStore({
   id: "skintext-postgres",
   connectionString: env.DATABASE_URL,
   schemaName: "mastra",
+  disableInit: process.env.NODE_ENV === "production",
   max: 5,
   idleTimeoutMillis: 10_000,
 });

@@ -19,9 +19,18 @@
     "socialProof": "Built for short, practical iMessage help",
     "conversationLabel": "iMessage",
     "userMessage": "I keep changing products. Where do I start?",
-    "assistantMessage": "With less. Keep cleanser and moisturizer steady for two weeks.",
-    "assistantFollowup": "If your skin stays comfortable, we’ll choose one next step together.",
-    "privacyNote": "Remembers only what you want · Delete anytime"
+    "assistantMessage": "Start with less: cleanser and moisturizer for two weeks.",
+    "assistantFollowup": "If your skin stays comfortable, we’ll choose one next step.",
+    "privacyNote": "Remembers only what you want · Delete anytime",
+    "guideLabel": "Animated Skintext skincare guide"
+  },
+  "Guide": {
+    "toggleLabel": "Show another tip from the Skintext guide",
+    "tips": {
+      "start": "Start small. Keep what works.",
+      "memory": "Your routine can change. Your memory stays yours.",
+      "questions": "Questions are welcome. I’ll keep the answer clear."
+    }
   },
   "IMessageButton": {
     "label": "Text Skintext in Messages",

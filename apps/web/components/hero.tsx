@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { ChromaCharacter } from "./chroma-character";
 import { IMessageButton } from "./imessage-button";
 
 function SkintextMark({ size = "md" }: { size?: "sm" | "md" }) {
@@ -28,45 +29,45 @@ function SkintextMark({ size = "md" }: { size?: "sm" | "md" }) {
   );
 }
 
-function ConversationPreview() {
+function GuideStage() {
   const t = useTranslations("Hero");
 
   return (
-    <div className="relative mx-auto w-full max-w-[410px] lg:mr-0">
+    <div className="relative mx-auto h-[430px] w-full max-w-[440px] lg:mr-0 lg:h-[535px] lg:max-w-[470px]">
       <div
-        className="absolute -inset-8 -z-10 rounded-full bg-[#f5a623]/12 blur-3xl"
+        className="absolute inset-x-8 bottom-4 top-12 -z-10 rounded-[48%] bg-[radial-gradient(circle_at_50%_40%,rgba(245,166,35,0.2),rgba(255,255,255,0.5)_48%,rgba(47,191,99,0.08)_72%,transparent_76%)] blur-xl"
         aria-hidden="true"
       />
-      <div className="rounded-[30px] border border-white/80 bg-white/82 p-3 shadow-[0_28px_80px_rgba(44,40,37,0.12),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-xl sm:p-4">
-        <div className="rounded-[22px] border border-border/75 bg-[#fbfcfb] px-4 py-4 sm:px-5 sm:py-5">
-          <div className="flex items-center gap-2.5 border-b border-border/70 pb-3.5">
-            <SkintextMark size="sm" />
-            <div className="min-w-0">
-              <p className="text-[13px] font-semibold leading-none text-primary">skintext</p>
-              <p className="mt-1 text-[11px] leading-none text-muted">{t("conversationLabel")}</p>
-            </div>
-          </div>
 
-          <div className="space-y-3 pt-4">
-            <p className="ml-auto w-fit max-w-[86%] rounded-[18px] rounded-br-[5px] bg-[#1687f8] px-4 py-2.5 text-[14px] leading-[1.4] text-white shadow-[0_4px_12px_rgba(22,135,248,0.16)]">
-              {t("userMessage")}
-            </p>
-            <div className="max-w-[91%] space-y-1.5">
-              <p className="w-fit rounded-[18px] rounded-bl-[5px] bg-[#e9ecea] px-4 py-2.5 text-[14px] leading-[1.45] text-primary">
-                {t("assistantMessage")}
-              </p>
-              <p className="w-fit rounded-[18px] rounded-tl-[5px] bg-[#e9ecea] px-4 py-2.5 text-[14px] leading-[1.45] text-primary">
-                {t("assistantFollowup")}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-5 flex items-center gap-2 border-t border-border/70 pt-3.5 text-[11px] leading-snug text-secondary">
-            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-            <span>{t("privacyNote")}</span>
+      <div className="absolute left-0 top-7 z-20 w-[190px] rounded-[22px] rounded-br-[6px] border border-white/90 bg-white/92 px-4 py-3.5 text-left shadow-[0_18px_48px_rgba(32,35,33,0.12)] backdrop-blur-xl sm:left-[8%] sm:w-[236px] lg:left-0 lg:top-16">
+        <div className="flex items-center gap-2.5 border-b border-border/70 pb-2.5">
+          <SkintextMark size="sm" />
+          <div className="min-w-0">
+            <p className="text-[12px] font-semibold leading-none text-primary">skintext</p>
+            <p className="mt-1 text-[10px] leading-none text-muted">{t("conversationLabel")}</p>
           </div>
         </div>
+        <p className="mt-3 text-[13px] leading-[1.5] text-primary">{t("assistantMessage")}</p>
+        <p className="mt-1.5 text-[13px] leading-[1.5] text-secondary">{t("assistantFollowup")}</p>
       </div>
+
+      <div className="absolute right-[-2%] top-0 z-10 w-[68%] sm:right-0 sm:w-[76%] lg:right-[-4%] lg:w-[82%]">
+        <ChromaCharacter label={t("guideLabel")} />
+      </div>
+
+      <div className="absolute bottom-5 left-[4%] z-20 inline-flex items-center gap-2 rounded-full border border-white/90 bg-white/88 px-3 py-2 text-[10px] font-medium text-secondary shadow-[0_12px_30px_rgba(32,35,33,0.09)] backdrop-blur-xl sm:text-[11px] lg:left-0 lg:bottom-8">
+        <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+        {t("privacyNote")}
+      </div>
+
+      <div
+        className="absolute right-[8%] top-[16%] h-2 w-2 rounded-full bg-[#f5a623]/75 shadow-[0_0_0_7px_rgba(245,166,35,0.1)]"
+        aria-hidden="true"
+      />
+      <div
+        className="absolute bottom-[18%] right-[2%] h-1.5 w-1.5 rounded-full bg-accent/55 shadow-[0_0_0_6px_rgba(47,191,99,0.08)]"
+        aria-hidden="true"
+      />
     </div>
   );
 }
@@ -101,12 +102,12 @@ export function Hero() {
           </div>
 
           <div className="mt-8 lg:hidden">
-            <ConversationPreview />
+            <GuideStage />
           </div>
         </div>
 
         <div className="hidden lg:block">
-          <ConversationPreview />
+          <GuideStage />
         </div>
       </div>
     </section>
