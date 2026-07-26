@@ -1,7 +1,12 @@
 export const SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS = {
   temporalMarkers: true,
   retrieval: true,
+  reflection: {
+    observationTokens: 50_000,
+  },
+  shareTokenBudget: true,
   observation: {
+    messageTokens: 80_000,
     bufferTokens: false,
     observeAttachments: false,
     instruction:

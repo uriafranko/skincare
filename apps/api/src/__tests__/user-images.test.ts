@@ -23,6 +23,7 @@ type BlobDeletionJob = {
 
 const uploaded: string[] = [];
 const deleted: string[] = [];
+let uploadError: Error | null = null;
 const deleteFailures = new Set<string>();
 let failAllDeletes = false;
 const queuedBlobDeletions: { key: string; reason: string; error?: unknown; retryAfter?: Date }[] =
@@ -41,6 +42,7 @@ mock.module("files-sdk", () => ({
   Files: class {
     async upload(key: string) {
       uploaded.push(key);
+      if (uploadError) throw uploadError;
     }
 
     async delete(key: string) {
@@ -111,6 +113,7 @@ const { deleteAllUserImageBlobs, pruneExpiredUserImageBlobs, saveInboundUserImag
 beforeEach(() => {
   uploaded.length = 0;
   deleted.length = 0;
+  uploadError = null;
   deleteFailures.clear();
   failAllDeletes = false;
   queuedBlobDeletions.length = 0;
@@ -133,6 +136,27 @@ const normalizedImage = {
 };
 
 describe("user image blob storage", () => {
+  test("logs the provider error when a blob upload fails", async () => {
+    uploadError = new Error("blob credentials missing");
+    const logError = mock(() => {});
+    const logSet = mock(() => {});
+
+    await expect(
+      saveInboundUserImage({
+        userId: "usr_test",
+        image: normalizedImage,
+        text: "my cheek today",
+        log: { error: logError, set: logSet } as never,
+      }),
+    ).rejects.toThrow("blob credentials missing");
+
+    expect(logError).toHaveBeenCalledWith(uploadError);
+    expect(logSet).toHaveBeenCalledWith({
+      imageStorageError: { occurred: true, hasBlobKey: true },
+    });
+    expect(savedImages).toEqual([]);
+  });
+
   test("deletes an uploaded blob when saving image metadata fails", async () => {
     saveUserImageImpl = async () => {
       throw new Error("db unavailable");

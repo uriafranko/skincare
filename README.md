@@ -95,9 +95,9 @@ skintext/
 
 1. User texts the Skintext number via iMessage.
 2. Sendblue forwards the message via webhook.
-3. New users establish the 16-17 or 18+ age band, then go through conversational onboarding for skin goals, sensitivities, products, reminders, and service consent.
+3. New users confirm they are 16 or older, then go through conversational onboarding for skin goals, sensitivities, products, reminders, and service consent.
 4. Returning users interact with the AI assistant.
-5. Photos are analyzed transiently by default. Adults can separately opt into 30-day encrypted private-blob retention; retention is unavailable to 16-17 users.
+5. Photos are analyzed transiently by default. Users can separately opt into 30-day encrypted private-blob retention.
 6. Text updates log routine steps, products, reactions, and skips.
 7. Morning and evening reminders are timezone-aware.
 8. End-of-day summaries report AM/PM completion, products used, and noted reactions.

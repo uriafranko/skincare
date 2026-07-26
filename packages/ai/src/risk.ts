@@ -55,17 +55,10 @@ export function shouldOfferPhotoRetention(input: {
   text: string;
   hasImage: boolean;
   riskState: SkintextRiskState;
-  ageBand: "16_17" | "18_plus" | null;
   consented: boolean;
   offerShown: boolean;
 }): boolean {
-  if (
-    !input.hasImage ||
-    input.riskState !== "routine" ||
-    input.ageBand !== "18_plus" ||
-    input.consented ||
-    input.offerShown
-  ) {
+  if (!input.hasImage || input.riskState !== "routine" || input.consented || input.offerShown) {
     return false;
   }
   return !/\b(?:save|store|retain|tracking|delete|privacy|private|forget)\b|(?:לשמור|אל תשמור|פרטיות|מחק)|(?:spara|radera|integritet)/iu.test(

@@ -16,10 +16,7 @@ const { deriveMinimumRiskState, shouldOfferCommunicationStyle, shouldOfferPhotoR
   await import("../risk");
 const { buildSkintextSystemPrompt } = await import("../prompts");
 
-function profile(
-  style: CommunicationStyle = "clear_expert",
-  ageBand: UserProfile["ageBand"] = "18_plus",
-): UserProfile {
+function profile(style: CommunicationStyle = "clear_expert"): UserProfile {
   return {
     id: "usr_test",
     phone: "encrypted",
@@ -35,7 +32,6 @@ function profile(
     allergies: ["fragrance"],
     currentProducts: [],
     routinePreference: "simple",
-    ageBand,
     communicationStyle: style,
     styleOfferState: "chosen",
     photoRetentionConsentedAt: null,
@@ -65,6 +61,7 @@ function context(style: CommunicationStyle = "clear_expert"): AgentContext {
     activeExperiment: null,
     streak: null,
     products: [],
+    recentRoutineLogs: [],
   };
 }
 
@@ -86,23 +83,13 @@ describe("personality v1 policies", () => {
       const ctx = context(style);
       return [
         buildSafetyPolicy(ctx),
-        buildCommercePolicy(ctx),
+        buildCommercePolicy(),
         buildMemoryPolicy(ctx),
         buildImagePolicy(ctx),
         buildBodyImagePolicy(),
       ].join("\n");
     });
     expect(new Set(invariantPolicies).size).toBe(1);
-  });
-
-  test("applies teen body-image, commerce, and photo overrides", () => {
-    const ctx = { ...context(), userProfile: profile("playful_guide", "16_17") };
-    const policy = [buildSafetyPolicy(ctx), buildCommercePolicy(ctx), buildImagePolicy(ctx)].join(
-      "\n",
-    );
-    expect(policy).toContain("age-appropriate language");
-    expect(policy).toContain("do not use targeted or affiliate-driven product persuasion");
-    expect(policy).toContain("Never save this user's photos across sessions");
   });
 
   test("offers wording styles only once on safe, useful non-sensitive turns", () => {
@@ -122,17 +109,15 @@ describe("personality v1 policies", () => {
     ).toBe(false);
   });
 
-  test("offers adult photo retention once without overriding privacy requests", () => {
+  test("offers photo retention once without overriding privacy requests", () => {
     const base = {
       text: "Can you help place this product?",
       hasImage: true,
       riskState: "routine" as const,
-      ageBand: "18_plus" as const,
       consented: false,
       offerShown: false,
     };
     expect(shouldOfferPhotoRetention(base)).toBe(true);
-    expect(shouldOfferPhotoRetention({ ...base, ageBand: "16_17" })).toBe(false);
     expect(shouldOfferPhotoRetention({ ...base, text: "Do not save this photo" })).toBe(false);
     expect(shouldOfferPhotoRetention({ ...base, text: "Save this for tracking" })).toBe(false);
   });
@@ -155,6 +140,7 @@ describe("personality v1 policies", () => {
     expect(prompt).toContain("Never imply human lived experience");
     expect(prompt).toContain("Never manufacture urgency");
     expect(prompt).toContain("Keep other variables stable");
+    expect(prompt).toContain("Never copy the existing profile into an update");
     expect(buildConversationPolicy(ctx)).toContain("one to three prioritized actions");
   });
 

@@ -82,8 +82,8 @@ function asksForCollectedField(message: TranscriptMessage): string | null {
 function fieldIsPresent(field: string, state?: OnboardingState): boolean {
   if (!state) return false;
   switch (field) {
-    case "age_band":
-      return !!state.ageBand;
+    case "age_eligibility":
+      return state.ageEligible === true;
     case "name":
       return !!state.name;
     case "skin_goals":

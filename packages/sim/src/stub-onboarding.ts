@@ -14,7 +14,7 @@ const GREETING_SETUP_REPLY =
   "Hey, I'm Skintext. I'll build a simple routine that fits you. Send your name, skin goal, skin type/sensitivity if known, avoids, products, and if you want reminders, best times. Unsure is fine. OK if I save this so reminders/logs work? You can delete anytime.";
 
 const CONSENT_ONLY_REPLY = "OK if I save this so reminders/logs work? You can delete it anytime.";
-const AGE_GATE_REPLY = "Hey, I'm Skintext. Before we set things up, are you 16-17 or 18+?";
+const AGE_GATE_REPLY = "Hey, I'm Skintext. Before we set things up, are you 16 or older?";
 const UNDER_16_REPLY = "Skintext is for people 16 or older, so I can't continue setup.";
 
 const concernKeywords = [
@@ -97,10 +97,25 @@ function extractName(text: string): string | undefined {
   return name;
 }
 
-function extractAge(text: string): Pick<OnboardingState, "ageBand" | "ageEligible"> {
+function extractAge(text: string, previousBotReply?: string): Pick<OnboardingState, "ageEligible"> {
   const lower = text.toLowerCase();
-  if (/\b18\s*\+|\badult\b|\bvuxen\b|בן\s*18\s*ומעלה|בת\s*18\s*ומעלה/.test(lower)) {
-    return { ageBand: "18_plus", ageEligible: true };
+  const previousAskedEligibility = /\b16\s+(?:or older|eller äldre)\b|16 ומעלה/i.test(
+    previousBotReply ?? "",
+  );
+  if (previousAskedEligibility) {
+    if (/\b(?:yes|yep|yeah|sure|i am|ja)\b|כן|נכון/i.test(lower)) {
+      return { ageEligible: true };
+    }
+    if (/\b(?:no|nope|i'm not|i am not|nej)\b|לא/i.test(lower)) {
+      return { ageEligible: false };
+    }
+  }
+  if (
+    /\b16\s*(?:\+|plus\b|or older\b)|\badult\b|\bvuxen\b|בן\s*16\s*ומעלה|בת\s*16\s*ומעלה/.test(
+      lower,
+    )
+  ) {
+    return { ageEligible: true };
   }
   const match =
     /\b(?:i am|i'm|im|aged?|jag är)\s*(\d{1,2})\b/i.exec(text) ??
@@ -108,7 +123,7 @@ function extractAge(text: string): Pick<OnboardingState, "ageBand" | "ageEligibl
   const age = match?.[1] ? Number(match[1]) : null;
   if (age === null || age > 120) return {};
   if (age < 16) return { ageEligible: false };
-  return { ageBand: age <= 17 ? "16_17" : "18_plus", ageEligible: true };
+  return { ageEligible: true };
 }
 
 function extractSkinType(lower: string): SkinType | undefined {
@@ -241,7 +256,7 @@ export function extractStubOnboarding(
 ): Partial<OnboardingState> {
   const lower = text.toLowerCase();
   const extracted: Partial<OnboardingState> = {};
-  Object.assign(extracted, extractAge(text));
+  Object.assign(extracted, extractAge(text, state.lastBotReply));
 
   if (!state.detectedLocale && /\p{Script=Hebrew}/u.test(text)) {
     extracted.detectedLocale = "he";
@@ -290,7 +305,7 @@ export function buildStubReply(state: OnboardingState, isFirstMessage: boolean):
   }
 
   const missing = getMissingOnboardingFields(state);
-  if (missing.includes("age_band")) return AGE_GATE_REPLY;
+  if (missing.includes("age_eligibility")) return AGE_GATE_REPLY;
   if (isFirstMessage && missing.length > 1) {
     return GREETING_SETUP_REPLY;
   }
@@ -321,7 +336,7 @@ export function advanceStubOnboarding(
           ageEligible: false,
           detectedLocale: rawExtracted.detectedLocale,
         }
-      : !state.ageBand && !rawExtracted.ageBand
+      : state.ageEligible !== true && rawExtracted.ageEligible !== true
         ? { detectedLocale: rawExtracted.detectedLocale }
         : rawExtracted;
   const merged = mergeOnboardingState(state, extracted);

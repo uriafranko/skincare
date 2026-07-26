@@ -26,7 +26,6 @@ export const users = pgTable(
     allergies: text("allergies").notNull(),
     currentProducts: text("current_products").notNull(),
     routinePreference: text("routine_preference").notNull(),
-    ageBand: text("age_band"),
     communicationStyle: text("communication_style").notNull().default("clear_expert"),
     styleOfferState: text("style_offer_state").notNull().default("pending"),
     photoRetentionConsentedAt: text("photo_retention_consented_at"),
@@ -107,7 +106,6 @@ export const onboardingStates = pgTable(
       .primaryKey()
       .references(() => users.id, { onDelete: "cascade" }),
     name: text("name"),
-    ageBand: text("age_band"),
     ageEligible: boolean("age_eligible"),
     timezoneConfirmed: boolean("timezone_confirmed"),
     timezone: text("timezone"),

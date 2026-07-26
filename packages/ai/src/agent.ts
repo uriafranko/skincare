@@ -7,7 +7,7 @@ import {
   createSkintextRequestContext,
   getSkintextRuntime,
   type SkintextRuntime,
-  skintextThreadId,
+  skintextMemoryOptions,
 } from "./runtime";
 import { deleteAccountTool } from "./tools/delete-account";
 import {
@@ -17,7 +17,6 @@ import {
   startExperimentTool,
 } from "./tools/experiments";
 import { exportDataTool } from "./tools/export-data";
-import { getUserProfile } from "./tools/get-profile";
 import {
   cancelOneOffReminderTool,
   listOneOffRemindersTool,
@@ -58,7 +57,6 @@ const coreTools = {
   deleteAllProducts: deleteAllProductsTool,
   listProducts: listProductsTool,
   logProductUse: logProductUseTool,
-  getUserProfile,
   updateProfile: updateProfileTool,
   setReminders: setRemindersTool,
   getReminders: getRemindersTool,
@@ -132,18 +130,13 @@ export async function runSkintextAgent(input: RunSkintextAgentInput, runtime: Sk
   const agent = mastra.getAgent("skintextAgent");
   const result = await agent.generate(buildUserMessage(input), {
     requestContext: createSkintextRequestContext(runtime),
-    memory: {
-      thread: skintextThreadId(runtime.userId),
-      resource: runtime.userId,
-      ...(input.hasImage ? { options: { readOnly: true } } : {}),
-    },
+    memory: skintextMemoryOptions(runtime.userId, input.hasImage),
     maxSteps: 15,
   });
 
   if (input.hasImage && !runtime.accountDeleted && !runtime.clearMemoryAfterRun) {
     if (
       runtime.photoRetentionEnabled &&
-      runtime.agentContext.userProfile?.ageBand !== "16_17" &&
       runtime.saveCurrentPhoto &&
       !runtime.currentPhotoSaved &&
       !runtime.skipCurrentPhotoRetention

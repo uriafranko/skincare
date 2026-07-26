@@ -32,8 +32,11 @@ app.post("/webhooks/sendblue", async (c) => {
     const msg = parseInbound(c.req.raw.headers, await c.req.json());
     if (!msg) return c.json({ ok: true });
 
-    markRead(msg.phone);
+    const readReceipt = markRead(msg.phone).catch((error) => {
+      log.error(error as Error);
+    });
     await handleIncoming(msg.phone, msg.text, msg.imageUrl, msg.messageId);
+    await readReceipt;
     return c.json({ ok: true });
   } catch (error) {
     log.error(error as Error);

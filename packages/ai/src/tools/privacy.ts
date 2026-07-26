@@ -23,7 +23,6 @@ export const getPersonalizationSummaryTool = createTool({
       found: true,
       profile: {
         name: profile.name,
-        ageBand: profile.ageBand,
         skinType: profile.skinType,
         sensitivity: profile.sensitivity,
         concerns: profile.concerns,
@@ -40,8 +39,8 @@ export const getPersonalizationSummaryTool = createTool({
       })),
       activeExperiment,
       photoRetention: {
-        available: profile.ageBand !== "16_17",
-        enabled: !!profile.photoRetentionConsentedAt && profile.ageBand !== "16_17",
+        available: true,
+        enabled: !!profile.photoRetentionConsentedAt,
         consentVersion: profile.photoRetentionConsentVersion,
         offerShown: !!profile.photoRetentionOfferShownAt,
       },
@@ -79,7 +78,7 @@ export const clearConversationHistoryTool = createTool({
 export const setPhotoRetentionTool = createTool({
   id: "set-photo-retention",
   description:
-    "Enable or disable retention of future user photos. This is separate from general service consent and is unavailable to users aged 16-17.",
+    "Enable or disable retention of future user photos. Photo-retention consent is separate from general service consent.",
   inputSchema: z.object({
     enabled: z.boolean(),
   }),
@@ -87,12 +86,6 @@ export const setPhotoRetentionTool = createTool({
     const runtime = getSkintextRuntime(context.requestContext);
     const profile = runtime.agentContext.userProfile;
     if (!profile) return { updated: false, message: "User not found." };
-    if (enabled && profile.ageBand === "16_17") {
-      return {
-        updated: false,
-        message: "Cross-session photo retention is unavailable for users aged 16-17.",
-      };
-    }
 
     const now = enabled ? new Date().toISOString() : "";
     await updateUser(runtime.userId, {
@@ -118,7 +111,7 @@ export const setPhotoRetentionTool = createTool({
 export const saveCurrentPhotoTool = createTool({
   id: "save-current-photo-for-tracking",
   description:
-    "Save the photo attached to the current message after an adult user explicitly consents to 30-day photo retention. Never call without an attached current photo and explicit consent.",
+    "Save the photo attached to the current message after the user explicitly consents to 30-day photo retention. Never call without an attached current photo and explicit consent.",
   inputSchema: z.object({
     consentToThirtyDayRetention: z.literal(true),
   }),
@@ -126,12 +119,6 @@ export const saveCurrentPhotoTool = createTool({
     const runtime = getSkintextRuntime(context.requestContext);
     const profile = runtime.agentContext.userProfile;
     if (!profile) return { saved: false, message: "User not found." };
-    if (profile.ageBand === "16_17") {
-      return {
-        saved: false,
-        message: "Cross-session photo retention is unavailable for users aged 16-17.",
-      };
-    }
     if (!runtime.hasImage || !runtime.saveCurrentPhoto) {
       return { saved: false, message: "There is no current photo available to save." };
     }

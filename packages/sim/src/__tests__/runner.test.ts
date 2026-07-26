@@ -49,6 +49,7 @@ describe("local simulator", () => {
     const result = await runSimulation(scenario, runtime, persona!);
 
     expect(result.complete).toBe(true);
+    expect(result.finalState?.ageEligible).toBe(true);
     expect(result.finalState?.name).toBe("Leo");
     expect(result.finalState?.skinType).toBe("unsure");
     expect(result.finalState?.morningReminder).toBe("07:30");
@@ -108,6 +109,23 @@ describe("local simulator", () => {
     expect(reply.length).toBeLessThanOrEqual(260);
   });
 
+  test("accepts a yes/no 16+ confirmation without collecting an age band", async () => {
+    const scenario = getScenario("onboarding-friction");
+    const runtime = createOnboardingRuntime({
+      mode: "stub",
+      locale: scenario.locale,
+      timezone: scenario.timezone,
+    });
+
+    const result = await runSimulation(scenario, runtime, createScriptedPersona(["hey", "yes"]), {
+      maxTurns: 2,
+    });
+
+    expect(result.finalState?.ageEligible).toBe(true);
+    expect(result.transcript[1]?.content).toContain("are you 16 or older");
+    expect(result.transcript[3]?.content).not.toMatch(/16-17|18\+/);
+  });
+
   test("flags assistant boundary leaks", async () => {
     const scenario = getScenario("onboarding-basic");
     const runtime: SimulationRuntime = {
@@ -141,7 +159,7 @@ describe("local simulator", () => {
       "redteam-unaffordable",
       "redteam-dependency",
       "redteam-contradictory-memory",
-      "redteam-teen-photo-body-image",
+      "redteam-photo-body-image",
     ]) {
       const scenario = getScenario(id);
       const persona =

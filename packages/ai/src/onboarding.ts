@@ -7,19 +7,12 @@ import { getDefaultModelName } from "./models";
 import { normalizeAssistantText } from "./text";
 
 const extractionSchema = z.object({
-  ageBand: z
-    .enum(["16_17", "18_plus"])
-    .nullable()
-    .optional()
-    .describe(
-      "The user's stated age band. 16 or 17 maps to 16_17; age 18 or older or an explicit adult statement maps to 18_plus. Never infer it.",
-    ),
   ageEligible: z
     .boolean()
     .nullable()
     .optional()
     .describe(
-      "False only when the user explicitly says they are under 16. True when their explicit age is 16 or older. Null when age is not established.",
+      "True only when the user confirms they are at least 16. False when they say they are under 16. Null when eligibility is not established.",
     ),
   name: z.string().nullable().describe("User's first name. Null if not mentioned."),
   skinType: z
@@ -107,7 +100,7 @@ const CONSENT_ASK_DESCRIPTION =
   "Ask whether it is OK to save setup details so reminders/logs work, and say they can delete it anytime.";
 const CONSENT_ONLY_REPLY_INSTRUCTION = `${CONSENT_ASK_DESCRIPTION} Ask this in the user's language, with no other setup asks.`;
 
-const ENGLISH_AGE_GATE_REPLY = "Hey, I'm Skintext. Before we set things up, are you 16-17 or 18+?";
+const ENGLISH_AGE_GATE_REPLY = "Hey, I'm Skintext. Before we set things up, are you 16 or older?";
 const ENGLISH_UNDER_16_REPLY = "Skintext is for people 16 or older, so I can't continue setup.";
 
 function formatList(values?: readonly string[]): string | null {
@@ -132,7 +125,7 @@ function hasSetupBasics(state: OnboardingState, extracted: Partial<OnboardingSta
   const reminderTimezoneReady =
     !hasReminder || !!(extracted.timezoneConfirmed ?? state.timezoneConfirmed);
   return (
-    !!(extracted.ageBand ?? state.ageBand) &&
+    (extracted.ageEligible ?? state.ageEligible) === true &&
     !!(extracted.name ?? state.name) &&
     (concerns.length > 0 || goals.length > 0) &&
     !!(extracted.skinType ?? state.skinType ?? extracted.sensitivity ?? state.sensitivity) &&
@@ -142,7 +135,7 @@ function hasSetupBasics(state: OnboardingState, extracted: Partial<OnboardingSta
 
 function describeState(state: OnboardingState): string {
   const parts: string[] = [];
-  if (state.ageBand) parts.push(`age band: ${state.ageBand}`);
+  if (state.ageEligible === true) parts.push("age eligibility: 16+ confirmed");
   if (state.name) parts.push(`name: ${state.name}`);
   if (state.skinType) parts.push(`skin type: ${state.skinType}`);
   if (state.sensitivity) parts.push(`sensitivity: ${state.sensitivity}`);
@@ -165,7 +158,7 @@ function describeState(state: OnboardingState): string {
 
 function describeMissing(state: OnboardingState): string {
   const missing: string[] = [];
-  if (!state.ageBand) missing.push("age band (16-17 or 18+)");
+  if (state.ageEligible !== true) missing.push("confirmation that the user is 16 or older");
   if (!state.name) missing.push("name");
   if (!state.concerns?.length && !state.goals?.length) missing.push("main skin goals or concerns");
   if (!state.skinType && !state.sensitivity) {
@@ -213,11 +206,11 @@ export async function processOnboardingMessage(
 
   let situation: string;
 
-  if (!state.ageBand) {
+  if (state.ageEligible !== true) {
     situation = `Age eligibility must be established before collecting or asking for any other setup information.
-- If this message does not establish age, ask only whether the user is 16-17 or 18+. Do not ask for their exact birthdate.
+- If this message does not establish eligibility, ask only whether the user is 16 or older. Do not ask for their exact age or birthdate.
 - If the user explicitly says they are under 16, explain briefly that Skintext is for people 16 or older and that setup cannot continue. Do not ask any other question.
-- If the message establishes they are 16-17 or 18+, acknowledge it briefly and ask for only the next one or two missing setup essentials. Extract any other details they volunteered, but do not ask for more than those next essentials.
+- If the message establishes they are 16 or older, acknowledge it briefly and ask for only the next one or two missing setup essentials. Extract any other details they volunteered, but do not ask for more than those next essentials.
 Keep this to one short bubble.`;
   } else if (ctx.isFirstMessage) {
     situation = `This is the user's FIRST message. Welcome them as Skintext, a skincare routine assistant in iMessage.
@@ -266,9 +259,9 @@ SITUATION: ${situation}
 
 EXTRACTION INSTRUCTIONS:
 - Extract values the user stated or confirmed in this message. Use null for anything not addressed.
-- ageBand: map an explicitly stated age of 16 or 17 to "16_17"; map age 18 or older, or an explicit statement that they are an adult, to "18_plus". Never infer age from appearance, language, phone number, products, or concerns.
-- ageEligible: set false only when the user explicitly establishes that they are under 16; set true for an explicit age of 16 or older; otherwise null.
-- Never request or extract an exact birthdate.
+- ageEligible: set true when the user explicitly confirms they are 16 or older, including an affirmative response to a previous 16+ question or a volunteered age of 16 or older. Set false when they explicitly say they are under 16, including a negative response to a previous 16+ question. Otherwise use null.
+- Never infer eligibility from appearance, language, phone number, products, or concerns.
+- Never request or extract an exact age or birthdate.
 - If your previous message asked the user to confirm something and the user replies affirmatively (yes, yeah, yep, ja, japp, oui, si, ok, sure, כן, etc.), mark consented as true only when the confirmation is about data storage.
 - skinType: use "unsure" if they say they do not know.
 - sensitivity: use "unsure" if they say they do not know.
@@ -304,12 +297,8 @@ REPLY INSTRUCTIONS:
   }
 
   const extracted: Partial<OnboardingState> = {};
-  if (output.ageBand) {
-    extracted.ageBand = output.ageBand;
-    extracted.ageEligible = true;
-  } else if (output.ageEligible === false) {
-    extracted.ageEligible = false;
-  }
+  if (output.ageEligible === true) extracted.ageEligible = true;
+  if (output.ageEligible === false) extracted.ageEligible = false;
   if (output.name) extracted.name = output.name;
   if (output.skinType) extracted.skinType = output.skinType;
   if (output.sensitivity) extracted.sensitivity = output.sensitivity;

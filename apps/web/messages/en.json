@@ -141,7 +141,7 @@
     "intro": "Skintext (\"Skintext\", \"we\", \"us\") is committed to protecting your privacy. This policy explains what data we collect, how we use it, and your rights.",
     "dataCollection": {
       "title": "Data We Collect",
-      "body": "When you use Skintext, we collect:\n\n• Your phone number (to identify your account and deliver messages via iMessage)\n• Your age band (16-17 or 18+), never your exact birthdate\n• Your name, communication style, skin goals, skin type if shared, sensitivities, allergies, and current products\n• Routine updates, product descriptions, reminders, timezone, and country for localization\n• Routine logs, saved products, and one-variable skincare experiments\n• Sanitized conversation history, which stores text and a generic marker for photo turns but not image bytes or private image URLs"
+      "body": "When you use Skintext, we collect:\n\n• Your phone number (to identify your account and deliver messages via iMessage)\n• Your confirmation that you are at least 16 during setup, never your exact age or birthdate\n• Your name, communication style, skin goals, skin type if shared, sensitivities, allergies, and current products\n• Routine updates, product descriptions, reminders, timezone, and country for localization\n• Routine logs, saved products, and one-variable skincare experiments\n• Sanitized conversation history, which stores text and a generic marker for photo turns but not image bytes or private image URLs"
     },
     "dataUsage": {
       "title": "How We Use Your Data",
@@ -149,7 +149,7 @@
     },
     "dataStorage": {
       "title": "Data Storage & Security",
-      "body": "Connections to our website and services use TLS (HTTPS). Your phone number is encrypted at rest using AES. Message history, routine log content, onboarding data during setup, saved products, experiments, and similar payloads are stored as encrypted application-layer blobs. Profile fields are stored with strict access controls. Photos are processed for the current reply by default and are not added to conversation history. Adults may separately opt into encrypted private photo retention for 30 days. Photo retention is unavailable to users aged 16-17."
+      "body": "Connections to our website and services use TLS (HTTPS). Your phone number is encrypted at rest using AES. Message history, routine log content, onboarding data during setup, saved products, experiments, and similar payloads are stored as encrypted application-layer blobs. Profile fields are stored with strict access controls. Photos are processed for the current reply by default and are not added to conversation history. Users may separately opt into encrypted private photo retention for 30 days."
     },
     "thirdParty": {
       "title": "Third-Party Services",
@@ -157,11 +157,11 @@
     },
     "retention": {
       "title": "Data Retention",
-      "body": "We retain profile data, routine logs, products, experiments, and sanitized conversation history while your account is active unless you delete them. Adult photos retained with separate consent expire after 30 days. Turning off photo retention affects future photos; saved photos can be deleted separately. Deleting saved photos does not remove text derived from earlier photo discussions unless conversation history is also cleared."
+      "body": "We retain profile data, routine logs, products, experiments, and sanitized conversation history while your account is active unless you delete them. Photos retained with separate consent expire after 30 days. Turning off photo retention affects future photos; saved photos can be deleted separately. Deleting saved photos does not remove text derived from earlier photo discussions unless conversation history is also cleared."
     },
     "rights": {
       "title": "Your Rights",
-      "body": "You have the right to:\n\n• Ask what Skintext remembers and request a copy of your data\n• Correct or forget profile fields and delete individual or all saved products\n• Enable or disable future photo retention if you are 18+, and delete saved photos\n• Clear conversation history after confirmation without deleting your profile\n• Request deletion of your account, including experiments and privacy preferences\n• Withdraw consent at any time"
+      "body": "You have the right to:\n\n• Ask what Skintext remembers and request a copy of your data\n• Correct or forget profile fields and delete individual or all saved products\n• Enable or disable future photo retention, and delete saved photos\n• Clear conversation history after confirmation without deleting your profile\n• Request deletion of your account, including experiments and privacy preferences\n• Withdraw consent at any time"
     },
     "contact": {
       "title": "Contact",
@@ -174,11 +174,11 @@
     "intro": "By using Skintext (\"Skintext\", \"the Service\"), you agree to these terms. Please read them carefully.",
     "eligibility": {
       "title": "Eligibility",
-      "body": "You must be at least 16 years old and have access to an iPhone with iMessage to use Skintext. We ask only whether you are 16-17 or 18+. Users aged 16-17 receive additional safeguards and cannot enable cross-session photo retention."
+      "body": "You must be at least 16 years old and have access to an iPhone with iMessage to use Skintext. We ask only whether you are 16 or older, not for your exact age or birthdate."
     },
     "service": {
       "title": "The Service",
-      "body": "Skintext is an AI-powered skincare routine assistant that operates through iMessage. The service includes routine logging, product notes, communication preferences, one-variable skincare experiments, summaries, adherence recaps, reminders, transient photo processing, and chat-based memory controls. Adult photo retention is optional and requires separate consent."
+      "body": "Skintext is an AI-powered skincare routine assistant that operates through iMessage. The service includes routine logging, product notes, communication preferences, one-variable skincare experiments, summaries, adherence recaps, reminders, transient photo processing, and chat-based memory controls. Photo retention is optional and requires separate consent."
     },
     "accuracy": {
       "title": "Skincare Guidance",

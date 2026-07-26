@@ -1,5 +1,4 @@
 import type {
-  AgeBand,
   CommunicationStyle,
   RoutinePreference,
   SensitivityLevel,
@@ -64,7 +63,6 @@ function pendingUserValues(
     allergies: stringifyList([]),
     currentProducts: stringifyList([]),
     routinePreference: "simple",
-    ageBand: null,
     communicationStyle: "clear_expert",
     styleOfferState: "pending",
     photoRetentionConsentedAt: null,
@@ -133,7 +131,6 @@ export async function getUser(userId: string): Promise<UserProfile | null> {
     allergies: parseList(d.allergies),
     currentProducts: parseList(d.currentProducts),
     routinePreference: String(d.routinePreference ?? "simple") as RoutinePreference,
-    ageBand: d.ageBand ? (String(d.ageBand) as AgeBand) : null,
     communicationStyle: String(d.communicationStyle ?? "clear_expert") as CommunicationStyle,
     styleOfferState: String(d.styleOfferState ?? "pending") as StyleOfferState,
     photoRetentionConsentedAt: d.photoRetentionConsentedAt
@@ -175,7 +172,6 @@ export async function createUser(
       allergies: stringifyList(profile.allergies),
       currentProducts: stringifyList(profile.currentProducts),
       routinePreference: profile.routinePreference,
-      ageBand: profile.ageBand,
       communicationStyle: profile.communicationStyle,
       styleOfferState: profile.styleOfferState,
       photoRetentionConsentedAt: profile.photoRetentionConsentedAt,
@@ -202,7 +198,6 @@ export async function createUser(
         allergies: stringifyList(profile.allergies),
         currentProducts: stringifyList(profile.currentProducts),
         routinePreference: profile.routinePreference,
-        ageBand: profile.ageBand,
         communicationStyle: profile.communicationStyle,
         styleOfferState: profile.styleOfferState,
         photoRetentionConsentedAt: profile.photoRetentionConsentedAt,
@@ -262,9 +257,6 @@ export async function updateUser(
         break;
       case "routinePreference":
         updates.routinePreference = value;
-        break;
-      case "ageBand":
-        updates.ageBand = value || null;
         break;
       case "communicationStyle":
         updates.communicationStyle = value;

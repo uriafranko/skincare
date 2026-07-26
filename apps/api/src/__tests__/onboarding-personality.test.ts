@@ -19,8 +19,8 @@ describe("age-gated onboarding eligibility", () => {
     const deletePendingUser = mock(() => Promise.resolve());
     expect(
       await rejectUnder16PendingOnboarding({
-        extracted: { ageBand: "16_17", ageEligible: true },
-        userId: "usr_teen",
+        extracted: { ageEligible: true },
+        userId: "usr_eligible",
         reply: "Continue",
         deletePendingUser,
       }),

@@ -60,6 +60,24 @@ function executeTool(
   ).execute(input, { requestContext });
 }
 
+function storedProfile(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "usr_test",
+    name: "Uria",
+    timezone: "Asia/Jerusalem",
+    timezoneConfirmed: false,
+    skinType: "unsure",
+    sensitivity: "unsure",
+    concerns: ["want smoother face"],
+    goals: ["smoother face"],
+    allergies: [],
+    currentProducts: [],
+    routinePreference: "simple",
+    communicationStyle: "clear_expert",
+    ...overrides,
+  };
+}
+
 describe("scheduleOneOffReminder", () => {
   beforeEach(() => {
     createOneOffReminder.mockClear();
@@ -442,5 +460,53 @@ describe("timezone profile updates", () => {
       }),
     );
     expect(updateUser).not.toHaveBeenCalled();
+  });
+
+  test("persists only the stated timezone when a model copies and mutates the full profile", async () => {
+    const user = storedProfile();
+    const runtime = {
+      inputText: "Turn off photo retention - I'm in jersalem",
+      agentContext: {
+        timezone: "Asia/Jerusalem",
+        localDate: "2026-07-26",
+        userName: "Uria",
+        userProfile: { ...user },
+      },
+    };
+    getUser.mockResolvedValueOnce(user);
+
+    const result = await executeTool(
+      updateProfileTool,
+      {
+        name: "Uria",
+        timezone: "Asia/Jerusalem",
+        skinType: "unsure",
+        sensitivity: "unsure",
+        concerns: ["want smoother face"],
+        goals: ["smoother face"],
+        allergies: [],
+        currentProducts: [],
+        routinePreference: "simple",
+        communicationStyle: "clear_expert",
+        clearFields: ["name"],
+      },
+      runtime,
+    );
+
+    expect(updateUser).toHaveBeenCalledTimes(1);
+    expect(updateUser).toHaveBeenCalledWith("usr_test", {
+      timezone: "Asia/Jerusalem",
+      timezoneConfirmed: "true",
+    });
+    expect(result).toEqual(
+      expect.objectContaining({
+        updated: true,
+        changes: ["timezone: Asia/Jerusalem"],
+        rejectedChanges: [
+          "name was not cleared because the latest user message did not explicitly request it",
+        ],
+      }),
+    );
+    expect(runtime.agentContext.userProfile.name).toBe("Uria");
   });
 });

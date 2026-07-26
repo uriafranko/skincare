@@ -4,8 +4,6 @@ export type SensitivityLevel = "low" | "medium" | "high" | "unsure";
 
 export type RoutinePreference = "simple" | "standard" | "detailed";
 
-export type AgeBand = "16_17" | "18_plus";
-
 export type CommunicationStyle =
   | "clear_expert"
   | "gentle_coach"
@@ -113,7 +111,6 @@ export interface UserProfile {
   allergies: string[];
   currentProducts: string[];
   routinePreference: RoutinePreference;
-  ageBand: AgeBand | null;
   communicationStyle: CommunicationStyle;
   styleOfferState: StyleOfferState;
   photoRetentionConsentedAt: string | null;
@@ -126,7 +123,6 @@ export interface UserProfile {
 }
 
 export interface OnboardingState {
-  ageBand?: AgeBand;
   ageEligible?: boolean;
   name?: string;
   timezoneConfirmed?: boolean;
@@ -146,7 +142,7 @@ export interface OnboardingState {
 }
 
 export type OnboardingFieldKey =
-  | "age_band"
+  | "age_eligibility"
   | "name"
   | "skin_goals"
   | "skin_profile"
@@ -155,7 +151,7 @@ export type OnboardingFieldKey =
 
 export function getMissingFields(state: OnboardingState): OnboardingFieldKey[] {
   const missing: OnboardingFieldKey[] = [];
-  if (!state.ageBand) missing.push("age_band");
+  if (state.ageEligible !== true) missing.push("age_eligibility");
   if (!state.name) missing.push("name");
   if (!state.concerns?.length && !state.goals?.length) missing.push("skin_goals");
   if (!state.skinType && !state.sensitivity) missing.push("skin_profile");
@@ -186,6 +182,7 @@ export interface AgentContext {
   activeExperiment: RoutineExperiment | null;
   streak: number | null;
   products: ProductEntry[];
+  recentRoutineLogs: { date: string; log: DailyRoutineLog }[];
 }
 
 export type RoutineExperimentStatus = "active" | "completed" | "stopped";

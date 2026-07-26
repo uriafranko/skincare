@@ -21,6 +21,7 @@ import {
   getActiveRoutineExperiment,
   getAdherenceStreak,
   getAllProducts,
+  getWeeklyRoutineLogs,
   updateUser,
 } from "@skintext/db";
 import type { AgentContext, UserProfile } from "@skintext/shared";
@@ -58,12 +59,13 @@ export async function runAgentMessage(
   text: string,
   options: RunAgentMessageOptions = {},
 ): Promise<string | null> {
-  const [streak, products, activeExperiment] = await Promise.all([
+  const localDate = localDateString(user.timezone);
+  const [streak, products, activeExperiment, recentRoutineLogs] = await Promise.all([
     getAdherenceStreak(user.id),
     getAllProducts(user.id),
     getActiveRoutineExperiment(user.id),
+    getWeeklyRoutineLogs(user.id, localDate),
   ]);
-  const localDate = localDateString(user.timezone);
   const hasImage = options.hasImage ?? !!options.imageUrl;
   const isScheduledEvent = text.includes(USER_REMINDER_OPEN_TAG);
   const riskState = deriveMinimumRiskState(text);
@@ -78,7 +80,6 @@ export async function runAgentMessage(
     text,
     hasImage,
     riskState,
-    ageBand: user.ageBand,
     consented: !!user.photoRetentionConsentedAt,
     offerShown: !!user.photoRetentionOfferShownAt,
   });
@@ -89,7 +90,6 @@ export async function runAgentMessage(
       policyVersion: PERSONALITY_POLICY_VERSION,
       riskState,
       communicationStyle: user.communicationStyle,
-      ageBand: user.ageBand,
       activeExperiment: !!activeExperiment,
     },
   });
@@ -110,6 +110,7 @@ export async function runAgentMessage(
     activeExperiment,
     streak: streak.current > 0 ? streak.current : null,
     products,
+    recentRoutineLogs,
   };
   const runtime: SkintextRuntime = {
     userId: user.id,
@@ -126,7 +127,7 @@ export async function runAgentMessage(
     scheduleOneOffReminderWorkflow: options.scheduleOneOffReminderWorkflow,
     cancelOneOffReminderWorkflow: options.cancelOneOffReminderWorkflow,
     syncRecurringReminderSchedule: options.syncRecurringReminderSchedule,
-    photoRetentionEnabled: user.ageBand !== "16_17" && !!user.photoRetentionConsentedAt,
+    photoRetentionEnabled: !!user.photoRetentionConsentedAt,
   };
 
   const result = await runSkintextAgent({ text, imageUrl: options.imageUrl, hasImage }, runtime);
@@ -156,7 +157,6 @@ export async function runAgentMessage(
       policyVersion: PERSONALITY_POLICY_VERSION,
       style: user.communicationStyle,
       riskState,
-      ageBand: user.ageBand,
       activeExperiment: !!activeExperiment,
       photoRetentionEnabled: runtime.photoRetentionEnabled ?? false,
       photoRetained: !!runtime.currentPhotoSaved,

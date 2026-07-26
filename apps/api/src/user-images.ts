@@ -93,9 +93,14 @@ export async function saveInboundUserImage({
   const expiresAt = new Date(now.getTime() + USER_IMAGE_TTL_MS);
   const files = getFiles();
 
-  await files.upload(key, image.buffer, {
-    contentType: image.contentType,
-  });
+  try {
+    await files.upload(key, image.buffer, {
+      contentType: image.contentType,
+    });
+  } catch (error) {
+    logStorageError(log, error, key);
+    throw error;
+  }
 
   const record: UserImage = {
     id,

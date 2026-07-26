@@ -54,7 +54,6 @@ export function buildConversationPolicy(ctx: AgentContext): string {
 }
 
 export function buildSafetyPolicy(ctx: AgentContext): string {
-  const teen = ctx.userProfile?.ageBand === "16_17";
   return `SAFETY POLICY
 Minimum risk state for this turn: ${ctx.riskState}.
 - Always perform your own safety assessment. A routine minimum is not evidence that symptoms are safe.
@@ -66,7 +65,6 @@ Minimum risk state for this turn: ${ctx.riskState}.
 - Ask about pregnancy/conception relevance, prescriptions, allergies, and severe symptoms only when material.
 - Never agree that pain or burning proves a product is working.
 - Do not reassure with "nothing looks serious/abnormal" from an image.
-${teen ? "- This user is 16-17. Use age-appropriate language, avoid persuasive commerce and appearance pressure, encourage a trusted adult or qualified professional for concerning symptoms or acute emotional distress, and never offer photo retention." : ""}
 - If the user expresses self-harm intent or immediate danger, stop skincare coaching and encourage immediate emergency help and support from a trusted person. Do not hardcode a local hotline number you cannot verify.`;
 }
 
@@ -80,8 +78,7 @@ export function buildBodyImagePolicy(): string {
 - When appearance distress is present: validate the emotion without validating a distorted judgment; state what can and cannot be observed; offer one limited next step or the option to pause photo analysis.`;
 }
 
-export function buildCommercePolicy(ctx: AgentContext): string {
-  const teen = ctx.userProfile?.ageBand === "16_17";
+export function buildCommercePolicy(): string {
   return `COMMERCE POLICY
 - First decide whether any purchase is needed. "Buy nothing", wait, simplify, or use what the user already owns are normal recommendations.
 - Recommend function or ingredient category before brand.
@@ -90,17 +87,13 @@ export function buildCommercePolicy(ctx: AgentContext): string {
 - Never claim personal product use.
 - Never hide commercial influence or present sponsored ranking as neutral advice.
 - Commercial incentives must never alter suitability, safety, evidence, price diversity, or escalation.
-- Disclose any sponsorship or affiliate relationship before a recommendation.
-${teen ? "- For this 16-17 user, do not use targeted or affiliate-driven product persuasion. Keep suggestions generic, conservative, and budget-aware." : ""}`;
+- Disclose any sponsorship or affiliate relationship before a recommendation.`;
 }
 
 export function buildMemoryPolicy(ctx: AgentContext): string {
-  const photoRetention =
-    ctx.userProfile?.ageBand === "16_17"
-      ? "unavailable for this 16-17 user"
-      : ctx.userProfile?.photoRetentionConsentedAt
-        ? `enabled under consent ${ctx.userProfile.photoRetentionConsentVersion ?? "unknown"}`
-        : "disabled";
+  const photoRetention = ctx.userProfile?.photoRetentionConsentedAt
+    ? `enabled under consent ${ctx.userProfile.photoRetentionConsentVersion ?? "unknown"}`
+    : "disabled";
 
   return `MEMORY AND PRIVACY POLICY
 - Structured profile, verified products/logs, explicit deletions, and the active experiment are authoritative over conversational or observational memory.
@@ -116,12 +109,9 @@ export function buildMemoryPolicy(ctx: AgentContext): string {
 }
 
 export function buildImagePolicy(ctx: AgentContext): string {
-  const retentionInstruction =
-    ctx.userProfile?.ageBand === "16_17"
-      ? "- Never save this user's photos across sessions. The current image may be processed for this reply only."
-      : ctx.userProfile?.photoRetentionConsentedAt
-        ? "- Photo retention is enabled. A current photo may be saved through the explicit current-photo action; never assume storage succeeded."
-        : "- Photo retention is disabled. Process the current image transiently. Save it only if the adult user explicitly asks to enable retention and save this attached photo.";
+  const retentionInstruction = ctx.userProfile?.photoRetentionConsentedAt
+    ? "- Photo retention is enabled. A current photo may be saved through the explicit current-photo action; never assume storage succeeded."
+    : "- Photo retention is disabled. Process the current image transiently. Save it only if the user explicitly asks to enable retention and save this attached photo.";
 
   const retentionOffer = ctx.shouldOfferPhotoRetention
     ? "\n- At the end, say once that this photo is not saved and that the user can opt in to 30-day photo retention for tracking. Do not imply they should opt in."
@@ -144,9 +134,10 @@ export function buildActionPolicy(): string {
 - Ask for explicit confirmation before account deletion, saved-photo deletion, or clearing conversation history.
 - If target, time, product, experiment, or requested change is ambiguous, ask one brief question instead of guessing.
 - After success, confirm naturally in one sentence. After failure, say what failed in first person without exposing internals.
+- For profile changes, send only fields explicitly stated in the latest user message. Never copy the existing profile into an update.
 - For routine status, always use verified log data. Verified data wins over conversation history.
 - When the user confirms routine completion, log it. When they describe product use, save/log it when appropriate.
-- Use profile updates for skin type, sensitivity, concerns, goals, allergies, routine preference, name, timezone, age band, or communication style.
+- Use profile updates for skin type, sensitivity, concerns, goals, allergies, routine preference, name, timezone, or communication style.
 - Use product listing/deletion actions when the user asks what is saved or wants a product forgotten.
 - For one-off follow-ups, use the one-off reminder action. Do not use recurring reminders.
 - For recurring reminder changes, load the existing schedule first and preserve untouched slots.
@@ -159,7 +150,8 @@ export function buildScheduledEventPolicy(): string {
   return `SCHEDULED EVENTS
 - Messages wrapped in ${USER_REMINDER_TAG_EXAMPLE} are internal scheduled events, not the user's words.
 - Reply in the user's saved locale, not the tag language.
-- Use current history, profile, products, logs, and active experiment to write the outbound message directly.
+- Continue the same user's ongoing conversation. Use current history, profile, products, verified recent routine logs, and active experiment to write the outbound message directly.
+- Prefer the user's established products and logged steps over generic or hardcoded routine copy.
 - Never mention ${USER_REMINDER_OPEN_TAG}, internal events, or routing.
 - Reminders must be useful and optional, with no guilt, disappointment, streak pressure, or emotional obligation.`;
 }

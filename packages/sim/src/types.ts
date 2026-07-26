@@ -51,7 +51,6 @@ export interface SimulationScenario {
   persona: PersonaConfig;
   expectations: SimulationExpectations;
   communicationStyle?: CommunicationStyle;
-  ageBand?: "16_17" | "18_plus";
   maxTurns?: number;
 }
 

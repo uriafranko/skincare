@@ -95,7 +95,7 @@ export async function handleOnboarding(
     locale,
   });
   const extracted =
-    !state.ageBand && !modelExtracted.ageBand && modelExtracted.ageEligible !== false
+    state.ageEligible !== true && modelExtracted.ageEligible == null
       ? {
           detectedLocale: modelExtracted.detectedLocale,
         }
@@ -157,7 +157,6 @@ export async function handleOnboarding(
       allergies: [...(merged.allergies ?? [])],
       currentProducts: [...(merged.currentProducts ?? [])],
       routinePreference: merged.routinePreference ?? "simple",
-      ageBand: merged.ageBand ?? null,
       communicationStyle: "clear_expert",
       styleOfferState: "pending",
       photoRetentionConsentedAt: null,

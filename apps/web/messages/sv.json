@@ -141,7 +141,7 @@
     "intro": "Skintext (\"Skintext\", \"vi\", \"oss\") är engagerade i att skydda din integritet. Denna policy förklarar vilken data vi samlar in, hur vi använder den och dina rättigheter.",
     "dataCollection": {
       "title": "Data vi samlar in",
-      "body": "När du använder Skintext samlar vi in:\n\n• Ditt telefonnummer (för att identifiera ditt konto och leverera meddelanden via iMessage)\n• Ditt åldersintervall (16-17 eller 18+), aldrig ditt exakta födelsedatum\n• Ditt namn, vald kommunikationsstil, hudmål, hudtyp om du delar den, känsligheter, allergier och nuvarande produkter\n• Rutinuppdateringar, produktbeskrivningar, påminnelser, tidszon och land för lokalisering\n• Rutinloggar, sparade produkter och hudvårdsexperiment med en ändring i taget\n• Rensad konversationshistorik, där fototurer innehåller text och en allmän fotomarkör men inte bilddata eller privata bildadresser"
+      "body": "När du använder Skintext samlar vi in:\n\n• Ditt telefonnummer (för att identifiera ditt konto och leverera meddelanden via iMessage)\n• Din bekräftelse under installationen på att du är minst 16 år, aldrig din exakta ålder eller ditt födelsedatum\n• Ditt namn, vald kommunikationsstil, hudmål, hudtyp om du delar den, känsligheter, allergier och nuvarande produkter\n• Rutinuppdateringar, produktbeskrivningar, påminnelser, tidszon och land för lokalisering\n• Rutinloggar, sparade produkter och hudvårdsexperiment med en ändring i taget\n• Rensad konversationshistorik, där fototurer innehåller text och en allmän fotomarkör men inte bilddata eller privata bildadresser"
     },
     "dataUsage": {
       "title": "Hur vi använder din data",
@@ -149,7 +149,7 @@
     },
     "dataStorage": {
       "title": "Datalagring och säkerhet",
-      "body": "Anslutningar till vår webbplats och våra tjänster använder TLS (HTTPS). Ditt telefonnummer krypteras vid lagring med AES. Meddelandehistorik, rutinloggar, onboardingdata under uppsättning, sparade produkter, experiment och liknande lagras som krypterade applikationslager-blobbar. Profilfält lagras med strikt åtkomstkontroll. Bilder behandlas för det aktuella svaret som standard och läggs inte till i konversationshistoriken. Vuxna kan separat samtycka till krypterad privat bildlagring i 30 dagar. Bildlagring är inte tillgänglig för användare som är 16-17 år."
+      "body": "Anslutningar till vår webbplats och våra tjänster använder TLS (HTTPS). Ditt telefonnummer krypteras vid lagring med AES. Meddelandehistorik, rutinloggar, onboardingdata under uppsättning, sparade produkter, experiment och liknande lagras som krypterade applikationslager-blobbar. Profilfält lagras med strikt åtkomstkontroll. Bilder behandlas för det aktuella svaret som standard och läggs inte till i konversationshistoriken. Användare kan separat samtycka till krypterad privat bildlagring i 30 dagar."
     },
     "thirdParty": {
       "title": "Tredjepartstjänster",
@@ -161,7 +161,7 @@
     },
     "rights": {
       "title": "Dina rättigheter",
-      "body": "Du har rätt att:\n\n• Fråga vad Skintext minns och begära en kopia av din data\n• Rätta eller glömma profilfält och radera enskilda eller alla sparade produkter\n• Aktivera eller stänga av framtida bildlagring om du är 18+, och radera sparade bilder\n• Rensa konversationshistoriken efter bekräftelse utan att radera profilen\n• Begära radering av kontot, inklusive experiment och integritetsinställningar\n• Återkalla samtycke när som helst"
+      "body": "Du har rätt att:\n\n• Fråga vad Skintext minns och begära en kopia av din data\n• Rätta eller glömma profilfält och radera enskilda eller alla sparade produkter\n• Aktivera eller stänga av framtida bildlagring och radera sparade bilder\n• Rensa konversationshistoriken efter bekräftelse utan att radera profilen\n• Begära radering av kontot, inklusive experiment och integritetsinställningar\n• Återkalla samtycke när som helst"
     },
     "contact": {
       "title": "Kontakt",
@@ -174,7 +174,7 @@
     "intro": "Genom att använda Skintext (\"Skintext\", \"Tjänsten\") godkänner du dessa villkor. Läs dem noggrant.",
     "eligibility": {
       "title": "Behörighet",
-      "body": "Du måste vara minst 16 år gammal och ha tillgång till en iPhone med iMessage för att använda Skintext. Vi frågar bara om du är 16-17 eller 18+. Användare som är 16-17 år får extra skydd och kan inte aktivera bildlagring mellan sessioner."
+      "body": "Du måste vara minst 16 år gammal och ha tillgång till en iPhone med iMessage för att använda Skintext. Vi frågar bara om du är 16 år eller äldre, inte efter din exakta ålder eller ditt födelsedatum."
     },
     "service": {
       "title": "Tjänsten",

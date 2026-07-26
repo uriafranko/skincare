@@ -10,7 +10,7 @@ const { clearConversationHistoryTool, saveCurrentPhotoTool, setPhotoRetentionToo
   "../tools/privacy"
 );
 
-function profile(ageBand: UserProfile["ageBand"] = "18_plus"): UserProfile {
+function profile(): UserProfile {
   return {
     id: "usr_photo",
     phone: "encrypted",
@@ -26,7 +26,6 @@ function profile(ageBand: UserProfile["ageBand"] = "18_plus"): UserProfile {
     allergies: [],
     currentProducts: [],
     routinePreference: "simple",
-    ageBand,
     communicationStyle: "clear_expert",
     styleOfferState: "shown",
     photoRetentionConsentedAt: null,
@@ -68,22 +67,7 @@ describe("photo-retention privacy tools", () => {
     updateUser.mockClear();
   });
 
-  test("rejects cross-session retention for a 16-17 user", async () => {
-    const save = mock(() => Promise.resolve({}));
-    const context = requestContext(profile("16_17"), save);
-    const result = await execute(
-      saveCurrentPhotoTool,
-      { consentToThirtyDayRetention: true },
-      context,
-    );
-    expect(result).toEqual(
-      expect.objectContaining({ saved: false, message: expect.stringContaining("16-17") }),
-    );
-    expect(save).not.toHaveBeenCalled();
-    expect(updateUser).not.toHaveBeenCalled();
-  });
-
-  test("records separate adult consent and saves the current photo idempotently", async () => {
+  test("records separate consent and saves the current photo idempotently", async () => {
     const image = {
       id: "img_1",
       userId: "usr_photo",
@@ -95,8 +79,8 @@ describe("photo-retention privacy tools", () => {
       expiresAt: "2026-08-25T00:00:00.000Z",
     };
     const save = mock(() => Promise.resolve(image));
-    const adult = profile();
-    const context = requestContext(adult, save);
+    const user = profile();
+    const context = requestContext(user, save);
 
     const first = await execute(
       saveCurrentPhotoTool,
@@ -118,7 +102,7 @@ describe("photo-retention privacy tools", () => {
         photoRetentionConsentVersion: "2026-07-26",
       }),
     );
-    expect(adult.photoRetentionConsentedAt).not.toBeNull();
+    expect(user.photoRetentionConsentedAt).not.toBeNull();
   });
 
   test("reports storage failure instead of claiming success", async () => {
@@ -139,10 +123,10 @@ describe("photo-retention privacy tools", () => {
   });
 
   test("can opt out of future retention in the same turn", async () => {
-    const adult = profile();
-    adult.photoRetentionConsentedAt = "2026-07-20T00:00:00.000Z";
-    adult.photoRetentionConsentVersion = "2026-07-26";
-    const context = requestContext(adult);
+    const user = profile();
+    user.photoRetentionConsentedAt = "2026-07-20T00:00:00.000Z";
+    user.photoRetentionConsentVersion = "2026-07-26";
+    const context = requestContext(user);
     const result = await execute(setPhotoRetentionTool, { enabled: false }, context);
 
     expect(result).toEqual(
@@ -152,7 +136,7 @@ describe("photo-retention privacy tools", () => {
         message: expect.stringContaining("Previously saved photos were not deleted"),
       }),
     );
-    expect(adult.photoRetentionConsentedAt).toBeNull();
+    expect(user.photoRetentionConsentedAt).toBeNull();
     expect(updateUser).toHaveBeenCalledWith(
       "usr_photo",
       expect.objectContaining({

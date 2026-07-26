@@ -11,7 +11,6 @@ const { processOnboardingMessage } = await import("../onboarding");
 
 function output(overrides: Record<string, unknown> = {}) {
   return {
-    ageBand: null,
     ageEligible: null,
     name: null,
     skinType: null,
@@ -32,7 +31,7 @@ function output(overrides: Record<string, unknown> = {}) {
 }
 
 const setupCompleteExceptConsent = {
-  ageBand: "18_plus" as const,
+  ageEligible: true,
   name: "Dana",
   skinType: "combination" as const,
   concerns: ["redness"],
@@ -115,7 +114,7 @@ describe("processOnboardingMessage", () => {
     );
   });
 
-  test("asks only for age band on the first greeting", async () => {
+  test("asks only for 16+ confirmation on the first greeting", async () => {
     const result = await processOnboardingMessage(
       "hey",
       {},
@@ -127,13 +126,12 @@ describe("processOnboardingMessage", () => {
       generateMock as never,
     );
 
-    expect(result.reply).toBe("Hey, I'm Skintext. Before we set things up, are you 16-17 or 18+?");
+    expect(result.reply).toBe("Hey, I'm Skintext. Before we set things up, are you 16 or older?");
     expect(generateMock).not.toHaveBeenCalled();
   });
 
-  test("extracts the adult age band and allows consent-only completion", async () => {
+  test("extracts 16+ eligibility and allows consent-only completion", async () => {
     nextOutput = output({
-      ageBand: "18_plus",
       ageEligible: true,
       detectedLocale: "en",
       reply: "Can I save this?",
@@ -150,7 +148,6 @@ describe("processOnboardingMessage", () => {
       generateMock as never,
     );
 
-    expect(result.extracted.ageBand).toBe("18_plus");
     expect(result.extracted.ageEligible).toBe(true);
     expect(result.reply).toBe(
       "OK if I save this so reminders/logs work? You can delete it anytime.",

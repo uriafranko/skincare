@@ -55,6 +55,7 @@ export {
   type SendUserImage,
   type SendUserImageInput,
   type SkintextRuntime,
+  skintextMemoryOptions,
 } from "./runtime";
 export { createTextGenerator } from "./text-generator";
 export { deleteAccountTool } from "./tools/delete-account";

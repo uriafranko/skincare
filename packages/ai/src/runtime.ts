@@ -84,6 +84,14 @@ export function skintextThreadId(userId: string): string {
   return `skintext:${userId}`;
 }
 
+export function skintextMemoryOptions(userId: string, readOnly = false) {
+  return {
+    thread: skintextThreadId(userId),
+    resource: userId,
+    ...(readOnly ? { options: { readOnly: true as const } } : {}),
+  };
+}
+
 export function getSkintextRuntime(requestContext?: RequestContext): SkintextRuntime {
   const runtime = requestContext?.get("runtime") as SkintextRuntime | undefined;
   if (!runtime) throw new Error("Skintext runtime is missing from the Mastra request context.");
