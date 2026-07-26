@@ -84,7 +84,7 @@ export const deleteRoutineEntryTool = createTool({
 export const getTodayRoutineLogTool = createTool({
   id: "get-today-routine-log",
   description:
-    "Get today's skincare routine log. Always returns TODAY's routine data -- no date parameter needed.",
+    "Load today's verified skincare routine log when exact completion status, steps, products used, or reactions matter. Always returns TODAY's data; do not rely on conversation memory for exact log status.",
   inputSchema: z.object({}),
   execute: async (_input, context) => {
     const { userId, agentContext } = getSkintextRuntime(context.requestContext);
@@ -95,7 +95,8 @@ export const getTodayRoutineLogTool = createTool({
 
 export const getWeeklyRoutineLogTool = createTool({
   id: "get-weekly-routine-log",
-  description: "Get the past 7 days of skincare routine logs for summaries and trends.",
+  description:
+    "Load the past 7 days of verified skincare routine logs when the user asks about earlier steps, products, adherence, reactions, summaries, or trends. Use retained conversation memory for continuity and this tool for exact log data.",
   inputSchema: z.object({
     endDate: z.string().describe("The end date in YYYY-MM-DD format"),
   }),

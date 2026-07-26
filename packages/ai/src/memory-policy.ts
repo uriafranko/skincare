@@ -10,7 +10,7 @@ export const SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS = {
     bufferTokens: false,
     observeAttachments: false,
     instruction:
-      "Preserve useful skincare task continuity, but never infer or retain ethnicity, attractiveness, exact age, pregnancy, diagnoses, emotional vulnerability, or private third-party facts. Treat explicit corrections and deletions as authoritative. Do not infer anything from attachment placeholders.",
+      "Preserve useful skincare task continuity, including established routine steps, product placement, changes being tested, explicit corrections, and pending follow-ups. Do not treat conversational memory as verified routine completion or log status; exact logs come from the routine-log tools. Never infer or retain ethnicity, attractiveness, exact age, pregnancy, diagnoses, emotional vulnerability, or private third-party facts. Treat explicit corrections and deletions as authoritative. Do not infer anything from attachment placeholders.",
   },
 } as const;
 

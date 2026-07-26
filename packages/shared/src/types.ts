@@ -182,7 +182,6 @@ export interface AgentContext {
   activeExperiment: RoutineExperiment | null;
   streak: number | null;
   products: ProductEntry[];
-  recentRoutineLogs: { date: string; log: DailyRoutineLog }[];
 }
 
 export type RoutineExperimentStatus = "active" | "completed" | "stopped";

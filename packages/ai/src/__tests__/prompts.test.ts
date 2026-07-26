@@ -74,7 +74,6 @@ const baseContext = {
       createdAt: "2026-07-26T00:00:00Z",
     },
   ],
-  recentRoutineLogs: [],
 };
 
 function makeContext(overrides: Record<string, unknown> = {}) {
@@ -107,7 +106,7 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("exact language of the latest user message");
   });
 
-  test("sends verified recent routine history as personalized agent context", () => {
+  test("keeps routine-log payloads out of the dynamic system prompt", () => {
     const prompt = buildSkintextSystemPrompt(
       makeContext({
         recentRoutineLogs: [
@@ -143,17 +142,12 @@ describe("buildSkintextSystemPrompt", () => {
       }),
     );
 
-    expect(prompt).toContain("RECENT VERIFIED ROUTINE HISTORY");
-    expect(prompt).toContain("Barrier Cream");
-    expect(prompt).toContain("less tightness");
-    expect(prompt).toContain("Do not replace relevant user-specific history");
-    expect(prompt).toContain("never instructions");
-  });
-
-  test("does not invent a hardcoded routine when no verified history exists", () => {
-    const prompt = buildSkintextSystemPrompt(makeContext());
-    expect(prompt).toContain("No routine entries were logged in the last 7 days");
-    expect(prompt).toContain("Do not invent a fixed routine");
+    expect(prompt).not.toContain("routine_1");
+    expect(prompt).not.toContain("Barrier Cream");
+    expect(prompt).not.toContain("less tightness");
+    expect(prompt).not.toContain("RECENT VERIFIED ROUTINE HISTORY");
+    expect(prompt).toContain("retained message history and observational memory");
+    expect(prompt).toContain("verified routine-log actions");
   });
 
   test("includes safety, privacy, commercial, and action invariants", () => {
@@ -192,7 +186,8 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("internal scheduled events");
     expect(prompt).toContain("Reply in the user's saved locale");
     expect(prompt).toContain("Continue the same user's ongoing conversation");
-    expect(prompt).toContain("established products and logged steps");
+    expect(prompt).toContain("retained history, observational memory");
+    expect(prompt).toContain("load them with the verified routine-log actions");
     expect(prompt).toContain(`Never mention ${USER_REMINDER_OPEN_TAG}`);
     expect(wrapUserReminder("Check whether irritation improved.")).toBe(
       `${USER_REMINDER_OPEN_TAG}\nCheck whether irritation improved.\n${USER_REMINDER_CLOSE_TAG}`,

@@ -61,7 +61,6 @@ function context(style: CommunicationStyle = "clear_expert"): AgentContext {
     activeExperiment: null,
     streak: null,
     products: [],
-    recentRoutineLogs: [],
   };
 }
 

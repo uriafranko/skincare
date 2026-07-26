@@ -25,7 +25,7 @@ Skintext uses one agent with composable identity, conversation, safety, body-ima
 
 **Goal:** Gentle routine nudges and wrap-ups. Reminders are warm, optional, and short; summaries are data-first and never use guilt or streak pressure.
 
-Every proactive surface sends an internal prompt through the same main agent and persistent per-user Mastra thread used for inbound messages. The dynamic system prompt also includes a bounded seven-day snapshot of verified routine logs, so the agent can continue from the user's actual products, steps, skips, and reactions instead of emitting a fixed generic routine.
+Every proactive surface sends an internal prompt through the same main agent and persistent per-user Mastra thread used for inbound messages. Recent messages and observational memory provide conversational continuity without injecting routine logs into the dynamic system prompt. When exact routine facts matter, the agent uses its verified today/weekly routine-log tools; scheduled prompts already carry the event-specific facts they need.
 
 ## Safety
 

@@ -21,7 +21,6 @@ import {
   getActiveRoutineExperiment,
   getAdherenceStreak,
   getAllProducts,
-  getWeeklyRoutineLogs,
   updateUser,
 } from "@skintext/db";
 import type { AgentContext, UserProfile } from "@skintext/shared";
@@ -60,11 +59,10 @@ export async function runAgentMessage(
   options: RunAgentMessageOptions = {},
 ): Promise<string | null> {
   const localDate = localDateString(user.timezone);
-  const [streak, products, activeExperiment, recentRoutineLogs] = await Promise.all([
+  const [streak, products, activeExperiment] = await Promise.all([
     getAdherenceStreak(user.id),
     getAllProducts(user.id),
     getActiveRoutineExperiment(user.id),
-    getWeeklyRoutineLogs(user.id, localDate),
   ]);
   const hasImage = options.hasImage ?? !!options.imageUrl;
   const isScheduledEvent = text.includes(USER_REMINDER_OPEN_TAG);
@@ -110,7 +108,6 @@ export async function runAgentMessage(
     activeExperiment,
     streak: streak.current > 0 ? streak.current : null,
     products,
-    recentRoutineLogs,
   };
   const runtime: SkintextRuntime = {
     userId: user.id,

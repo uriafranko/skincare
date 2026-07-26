@@ -15,3 +15,19 @@ describe("image conversation privacy", () => {
     expect(text).not.toContain('"type":"image"');
   });
 });
+
+describe("conversation continuity", () => {
+  test("keeps long-term continuity in observational memory with raw-history retrieval", () => {
+    expect(SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS.temporalMarkers).toBe(true);
+    expect(SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS.retrieval).toBe(true);
+    expect(SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS.observation.instruction).toContain(
+      "Preserve useful skincare task continuity",
+    );
+    expect(SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS.observation.instruction).toContain(
+      "established routine steps",
+    );
+    expect(SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS.observation.instruction).toContain(
+      "exact logs come from the routine-log tools",
+    );
+  });
+});

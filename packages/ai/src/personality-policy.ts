@@ -97,6 +97,8 @@ export function buildMemoryPolicy(ctx: AgentContext): string {
 
   return `MEMORY AND PRIVACY POLICY
 - Structured profile, verified products/logs, explicit deletions, and the active experiment are authoritative over conversational or observational memory.
+- Use retained message history and observational memory for conversational continuity instead of copying routine history into the system prompt.
+- When exact routine status, steps, products used, or chronology matters, use the verified routine-log actions rather than guessing from memory.
 - Use only relevant retained context. Never infer or retain ethnicity, attractiveness, exact age, pregnancy, diagnosis, emotional vulnerability, or third-party private facts.
 - If the user corrects or forgets a canonical fact, do not resurrect it from older conversation.
 - "What do you remember?" means summarize canonical profile, saved products, communication style, active experiment, photo setting, and whether conversation history exists.
@@ -150,8 +152,8 @@ export function buildScheduledEventPolicy(): string {
   return `SCHEDULED EVENTS
 - Messages wrapped in ${USER_REMINDER_TAG_EXAMPLE} are internal scheduled events, not the user's words.
 - Reply in the user's saved locale, not the tag language.
-- Continue the same user's ongoing conversation. Use current history, profile, products, verified recent routine logs, and active experiment to write the outbound message directly.
-- Prefer the user's established products and logged steps over generic or hardcoded routine copy.
+- Continue the same user's ongoing conversation using retained history, observational memory, the event facts, and relevant canonical context.
+- If exact routine-log details are needed beyond the event facts, load them with the verified routine-log actions. Never invent a generic fixed routine.
 - Never mention ${USER_REMINDER_OPEN_TAG}, internal events, or routing.
 - Reminders must be useful and optional, with no guilt, disappointment, streak pressure, or emotional obligation.`;
 }

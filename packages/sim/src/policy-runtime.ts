@@ -115,7 +115,6 @@ function contextForScenario(
     activeExperiment: null,
     streak: null,
     products: [],
-    recentRoutineLogs: [],
   };
 }
 
