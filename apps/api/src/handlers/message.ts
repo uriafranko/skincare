@@ -1,18 +1,13 @@
-import {
-  deleteAllUserData,
-  deleteReminderRunId,
-  getReminderRunId,
-  setReminderRunId,
-} from "@skintext/db";
+import { deleteAllUserData } from "@skintext/db";
 import type { UserProfile } from "@skintext/shared";
 import type { RequestLogger } from "evlog";
 import { getRun, start } from "workflow/api";
 import { runAgentMessage } from "@/agent-runner";
 import type { NormalizedImage } from "@/image";
+import { reminderRunManager } from "@/reminder-runs";
 import { sendUiMessageAttachment } from "@/ui-messages";
 import { deleteAllUserImageBlobs, saveInboundUserImage, sendStoredUserImage } from "@/user-images";
 import { oneOffReminderWorkflow } from "../../workflows/one-off-reminder";
-import { reminderLoop } from "../../workflows/reminder-loop";
 
 export async function handleMessage(
   log: RequestLogger,
@@ -60,29 +55,7 @@ export async function handleMessage(
       await run.cancel();
       return true;
     },
-    syncRecurringReminderSchedule: async ({ userId, enabled }) => {
-      const existingRunId = await getReminderRunId(userId);
-
-      if (existingRunId) {
-        const run = getRun(existingRunId);
-        if (await run.exists) {
-          const status = await run.status;
-          if (status === "pending" || status === "running") {
-            await run.wakeUp();
-            return existingRunId;
-          }
-        }
-        await deleteReminderRunId(userId);
-      }
-
-      if (!enabled) {
-        await deleteReminderRunId(userId);
-        return undefined;
-      }
-
-      const run = await start(reminderLoop, [userId]);
-      await setReminderRunId(userId, run.runId);
-      return run.runId;
-    },
+    syncRecurringReminderSchedule: ({ userId, enabled }) =>
+      reminderRunManager.sync(userId, enabled),
   });
 }

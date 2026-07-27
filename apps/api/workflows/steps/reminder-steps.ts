@@ -8,6 +8,7 @@ import {
   getRoutineLogForDate,
   getUser,
   getWeeklyRoutineLogs,
+  isReminderRunGenerationCurrent,
   markOneOffReminderFailed as saveOneOffReminderFailed,
   markOneOffReminderSent as saveOneOffReminderSent,
   updateAdherenceStreak,
@@ -29,9 +30,14 @@ export async function loadReminderTimes(userId: string) {
   return getCustomReminderTimes(userId);
 }
 
-export async function clearReminderRunId(userId: string) {
+export async function clearReminderRunId(userId: string, generation: string) {
   "use step";
-  await deleteReminderRunId(userId);
+  await deleteReminderRunId(userId, generation);
+}
+
+export async function ownsReminderRun(userId: string, generation: string): Promise<boolean> {
+  "use step";
+  return isReminderRunGenerationCurrent(userId, generation);
 }
 
 export async function loadOneOffReminder(userId: string, reminderId: string) {
@@ -55,8 +61,14 @@ export async function loadRoutineLog(userId: string, timezone: string) {
   return getRoutineLogForDate(userId, localDate);
 }
 
-export async function sendReminderToAgent(userId: string, text: string): Promise<boolean> {
+export async function sendReminderToAgent(
+  userId: string,
+  text: string,
+  generation?: string,
+): Promise<boolean> {
   "use step";
+  if (generation && !(await isReminderRunGenerationCurrent(userId, generation))) return false;
+
   const user = await getUser(userId);
   if (!user?.consentedAt) return false;
 

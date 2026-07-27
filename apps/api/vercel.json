@@ -6,6 +6,10 @@
   "bunVersion": "1.x",
   "crons": [
     {
+      "path": "/cron/migrate-reminder-runs",
+      "schedule": "* * * * *"
+    },
+    {
       "path": "/cron/prune-images",
       "schedule": "0 3 * * *"
     }

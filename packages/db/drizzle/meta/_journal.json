@@ -78,6 +78,13 @@
       "when": 1785099302395,
       "tag": "0010_nebulous_preak",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1785132124889,
+      "tag": "0011_sudden_wiccan",
+      "breakpoints": true
     }
   ]
 }

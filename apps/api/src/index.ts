@@ -3,6 +3,7 @@ import { initLogger } from "evlog";
 import { type EvlogVariables, evlog } from "evlog/hono";
 import { Hono } from "hono";
 import { handleIncoming } from "@/handler";
+import { reminderRunManager } from "@/reminder-runs";
 import { markRead, parseInbound } from "@/sendblue";
 import { pruneExpiredUserImageBlobs } from "@/user-images";
 
@@ -22,6 +23,18 @@ app.get("/cron/prune-images", async (c) => {
   }
 
   const result = await pruneExpiredUserImageBlobs(c.get("log"));
+  return c.json({ ok: true, ...result });
+});
+
+app.get("/cron/migrate-reminder-runs", async (c) => {
+  if (env.CRON_SECRET) {
+    const auth = c.req.header("Authorization");
+    if (auth !== `Bearer ${env.CRON_SECRET}`) return c.json({ error: "unauthorized" }, 401);
+  } else if (process.env.NODE_ENV === "production") {
+    return c.json({ error: "CRON_SECRET is required in production" }, 401);
+  }
+
+  const result = await reminderRunManager.migrateStale(c.get("log"));
   return c.json({ ok: true, ...result });
 });
 

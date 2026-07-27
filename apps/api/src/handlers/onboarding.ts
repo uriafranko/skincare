@@ -7,14 +7,12 @@ import {
   saveProduct,
   setCustomReminderTimes,
   setOnboardingState,
-  setReminderRunId,
 } from "@skintext/db";
 import type { OnboardingState } from "@skintext/shared";
 import { CONSENT_VERSION, generateId, isOnboardingComplete } from "@skintext/shared";
 import type { RequestLogger } from "evlog";
-import { start } from "workflow/api";
 import { rejectUnder16PendingOnboarding } from "@/onboarding-eligibility";
-import { reminderLoop } from "../../workflows/reminder-loop";
+import { reminderRunManager } from "@/reminder-runs";
 
 function mergeList(existing?: readonly string[], incoming?: readonly string[]): string[] {
   return Array.from(
@@ -175,8 +173,7 @@ export async function handleOnboarding(
 
     if (reminderTimes.length > 0) {
       try {
-        const run = await start(reminderLoop, [userId]);
-        await setReminderRunId(userId, run.runId);
+        await reminderRunManager.start(userId);
       } catch (err) {
         log.error(err as Error);
       }

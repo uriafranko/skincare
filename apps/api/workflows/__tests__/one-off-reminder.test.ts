@@ -36,6 +36,7 @@ const loadRoutineLog = mock(
 const loadUser = mock(() => Promise.resolve(user));
 const markOneOffReminderFailed = mock(() => Promise.resolve());
 const markOneOffReminderSent = mock(() => Promise.resolve());
+const ownsReminderRun = mock(() => Promise.resolve(true));
 const sendReminderToAgent = mock(() => Promise.resolve(true));
 
 mock.module("workflow", () => ({
@@ -61,6 +62,7 @@ mock.module("../steps/reminder-steps", () => ({
   loadUser,
   markOneOffReminderFailed,
   markOneOffReminderSent,
+  ownsReminderRun,
   sendReminderToAgent,
 }));
 
@@ -100,6 +102,8 @@ describe("oneOffReminderWorkflow", () => {
     loadUser.mockClear();
     markOneOffReminderFailed.mockClear();
     markOneOffReminderSent.mockClear();
+    ownsReminderRun.mockClear();
+    ownsReminderRun.mockResolvedValue(true);
     sendReminderToAgent.mockClear();
     sendReminderToAgent.mockResolvedValue(true);
   });
@@ -178,6 +182,8 @@ describe("reminderLoop", () => {
     loadReminderTimes.mockClear();
     loadRoutineLog.mockClear();
     loadUser.mockClear();
+    ownsReminderRun.mockClear();
+    ownsReminderRun.mockResolvedValue(true);
     sendReminderToAgent.mockClear();
   });
 
@@ -185,9 +191,9 @@ describe("reminderLoop", () => {
     loadUser.mockResolvedValueOnce(user);
     loadReminderTimes.mockResolvedValueOnce(null);
 
-    await reminderLoop("usr_test");
+    await reminderLoop("usr_test", "generation_1");
 
-    expect(clearReminderRunId).toHaveBeenCalledWith("usr_test");
+    expect(clearReminderRunId).toHaveBeenCalledWith("usr_test", "generation_1");
     expect(buildRoutineReminder).not.toHaveBeenCalled();
     expect(buildDailySummaryReminder).not.toHaveBeenCalled();
     expect(sendReminderToAgent).not.toHaveBeenCalled();
@@ -197,7 +203,7 @@ describe("reminderLoop", () => {
     loadUser.mockResolvedValueOnce(user).mockResolvedValueOnce(null);
     loadReminderTimes.mockResolvedValueOnce([{ label: "morning", hour: 9, minute: 30 }]);
 
-    await reminderLoop("usr_test");
+    await reminderLoop("usr_test", "generation_1");
 
     expect(buildRoutineReminder).toHaveBeenCalledTimes(1);
     expect(buildRoutineReminder).toHaveBeenCalledWith(
@@ -209,7 +215,11 @@ describe("reminderLoop", () => {
       expect.any(Object),
     );
     expect(buildDailySummaryReminder).toHaveBeenCalledWith("usr_test", "en");
-    expect(sendReminderToAgent).toHaveBeenCalledWith("usr_test", "Routine reminder event.");
+    expect(sendReminderToAgent).toHaveBeenCalledWith(
+      "usr_test",
+      "Routine reminder event.",
+      "generation_1",
+    );
   });
 
   test("does not send a routine reminder for an already completed slot", async () => {
@@ -223,8 +233,18 @@ describe("reminderLoop", () => {
       reactions: [],
     });
 
-    await reminderLoop("usr_test");
+    await reminderLoop("usr_test", "generation_1");
 
+    expect(buildRoutineReminder).not.toHaveBeenCalled();
+    expect(sendReminderToAgent).not.toHaveBeenCalled();
+  });
+
+  test("exits before sending when a newer deployment owns the reminder run", async () => {
+    ownsReminderRun.mockResolvedValueOnce(false);
+
+    await reminderLoop("usr_test", "stale_generation");
+
+    expect(loadUser).not.toHaveBeenCalled();
     expect(buildRoutineReminder).not.toHaveBeenCalled();
     expect(sendReminderToAgent).not.toHaveBeenCalled();
   });

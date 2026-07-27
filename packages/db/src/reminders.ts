@@ -1,6 +1,6 @@
 import type { OneOffReminder } from "@skintext/shared";
 import { decrypt, encryptContent } from "@skintext/shared";
-import { and, asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, isNull, lt, ne, or, sql } from "drizzle-orm";
 import { getDb } from "./client";
 import { customReminderTimes, oneOffReminders, reminderRunIds } from "./schema";
 
@@ -10,25 +10,202 @@ export interface CustomReminderTime {
   minute: number;
 }
 
-export async function setReminderRunId(userId: string, runId: string): Promise<void> {
+export interface ReminderRunRecord {
+  userId: string;
+  runId: string;
+  deploymentId: string | null;
+  generation: string | null;
+  migrationId: string | null;
+  migrationStartedAt: Date | null;
+}
+
+export async function setReminderRunId(
+  userId: string,
+  runId: string,
+  options: { deploymentId?: string; generation?: string } = {},
+): Promise<void> {
   await getDb()
     .insert(reminderRunIds)
-    .values({ userId, runId })
+    .values({
+      userId,
+      runId,
+      deploymentId: options.deploymentId,
+      generation: options.generation,
+    })
     .onConflictDoUpdate({
       target: reminderRunIds.userId,
-      set: { runId, updatedAt: sql`now()` },
+      set: {
+        runId,
+        deploymentId: options.deploymentId,
+        generation: options.generation,
+        migrationId: null,
+        migrationStartedAt: null,
+        updatedAt: sql`now()`,
+      },
     });
 }
 
-export async function getReminderRunId(userId: string): Promise<string | null> {
+export async function getReminderRun(userId: string): Promise<ReminderRunRecord | null> {
   const row = await getDb().query.reminderRunIds.findFirst({
     where: eq(reminderRunIds.userId, userId),
   });
-  return row?.runId ?? null;
+  if (!row) return null;
+  return {
+    userId: row.userId,
+    runId: row.runId,
+    deploymentId: row.deploymentId,
+    generation: row.generation,
+    migrationId: row.migrationId,
+    migrationStartedAt: row.migrationStartedAt,
+  };
 }
 
-export async function deleteReminderRunId(userId: string): Promise<void> {
-  await getDb().delete(reminderRunIds).where(eq(reminderRunIds.userId, userId));
+export async function getReminderRunId(userId: string): Promise<string | null> {
+  return (await getReminderRun(userId))?.runId ?? null;
+}
+
+export async function deleteReminderRunId(userId: string, generation?: string): Promise<void> {
+  await getDb()
+    .delete(reminderRunIds)
+    .where(
+      generation
+        ? and(eq(reminderRunIds.userId, userId), eq(reminderRunIds.generation, generation))
+        : eq(reminderRunIds.userId, userId),
+    );
+}
+
+export async function isReminderRunGenerationCurrent(
+  userId: string,
+  generation: string,
+): Promise<boolean> {
+  const row = await getDb().query.reminderRunIds.findFirst({
+    where: and(eq(reminderRunIds.userId, userId), eq(reminderRunIds.generation, generation)),
+  });
+  return !!row;
+}
+
+export async function listReminderRunsNeedingMigration(
+  deploymentId: string,
+  limit: number,
+): Promise<ReminderRunRecord[]> {
+  const rows = await getDb().query.reminderRunIds.findMany({
+    where: or(
+      isNull(reminderRunIds.deploymentId),
+      ne(reminderRunIds.deploymentId, deploymentId),
+      isNull(reminderRunIds.generation),
+    ),
+    orderBy: asc(reminderRunIds.userId),
+    limit,
+  });
+  return rows.map((row) => ({
+    userId: row.userId,
+    runId: row.runId,
+    deploymentId: row.deploymentId,
+    generation: row.generation,
+    migrationId: row.migrationId,
+    migrationStartedAt: row.migrationStartedAt,
+  }));
+}
+
+export async function claimReminderRunMigration(input: {
+  userId: string;
+  runId: string;
+  deploymentId: string;
+  migrationId: string;
+  leaseExpiredBefore: Date;
+}): Promise<boolean> {
+  const rows = await getDb()
+    .update(reminderRunIds)
+    .set({
+      generation: input.migrationId,
+      migrationId: input.migrationId,
+      migrationStartedAt: new Date(),
+      updatedAt: sql`now()`,
+    })
+    .where(
+      and(
+        eq(reminderRunIds.userId, input.userId),
+        eq(reminderRunIds.runId, input.runId),
+        or(
+          isNull(reminderRunIds.deploymentId),
+          ne(reminderRunIds.deploymentId, input.deploymentId),
+          isNull(reminderRunIds.generation),
+        ),
+        or(
+          isNull(reminderRunIds.migrationStartedAt),
+          lt(reminderRunIds.migrationStartedAt, input.leaseExpiredBefore),
+        ),
+      ),
+    )
+    .returning({ userId: reminderRunIds.userId });
+  return rows.length > 0;
+}
+
+export async function prepareReminderRunStart(input: {
+  userId: string;
+  deploymentId: string;
+  generation: string;
+}): Promise<boolean> {
+  const rows = await getDb()
+    .insert(reminderRunIds)
+    .values({
+      userId: input.userId,
+      runId: `pending:${input.generation}`,
+      deploymentId: input.deploymentId,
+      generation: input.generation,
+    })
+    .onConflictDoNothing()
+    .returning({ userId: reminderRunIds.userId });
+  return rows.length > 0;
+}
+
+export async function completeReminderRunStart(input: {
+  userId: string;
+  expectedRunId: string;
+  deploymentId: string;
+  generation: string;
+  runId: string;
+}): Promise<boolean> {
+  const rows = await getDb()
+    .update(reminderRunIds)
+    .set({
+      runId: input.runId,
+      deploymentId: input.deploymentId,
+      generation: input.generation,
+      migrationId: null,
+      migrationStartedAt: null,
+      updatedAt: sql`now()`,
+    })
+    .where(
+      and(
+        eq(reminderRunIds.userId, input.userId),
+        eq(reminderRunIds.runId, input.expectedRunId),
+        eq(reminderRunIds.generation, input.generation),
+      ),
+    )
+    .returning({ userId: reminderRunIds.userId });
+  return rows.length > 0;
+}
+
+export async function releaseReminderRunMigration(input: {
+  userId: string;
+  runId: string;
+  migrationId: string;
+}): Promise<void> {
+  await getDb()
+    .update(reminderRunIds)
+    .set({
+      migrationId: null,
+      migrationStartedAt: null,
+      updatedAt: sql`now()`,
+    })
+    .where(
+      and(
+        eq(reminderRunIds.userId, input.userId),
+        eq(reminderRunIds.runId, input.runId),
+        eq(reminderRunIds.migrationId, input.migrationId),
+      ),
+    );
 }
 
 export async function setCustomReminderTimes(

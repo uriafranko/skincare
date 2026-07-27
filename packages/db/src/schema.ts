@@ -164,6 +164,10 @@ export const reminderRunIds = pgTable("reminder_run_ids", {
     .primaryKey()
     .references(() => users.id, { onDelete: "cascade" }),
   runId: text("run_id").notNull(),
+  deploymentId: text("deployment_id"),
+  generation: text("generation"),
+  migrationId: text("migration_id"),
+  migrationStartedAt: timestamp("migration_started_at", { withTimezone: true, mode: "date" }),
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
 });
 
