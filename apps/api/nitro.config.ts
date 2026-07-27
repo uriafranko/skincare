@@ -1,5 +1,5 @@
 import { copyFile, mkdir } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "nitro";
 
@@ -29,7 +29,11 @@ export default defineConfig({
   modules: [
     "workflow/nitro",
     (nitro) => {
-      nitro.hooks.hook("compiled", () => copyInterFonts(nitro.options.output.serverDir));
+      nitro.hooks.hook("compiled", async () => {
+        const serverDir = nitro.options.output.serverDir;
+        const workflowStepDir = join(dirname(serverDir), ".well-known/workflow/v1/step.func");
+        await Promise.all([copyInterFonts(serverDir), copyInterFonts(workflowStepDir)]);
+      });
     },
   ],
   alias: {
