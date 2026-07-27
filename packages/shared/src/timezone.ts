@@ -11,8 +11,8 @@ export function isValidTimeZone(timezone: string): boolean {
   }
 }
 
-export function nextLocalTime(hour: number, minute: number, tz: string): Date {
-  const now = new TZDate(new Date(), tz);
+export function nextLocalTime(hour: number, minute: number, tz: string, date?: Date): Date {
+  const now = new TZDate(date ?? new Date(), tz);
   let target = set(now, { hours: hour, minutes: minute, seconds: 0, milliseconds: 0 });
   if (isAfter(now, target)) {
     target = addDays(target, 1);

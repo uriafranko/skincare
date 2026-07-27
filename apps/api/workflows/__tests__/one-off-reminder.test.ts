@@ -34,9 +34,11 @@ const loadRoutineLog = mock(
     }),
 );
 const loadUser = mock(() => Promise.resolve(user));
+const isLocalDayOfWeek = mock(() => Promise.resolve(false));
 const markOneOffReminderFailed = mock(() => Promise.resolve());
 const markOneOffReminderSent = mock(() => Promise.resolve());
 const ownsReminderRun = mock(() => Promise.resolve(true));
+const resolveNextLocalTimestamp = mock(() => Promise.resolve(Date.now() - 2000));
 const sendReminderToAgent = mock(() => Promise.resolve(true));
 
 mock.module("workflow", () => ({
@@ -56,6 +58,7 @@ mock.module("../steps/reminder-steps", () => ({
   buildRoutineReminder,
   buildWeeklyRecapReminder,
   clearReminderRunId,
+  isLocalDayOfWeek,
   loadOneOffReminder,
   loadReminderTimes,
   loadRoutineLog,
@@ -63,6 +66,7 @@ mock.module("../steps/reminder-steps", () => ({
   markOneOffReminderFailed,
   markOneOffReminderSent,
   ownsReminderRun,
+  resolveNextLocalTimestamp,
   sendReminderToAgent,
 }));
 
@@ -180,8 +184,12 @@ describe("reminderLoop", () => {
     loadReminderTimes.mockClear();
     loadRoutineLog.mockClear();
     loadUser.mockClear();
+    isLocalDayOfWeek.mockClear();
+    isLocalDayOfWeek.mockResolvedValue(false);
     ownsReminderRun.mockClear();
     ownsReminderRun.mockResolvedValue(true);
+    resolveNextLocalTimestamp.mockClear();
+    resolveNextLocalTimestamp.mockResolvedValue(Date.now() - 2000);
     sendReminderToAgent.mockClear();
   });
 
@@ -217,6 +225,8 @@ describe("reminderLoop", () => {
       "Routine reminder event.",
       "generation_1",
     );
+    expect(resolveNextLocalTimestamp).toHaveBeenNthCalledWith(1, 9, 30, "Asia/Jerusalem");
+    expect(resolveNextLocalTimestamp).toHaveBeenNthCalledWith(2, 22, 0, "Asia/Jerusalem");
   });
 
   test("does not send a routine reminder for an already completed slot", async () => {

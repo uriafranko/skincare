@@ -13,7 +13,7 @@ import {
   updateAdherenceStreak,
 } from "@skintext/db";
 import type { AdherenceStreak, DailyRoutineLog, UserAccount } from "@skintext/shared";
-import { decrypt, localDateString } from "@skintext/shared";
+import { decrypt, isDayOfWeek, localDateString, nextLocalTime } from "@skintext/shared";
 import { createLogger } from "evlog";
 import { runAgentMessage } from "../../src/agent-runner";
 import { sendReplyBubbles } from "../../src/replies";
@@ -27,6 +27,22 @@ export async function loadUser(userId: string): Promise<UserAccount | null> {
 export async function loadReminderTimes(userId: string) {
   "use step";
   return getCustomReminderTimes(userId);
+}
+
+export async function resolveNextLocalTimestamp(
+  hour: number,
+  minute: number,
+  timezone: string,
+): Promise<number> {
+  "use step";
+  // Keep TZDate outside the durable workflow VM, whose deterministic Date shim
+  // does not preserve Date subclasses and would interpret the wall clock as UTC.
+  return nextLocalTime(hour, minute, timezone).getTime();
+}
+
+export async function isLocalDayOfWeek(timezone: string, dayName: string): Promise<boolean> {
+  "use step";
+  return isDayOfWeek(timezone, dayName);
 }
 
 export async function clearReminderRunId(userId: string, generation: string) {

@@ -1,9 +1,6 @@
 import {
   ADHERENCE_MILESTONES,
   DAILY_SUMMARY_HOUR,
-  isDayOfWeek,
-  msUntil,
-  nextLocalTime,
   WEEKLY_RECAP_DAY,
   WEEKLY_RECAP_HOUR,
 } from "@skintext/shared";
@@ -13,10 +10,12 @@ import {
   buildRoutineReminder,
   buildWeeklyRecapReminder,
   clearReminderRunId,
+  isLocalDayOfWeek,
   loadReminderTimes,
   loadRoutineLog,
   loadUser,
   ownsReminderRun,
+  resolveNextLocalTimestamp,
   sendReminderToAgent,
 } from "./steps/reminder-steps";
 
@@ -43,23 +42,25 @@ export async function reminderLoop(userId: string, generation: string) {
       break;
     }
 
-    const routineTimes = customTimes
-      .map((t) => ({
-        label: t.label,
-        hour: t.hour,
-        minute: t.minute,
-        emoji: t.label === "morning" ? "☀️" : t.label === "evening" ? "🌙" : "🧴",
-        target: nextLocalTime(t.hour, t.minute, tz),
-      }))
-      .sort((a, b) => a.target.getTime() - b.target.getTime());
+    const routineTimes = [];
+    for (const time of customTimes) {
+      routineTimes.push({
+        label: time.label,
+        hour: time.hour,
+        minute: time.minute,
+        emoji: time.label === "morning" ? "☀️" : time.label === "evening" ? "🌙" : "🧴",
+        targetAt: await resolveNextLocalTimestamp(time.hour, time.minute, tz),
+      });
+    }
+    routineTimes.sort((a, b) => a.targetAt - b.targetAt);
 
     for (const routine of routineTimes) {
-      const waitMs = msUntil(routine.target);
+      const waitMs = Math.max(0, routine.targetAt - Date.now());
       if (waitMs > 0) {
         await sleep(`${waitMs}ms`);
       }
       if (!(await ownsReminderRun(userId, generation))) break reminderCycle;
-      if (Date.now() < routine.target.getTime() - EARLY_WAKE_TOLERANCE_MS) {
+      if (Date.now() < routine.targetAt - EARLY_WAKE_TOLERANCE_MS) {
         continue reminderCycle;
       }
 
@@ -80,13 +81,13 @@ export async function reminderLoop(userId: string, generation: string) {
       }
     }
 
-    const summaryTarget = nextLocalTime(DAILY_SUMMARY_HOUR, 0, tz);
-    const summaryWait = msUntil(summaryTarget);
+    const summaryTargetAt = await resolveNextLocalTimestamp(DAILY_SUMMARY_HOUR, 0, tz);
+    const summaryWait = Math.max(0, summaryTargetAt - Date.now());
     if (summaryWait > 0) {
       await sleep(`${summaryWait}ms`);
     }
     if (!(await ownsReminderRun(userId, generation))) break;
-    if (Date.now() < summaryTarget.getTime() - EARLY_WAKE_TOLERANCE_MS) {
+    if (Date.now() < summaryTargetAt - EARLY_WAKE_TOLERANCE_MS) {
       continue;
     }
 
@@ -102,14 +103,14 @@ export async function reminderLoop(userId: string, generation: string) {
       }
     }
 
-    if (isDayOfWeek(tz, WEEKLY_RECAP_DAY)) {
-      const recapTarget = nextLocalTime(WEEKLY_RECAP_HOUR, 0, tz);
-      const recapWait = msUntil(recapTarget);
+    if (await isLocalDayOfWeek(tz, WEEKLY_RECAP_DAY)) {
+      const recapTargetAt = await resolveNextLocalTimestamp(WEEKLY_RECAP_HOUR, 0, tz);
+      const recapWait = Math.max(0, recapTargetAt - Date.now());
       if (recapWait > 0) {
         await sleep(`${recapWait}ms`);
       }
       if (!(await ownsReminderRun(userId, generation))) break;
-      if (Date.now() < recapTarget.getTime() - EARLY_WAKE_TOLERANCE_MS) {
+      if (Date.now() < recapTargetAt - EARLY_WAKE_TOLERANCE_MS) {
         continue;
       }
 

@@ -74,10 +74,18 @@ describe("isDayOfWeek", () => {
 });
 
 describe("nextLocalTime", () => {
-  test("returns a future Date", () => {
-    const result = nextLocalTime(8, 0, "America/New_York");
-    expect(result.getTime()).toBeGreaterThan(Date.now() - 24 * 60 * 60 * 1000);
-    expect(result instanceof Date).toBe(true);
+  test("converts a future Jerusalem wall-clock time to UTC", () => {
+    const now = new Date("2026-07-27T04:00:00.000Z"); // 07:00 in Jerusalem
+    const result = nextLocalTime(8, 30, "Asia/Jerusalem", now);
+
+    expect(result.toISOString()).toBe("2026-07-27T05:30:00.000Z");
+  });
+
+  test("rolls a passed Jerusalem wall-clock time to the next local day", () => {
+    const now = new Date("2026-07-27T06:52:53.954Z"); // 09:52 in Jerusalem
+    const result = nextLocalTime(8, 30, "Asia/Jerusalem", now);
+
+    expect(result.toISOString()).toBe("2026-07-28T05:30:00.000Z");
   });
 });
 
