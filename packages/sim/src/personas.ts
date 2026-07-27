@@ -37,7 +37,7 @@ export function createModelPersona(
   const modelName = options.model ?? resolveDefaultModelName(process.env);
   const generate = createTextGenerator({
     id: `skintext-simulator-persona-${scenario.id}`,
-    instructions: "Simulate the user in a Skintext onboarding conversation.",
+    instructions: "Simulate the user in a Zoey onboarding conversation.",
     model: modelName,
   });
   let usedOpening = false;
@@ -57,7 +57,7 @@ export function createModelPersona(
       }
 
       const text = (
-        await generate(`You are simulating a real user for local Skintext QA.
+        await generate(`You are simulating a real user for local Zoey QA.
 
 Task under test: ${scenario.task}
 

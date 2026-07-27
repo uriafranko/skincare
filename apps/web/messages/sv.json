@@ -1,20 +1,20 @@
 {
   "Metadata": {
-    "title": "Skintext - Hudvård, ett tydligt steg i taget",
-    "description": "Bygg en enkel hudvårdsrutin i iMessage. Skintext kommer ihåg vad du provar, följer upp utan skuld och hjälper dig ändra en sak i taget.",
-    "ogTitle": "Skintext - Hudvård, ett tydligt steg i taget",
-    "ogDescription": "Bygg en enkel hudvårdsrutin i iMessage. Skintext kommer ihåg vad du provar, följer upp utan skuld och hjälper dig ändra en sak i taget."
+    "title": "Zoey - Din hudvårdscoach i iMessage",
+    "description": "Möt Zoey, din AI-hudvårdscoach i iMessage. Hon kommer ihåg vad du provar, följer upp utan skuld och hjälper dig ändra en sak i taget.",
+    "ogTitle": "Zoey - Din hudvårdscoach i iMessage",
+    "ogDescription": "Möt Zoey, din AI-hudvårdscoach i iMessage. Hon kommer ihåg vad du provar, följer upp utan skuld och hjälper dig ändra en sak i taget."
   },
   "Nav": {
-    "logo": "skintext",
+    "logo": "Zoey",
     "features": "Så fungerar det",
     "faqs": "Vanliga frågor",
-    "getStarted": "Skriv till Skintext"
+    "getStarted": "Skriv till Zoey"
   },
   "Hero": {
     "eyebrow": "En hudvårdscoach i iMessage",
     "headline": "Hudvård, ett tydligt steg i taget.",
-    "subtitle": "Bygg en enkel rutin i iMessage. Skintext kommer ihåg vad du provar, följer upp utan skuld och hjälper dig ändra en sak i taget.",
+    "subtitle": "Möt Zoey, din AI-hudvårdscoach i iMessage. Hon kommer ihåg vad du provar, följer upp utan skuld och hjälper dig ändra en sak i taget.",
     "trustLine": "Ingen app · Ingen säljpress · Du styr minnet",
     "socialProof": "Byggt för kort, praktisk iMessage-hjälp",
     "conversationLabel": "iMessage",
@@ -22,10 +22,10 @@
     "assistantMessage": "Börja med mindre: rengöring och fuktkräm i två veckor.",
     "assistantFollowup": "Om huden känns bra väljer vi ett nästa steg.",
     "privacyNote": "Minns bara det du vill · Radera när du vill",
-    "guideLabel": "Animerad hudvårdsguide från Skintext"
+    "guideLabel": "Animerad hudvårdsguide från Zoey"
   },
   "Guide": {
-    "toggleLabel": "Visa ett annat tips från Skintexts guide",
+    "toggleLabel": "Visa ett annat tips från Zoey",
     "tips": {
       "start": "Börja enkelt. Behåll det som fungerar.",
       "memory": "Din rutin kan ändras. Ditt minne förblir ditt.",
@@ -33,21 +33,21 @@
     }
   },
   "IMessageButton": {
-    "label": "Skriv till Skintext i Meddelanden",
-    "shortLabel": "Skriv till Skintext",
+    "label": "Skriv till Zoey i Meddelanden",
+    "shortLabel": "Skriv till Zoey",
     "smsBody": "Hej – hjälp mig bygga en enkel hudvårdsrutin."
   },
   "Features": {
     "story": {
       "eyebrow": "Byggt för verkliga rutiner",
       "heading": "Hjälpsam, utan att bli ännu en sak att sköta.",
-      "subtitle": "Skintext är varm och tydlig när det hjälper, försiktig när något verkar fel och kort nog för att fungera i vardagen.",
+      "subtitle": "Zoey skriver som en person: varmt, tydligt och kort nog för vardagen. Hon är försiktig när något kan behöva professionell hjälp.",
       "snapOrText": {
         "value": "Börjar enkelt",
         "heading": "En rutin du kan leva med.",
-        "body": "Två steg du faktiskt gör slår tio som känns överväldigande. Skintext ändrar en sak i taget så du kan se vad som hjälper.",
-        "point1": "Den beskriver synliga detaljer försiktigt och undviker diagnoser.",
-        "point2": "När en produkt bör kommas ihåg frågar den innan den sparas."
+        "body": "Två steg du faktiskt gör slår tio som känns överväldigande. Zoey hjälper dig ändra en sak i taget så du kan se vad som fungerar.",
+        "point1": "Hon beskriver synliga detaljer försiktigt och undviker diagnoser.",
+        "point2": "När en produkt bör kommas ihåg frågar hon innan den sparas."
       },
       "smartReminders": {
         "value": "Följer upp vänligt",
@@ -59,7 +59,7 @@
       "dailySummaries": {
         "value": "Minne med ditt samtycke",
         "heading": "Sammanhang som förblir användbart.",
-        "body": "Produkter, reaktioner och mål kan följa med mellan samtal. Skintext frågar innan känsliga uppgifter sparas, och du kan radera dem.",
+        "body": "Produkter, reaktioner och mål kan följa med mellan samtal. Zoey frågar innan känsliga uppgifter sparas, och du kan radera dem.",
         "point1": "Rutinstatus kommer från verifierade loggar, inte gissningar från chatten.",
         "point2": "Export och radering ingår i samma datahistoria."
       }
@@ -101,27 +101,27 @@
   },
   "Faq": {
     "heading": "Några bra svar",
-    "q1": "Kan Skintext diagnostisera min hud?",
-    "a1": "Nej. Skintext kan beskriva synliga saker försiktigt, förklara produktetiketter och föreslå praktiska rutinsteg. Det ersätter inte vårdpersonal.",
+    "q1": "Kan Zoey diagnostisera min hud?",
+    "a1": "Nej. Zoey är en AI-hudvårdscoach. Hon kan beskriva synliga saker försiktigt, förklara produktetiketter och föreslå praktiska rutinsteg, men hon diagnostiserar inte och ersätter inte vårdpersonal.",
     "q2": "Vad behöver jag för att komma igång?",
-    "a2": "Bara en iPhone med iMessage. Ingen app att ladda ner, inget konto att skapa. Skriv till Skintext och sätt upp rutinen i en kort chatt.",
-    "q3": "Vad kommer Skintext ihåg?",
-    "a3": "Bara sådant som gör framtida hjälp mer användbar, som din rutin, dina mål, produkter och reaktioner. Skintext frågar innan känsliga uppgifter sparas, och du kan fråga vad den minns eller radera det.",
+    "a2": "Bara en iPhone med iMessage. Ingen app att ladda ner, inget konto att skapa. Skriv till Zoey och sätt upp rutinen i en kort chatt.",
+    "q3": "Vad kommer Zoey ihåg?",
+    "a3": "Bara sådant som gör framtida hjälp mer användbar, som din rutin, dina mål, produkter och reaktioner. Zoey frågar innan känsliga uppgifter sparas, och du kan fråga vad hon minns eller radera det.",
     "q4": "Hur fungerar den gratis provperioden?",
     "a4": "Du får full tillgång under provperioden. Följ rutiner, kom ihåg produkter, ställ in påminnelser och se sammanfattningar. Inget kreditkort krävs.",
     "q5": "Vilka språk stöds?",
-    "a5": "Skintext upptäcker ditt språk från meddelandet och svarar därefter. Engelska och svenska stöds, med fler språk på väg."
+    "a5": "Zoey upptäcker ditt språk från meddelandet och svarar därefter. Engelska och svenska stöds, med fler språk på väg."
   },
   "BottomCta": {
     "heading": "Starta din rutin idag",
-    "subtitle": "Öppna iMessage och skriv till Skintext. Rutinen sätts upp i en kort chatt.",
+    "subtitle": "Öppna iMessage och skriv till Zoey. Hon hjälper dig sätta upp rutinen i en kort chatt.",
     "buttonHint": "Öppnar iMessage på din Mac eller iPhone",
     "qrLabel": "Skanna med din telefon"
   },
   "PhoneMockup": {
-    "header": "skintext",
+    "header": "Zoey",
     "inputPlaceholder": "iMessage",
-    "lockTitle": "skintext",
+    "lockTitle": "Zoey",
     "lockBody": "Kvällsrutin loggad.",
     "lockBodyLogging": "Jag fick bilden. Jag kollar rutinpassningen.",
     "lockBodySummary": "Här är dagens rutinsammanfattning.",
@@ -138,10 +138,10 @@
   "Privacy": {
     "heading": "Integritetspolicy",
     "lastUpdated": "Senast uppdaterad: juli 2026",
-    "intro": "Skintext (\"Skintext\", \"vi\", \"oss\") är engagerade i att skydda din integritet. Denna policy förklarar vilken data vi samlar in, hur vi använder den och dina rättigheter.",
+    "intro": "Zoey (\"Zoey\", \"vi\", \"oss\") är engagerade i att skydda din integritet. Denna policy förklarar vilken data vi samlar in, hur vi använder den och dina rättigheter.",
     "dataCollection": {
       "title": "Data vi samlar in",
-      "body": "När du använder Skintext samlar vi in:\n\n• Ditt telefonnummer (för att identifiera ditt konto och leverera meddelanden via iMessage)\n• Din bekräftelse under installationen på att du är minst 16 år, aldrig din exakta ålder eller ditt födelsedatum\n• Ditt namn, vald kommunikationsstil, hudmål, hudtyp om du delar den, känsligheter, allergier, nuvarande produkter och hudvårdsexperiment med en ändring i taget i agentminnet\n• Rutinuppdateringar och loggar, påminnelser, tidszon och land för lokalisering\n• Rensad konversationshistorik, där fototurer innehåller text och en allmän fotomarkör men inte bilddata eller privata bildadresser"
+      "body": "När du använder Zoey samlar vi in:\n\n• Ditt telefonnummer (för att identifiera ditt konto och leverera meddelanden via iMessage)\n• Din bekräftelse under installationen på att du är minst 16 år, aldrig din exakta ålder eller ditt födelsedatum\n• Ditt namn, vald kommunikationsstil, hudmål, hudtyp om du delar den, känsligheter, allergier, nuvarande produkter och hudvårdsexperiment med en ändring i taget i agentminnet\n• Rutinuppdateringar och loggar, påminnelser, tidszon och land för lokalisering\n• Rensad konversationshistorik, där fototurer innehåller text och en allmän fotomarkör men inte bilddata eller privata bildadresser"
     },
     "dataUsage": {
       "title": "Hur vi använder din data",
@@ -153,7 +153,7 @@
     },
     "thirdParty": {
       "title": "Tredjepartstjänster",
-      "body": "Vi använder följande tredjepartstjänster för att driva Skintext:\n\n• OpenAI — för bildanalys och naturlig språkbehandling\n• Sendblue — för iMessage-leverans\n\nDessa tjänster behandlar data som är nödvändig för att tillhandahålla våra funktioner. Vi säljer inte din data till tredje part."
+      "body": "Vi använder följande tredjepartstjänster för att driva Zoey:\n\n• OpenAI — för bildanalys och naturlig språkbehandling\n• Sendblue — för iMessage-leverans\n\nDessa tjänster behandlar data som är nödvändig för att tillhandahålla våra funktioner. Vi säljer inte din data till tredje part."
     },
     "retention": {
       "title": "Datalagring",
@@ -161,7 +161,7 @@
     },
     "rights": {
       "title": "Dina rättigheter",
-      "body": "Du har rätt att:\n\n• Fråga vad Skintext minns och begära en kopia av din data\n• Rätta eller glömma profil-, produkt- och experimentuppgifter i agentminnet\n• Aktivera eller stänga av framtida bildlagring och radera sparade bilder\n• Begära radering av kontot, inklusive agentminne och integritetsinställningar\n• Återkalla samtycke när som helst"
+      "body": "Du har rätt att:\n\n• Fråga vad Zoey minns och begära en kopia av din data\n• Rätta eller glömma profil-, produkt- och experimentuppgifter i agentminnet\n• Aktivera eller stänga av framtida bildlagring och radera sparade bilder\n• Begära radering av kontot, inklusive agentminne och integritetsinställningar\n• Återkalla samtycke när som helst"
     },
     "contact": {
       "title": "Kontakt",
@@ -171,34 +171,34 @@
   "Terms": {
     "heading": "Användarvillkor",
     "lastUpdated": "Senast uppdaterad: juli 2026",
-    "intro": "Genom att använda Skintext (\"Skintext\", \"Tjänsten\") godkänner du dessa villkor. Läs dem noggrant.",
+    "intro": "Genom att använda Zoey (\"Zoey\", \"Tjänsten\") godkänner du dessa villkor. Läs dem noggrant.",
     "eligibility": {
       "title": "Behörighet",
-      "body": "Du måste vara minst 16 år gammal och ha tillgång till en iPhone med iMessage för att använda Skintext. Vi frågar bara om du är 16 år eller äldre, inte efter din exakta ålder eller ditt födelsedatum."
+      "body": "Du måste vara minst 16 år gammal och ha tillgång till en iPhone med iMessage för att använda Zoey. Vi frågar bara om du är 16 år eller äldre, inte efter din exakta ålder eller ditt födelsedatum."
     },
     "service": {
       "title": "Tjänsten",
-      "body": "Skintext är en AI-driven hudvårdsassistent som fungerar via iMessage. Tjänsten inkluderar rutinloggning, produktanteckningar, kommunikationsinställningar, hudvårdsexperiment med en ändring, sammanfattningar, veckokoll, påminnelser, tillfällig bildbehandling och minneskontroller i chatten. Bildlagring för vuxna är frivillig och kräver separat samtycke."
+      "body": "Zoey är en AI-driven hudvårdsassistent som fungerar via iMessage. Tjänsten inkluderar rutinloggning, produktanteckningar, kommunikationsinställningar, hudvårdsexperiment med en ändring, sammanfattningar, veckokoll, påminnelser, tillfällig bildbehandling och minneskontroller i chatten. Bildlagring för vuxna är frivillig och kräver separat samtycke."
     },
     "accuracy": {
       "title": "Hudvårdsråd",
-      "body": "Skintext ger rutinhjälp och försiktig produktvägledning baserat på det du delar. Det diagnostiserar inte, skriver inte ut behandling och ersätter inte professionell vård. Kontakta vårdpersonal vid oroande, allvarliga, ihållande eller snabbt föränderliga symtom."
+      "body": "Zoey ger rutinhjälp och försiktig produktvägledning baserat på det du delar. Hon diagnostiserar inte, skriver inte ut behandling och ersätter inte professionell vård. Kontakta vårdpersonal vid oroande, allvarliga, ihållande eller snabbt föränderliga symtom."
     },
     "account": {
       "title": "Ditt konto",
-      "body": "Ditt konto identifieras av ditt telefonnummer. Du ansvarar för all aktivitet kopplad till ditt telefonnummer. Dela inte åtkomst till ditt iMessage-konto med andra i syfte att använda Skintext."
+      "body": "Ditt konto identifieras av ditt telefonnummer. Du ansvarar för all aktivitet kopplad till ditt telefonnummer. Dela inte åtkomst till ditt iMessage-konto med andra i syfte att använda Zoey."
     },
     "ip": {
       "title": "Immaterialrätt",
-      "body": "Allt innehåll, alla funktioner och all funktionalitet i Skintext ägs av Skintext och skyddas av upphovsrätt och andra immaterialrättsliga lagar."
+      "body": "Allt innehåll, alla funktioner och all funktionalitet i Zoey ägs av Zoey och skyddas av upphovsrätt och andra immaterialrättsliga lagar."
     },
     "liability": {
       "title": "Ansvarsbegränsning",
-      "body": "Skintext tillhandahålls \"i befintligt skick\" utan garantier av något slag. Vi ansvarar inte för skador som uppstår genom din användning av tjänsten, inklusive resultat baserade på rutinhjälp från tjänsten."
+      "body": "Zoey tillhandahålls \"i befintligt skick\" utan garantier av något slag. Vi ansvarar inte för skador som uppstår genom din användning av tjänsten, inklusive resultat baserade på rutinhjälp från tjänsten."
     },
     "changes": {
       "title": "Ändringar av villkor",
-      "body": "Vi kan uppdatera dessa villkor från tid till annan. Fortsatt användning av Skintext efter ändringar innebär att du godkänner de nya villkoren."
+      "body": "Vi kan uppdatera dessa villkor från tid till annan. Fortsatt användning av Zoey efter ändringar innebär att du godkänner de nya villkoren."
     },
     "contact": {
       "title": "Kontakt",
@@ -206,11 +206,11 @@
     }
   },
   "Footer": {
-    "logo": "skintext",
+    "logo": "Zoey",
     "tagline": "Hudvårdsrutiner som lever i dina meddelanden.",
     "privacy": "Integritet",
     "terms": "Villkor",
-    "copyright": "© {year} skintext",
+    "copyright": "© {year} Zoey",
     "x": "X",
     "instagram": "Instagram",
     "tiktok": "TikTok"

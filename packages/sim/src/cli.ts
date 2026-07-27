@@ -129,7 +129,7 @@ async function play(options: CliOptions) {
 
     for (const message of reply.messages) {
       transcript.push({ role: "assistant", content: message, turn, state: reply.state });
-      console.log(`skintext> ${message}`);
+      console.log(`zoey> ${message}`);
     }
 
     if (reply.complete) {

@@ -1,3 +1,5 @@
+import { normalizeAssistantText } from "@skintext/ai/text";
+
 const DEFAULT_MIN_CHARS = 120;
 const DEFAULT_MAX_CHARS = 180;
 const DEFAULT_HARD_MAX_CHARS = 1400;
@@ -70,16 +72,7 @@ function resolveSplitOptions(options: ReplySplitOptions): ResolvedSplitOptions {
 }
 
 function normalizeText(text: string): string {
-  return text
-    .replace(/\u00a0/g, " ")
-    .replace(/[\u2018\u2019\u201a\u201b\u2032]/g, "'")
-    .replace(/[\u201c\u201d\u201e\u2033]/g, '"')
-    .replace(/[\u2013\u2014]/g, "-")
-    .replace(/\u2026/g, "...")
-    .replace(/\r\n/g, "\n")
-    .replace(/[ \t]+\n/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
+  return normalizeAssistantText(text);
 }
 
 function isStructuredReply(text: string): boolean {

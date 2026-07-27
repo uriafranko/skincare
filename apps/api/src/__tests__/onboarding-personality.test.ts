@@ -7,11 +7,13 @@ describe("age-gated onboarding eligibility", () => {
     const replies = await rejectUnder16PendingOnboarding({
       extracted: { ageEligible: false, detectedLocale: "en" },
       userId: "usr_under_16",
-      reply: "Skintext is for people 16 or older, so I can't continue setup.",
+      reply: "I can only help people who are 16 or older, so I can't continue setup.",
       deletePendingUser,
     });
 
-    expect(replies).toEqual(["Skintext is for people 16 or older, so I can't continue setup."]);
+    expect(replies).toEqual([
+      "I can only help people who are 16 or older, so I can't continue setup.",
+    ]);
     expect(deletePendingUser).toHaveBeenCalledWith("usr_under_16");
   });
 

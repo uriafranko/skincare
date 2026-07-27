@@ -3,6 +3,7 @@ import { getUserImage, listUserImages } from "@skintext/db";
 import type { UserImage } from "@skintext/shared";
 import { z } from "zod";
 import { getSkintextRuntime } from "../runtime";
+import { normalizeAssistantText } from "../text";
 
 function imageSummary(image: UserImage) {
   return {
@@ -43,7 +44,7 @@ export const sendUserImageTool = createTool({
       .string()
       .max(300)
       .optional()
-      .describe("Optional short caption to send with the image."),
+      .describe("Optional short plain-text caption to send with the image. Never use Markdown."),
   }),
   execute: async ({ imageId, caption }, context) => {
     const { userId, sendUserImage } = getSkintextRuntime(context.requestContext);
@@ -54,7 +55,8 @@ export const sendUserImageTool = createTool({
       return { sent: false, message: "Image not found or expired." };
     }
 
-    await sendUserImage({ userId, image, caption: caption?.trim() || undefined });
+    const plainTextCaption = caption ? normalizeAssistantText(caption) : "";
+    await sendUserImage({ userId, image, caption: plainTextCaption || undefined });
     return { sent: true, image: imageSummary(image) };
   },
 });

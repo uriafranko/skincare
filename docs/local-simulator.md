@@ -1,6 +1,6 @@
 # Local Simulator
 
-The simulator is a local harness for playing through Skintext flows without Sendblue webhooks. It is designed for iteration tasks such as "optimize onboarding": run a persona, inspect the transcript, change prompts or flow logic, and rerun the same scenario.
+The simulator is a local harness for playing through Zoey flows without Sendblue webhooks. It is designed for iteration tasks such as "optimize onboarding": run a persona, inspect the transcript, change prompts or flow logic, and rerun the same scenario.
 
 ## Commands
 

@@ -14,6 +14,12 @@ describe("reply bubble splitting", () => {
     ]);
   });
 
+  test("strips Markdown before iMessage delivery", () => {
+    expect(splitReplyIntoBubbles("# Tonight\n- **Cleanse** gently\n- Apply `moisturizer`")).toEqual(
+      ["Tonight\nCleanse gently\nApply moisturizer"],
+    );
+  });
+
   test("splits conversational replies at sentence boundaries", () => {
     const text =
       "Start with the cleanser tonight. Skip the exfoliant for two days. Add moisturizer while the redness settles.";

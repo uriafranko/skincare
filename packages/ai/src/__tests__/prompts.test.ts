@@ -62,6 +62,8 @@ function makeContext(overrides: Record<string, unknown> = {}) {
 describe("buildSkintextSystemPrompt", () => {
   test("composes every trusted-core policy module", () => {
     const prompt = buildSkintextSystemPrompt(makeContext());
+    expect(prompt).toContain("Your name is Zoey");
+    expect(prompt).toContain("You are AI, not a human");
     expect(prompt).toContain("ROLE AND IDENTITY");
     expect(prompt).toContain("CONVERSATION POLICY");
     expect(prompt).toContain("SAFETY POLICY");
@@ -137,6 +139,8 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("latest explicit addition, correction, stop, removal, or forget");
     expect(prompt).toContain("Raw image bytes and private URLs");
     expect(prompt).toContain("Keep only one active skincare experiment");
+    expect(prompt).toContain("Every user-visible reply must be plain text");
+    expect(prompt).toContain("Never use Markdown syntax");
   });
 
   test("does not inject experiment state outside working memory", () => {
@@ -209,6 +213,14 @@ describe("scheduled prompts", () => {
     const prompt = buildWeeklyRoutineRecapPrompt("en");
     expect(prompt).toContain("morning/evening routine slots");
     expect(prompt).toContain("conversational");
+    expect(prompt).toContain("plain text only");
+    expect(prompt).not.toContain("unless the user asked for a checklist");
+  });
+
+  test("all scheduled prompts prohibit Markdown", () => {
+    expect(buildDailyRoutineSummaryPrompt("en")).toContain("Do not use any Markdown");
+    expect(buildRoutineReminderPrompt("en")).toContain("Do not use any Markdown");
+    expect(buildWeeklyRoutineRecapPrompt("en")).toContain("Do not use any Markdown");
   });
 
   test("scheduled prompts support Hebrew locale names", () => {
@@ -237,5 +249,6 @@ describe("onboarding prompt source", () => {
     expect(source).toContain("natural language mix if they code-switch");
     expect(source).toContain("slang level");
     expect(source).toContain("Do not force slang, caricature a dialect");
+    expect(source).toContain("Return plain text only. Never use Markdown");
   });
 });

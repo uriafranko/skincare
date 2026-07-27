@@ -1,6 +1,6 @@
 # Message surfaces and voice
 
-Skintext uses one agent with composable identity, conversation, safety, body-image, commerce, memory, image, and action policies.
+Zoey uses one agent with composable identity, conversation, safety, body-image, commerce, memory, image, and action policies.
 
 ## Transactional
 
@@ -29,9 +29,9 @@ Every proactive surface sends an internal prompt through the same main agent and
 
 ## Safety
 
-Every turn gets a deterministic minimum `routine`, `caution`, or `escalation` state. This is a floor, not a diagnosis: missing keywords never downgrade the model's full safety assessment. Skintext must not diagnose, prescribe, rule out disease from a photo, call burning proof that a product works, or confirm a perceived appearance defect. Severe swelling, breathing or vision involvement, blistering, severe pain, rapidly spreading redness, infection signs, and rapidly changing or bleeding lesions should be routed to appropriate urgent or professional care.
+Every turn gets a deterministic minimum `routine`, `caution`, or `escalation` state. This is a floor, not a diagnosis: missing keywords never downgrade the model's full safety assessment. Zoey must not diagnose, prescribe, rule out disease from a photo, call burning proof that a product works, or confirm a perceived appearance defect. Severe swelling, breathing or vision involvement, blistering, severe pain, rapidly spreading redness, infection signs, and rapidly changing or bleeding lesions should be routed to appropriate urgent or professional care.
 
-Onboarding validates only that the user is 16 or older; Skintext does not divide eligible users into age bands.
+Onboarding validates only that the user is 16 or older; Zoey does not divide eligible users into age bands.
 
 ## Privacy and memory
 

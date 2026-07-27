@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Skintext is a Bun/Turborepo monorepo for an iMessage skincare routine assistant. Keep this file short: only durable facts and commands that future agents should use almost every time.
+Zoey is a Bun/Turborepo monorepo for an iMessage skincare routine assistant. Internal package names and stable storage keys still use `skintext`. Keep this file short: only durable facts and commands that future agents should use almost every time.
 
 ## Project Map
 

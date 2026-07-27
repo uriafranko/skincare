@@ -59,6 +59,7 @@ export {
   type SkintextRuntime,
   skintextMemoryOptions,
 } from "./runtime";
+export { normalizeAssistantText } from "./text";
 export { createTextGenerator } from "./text-generator";
 export { skintextAgentTools } from "./tools/agent-tools";
 export { deleteAccountTool } from "./tools/delete-account";

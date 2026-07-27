@@ -1,20 +1,20 @@
 {
   "Metadata": {
-    "title": "Skintext - Skincare, one clear step at a time",
-    "description": "Build a simple skincare routine in iMessage. Skintext remembers what you try, follows up without judgment, and helps you change one thing at a time.",
-    "ogTitle": "Skintext - Skincare, one clear step at a time",
-    "ogDescription": "Build a simple skincare routine in iMessage. Skintext remembers what you try, follows up without judgment, and helps you change one thing at a time."
+    "title": "Zoey - Your skincare coach in iMessage",
+    "description": "Meet Zoey, your AI skincare coach in iMessage. She remembers what you try, checks in without judgment, and helps you change one thing at a time.",
+    "ogTitle": "Zoey - Your skincare coach in iMessage",
+    "ogDescription": "Meet Zoey, your AI skincare coach in iMessage. She remembers what you try, checks in without judgment, and helps you change one thing at a time."
   },
   "Nav": {
-    "logo": "skintext",
+    "logo": "Zoey",
     "features": "How it works",
     "faqs": "FAQs",
-    "getStarted": "Text Skintext"
+    "getStarted": "Text Zoey"
   },
   "Hero": {
     "eyebrow": "A skincare coach in iMessage",
     "headline": "Skincare, one clear step at a time.",
-    "subtitle": "Build a simple routine in iMessage. Skintext remembers what you try, follows up without judgment, and helps you change one thing at a time.",
+    "subtitle": "Meet Zoey, your AI skincare coach in iMessage. She remembers what you try, checks in without judgment, and helps you change one thing at a time.",
     "trustLine": "No app · No sales pressure · You control memory",
     "socialProof": "Built for short, practical iMessage help",
     "conversationLabel": "iMessage",
@@ -22,10 +22,10 @@
     "assistantMessage": "Start with less: cleanser and moisturizer for two weeks.",
     "assistantFollowup": "If your skin stays comfortable, we’ll choose one next step.",
     "privacyNote": "Remembers only what you want · Delete anytime",
-    "guideLabel": "Animated Skintext skincare guide"
+    "guideLabel": "Animated Zoey skincare guide"
   },
   "Guide": {
-    "toggleLabel": "Show another tip from the Skintext guide",
+    "toggleLabel": "Show another tip from Zoey",
     "tips": {
       "start": "Start small. Keep what works.",
       "memory": "Your routine can change. Your memory stays yours.",
@@ -33,21 +33,21 @@
     }
   },
   "IMessageButton": {
-    "label": "Text Skintext in Messages",
-    "shortLabel": "Text Skintext",
+    "label": "Text Zoey in Messages",
+    "shortLabel": "Text Zoey",
     "smsBody": "Hi — help me build a simple skincare routine."
   },
   "Features": {
     "story": {
       "eyebrow": "Built for real routines",
       "heading": "Helpful, without becoming another thing to manage.",
-      "subtitle": "Skintext is warm and clear when that helps, cautious when something looks wrong, and brief enough to fit real life.",
+      "subtitle": "Zoey talks like a person: warm, clear, and brief enough for real life. She stays careful when something may need a professional.",
       "snapOrText": {
         "value": "Starts small",
         "heading": "A routine you can live with.",
-        "body": "Two steps you actually do beat ten that feel overwhelming. Skintext changes one thing at a time so you can see what helps.",
-        "point1": "It describes visible details cautiously and avoids diagnosis.",
-        "point2": "When a product should be remembered, it asks before saving it."
+        "body": "Two steps you actually do beat ten that feel overwhelming. Zoey helps you change one thing at a time so you can see what works.",
+        "point1": "She describes visible details cautiously and avoids diagnosis.",
+        "point2": "When a product should be remembered, she asks before saving it."
       },
       "smartReminders": {
         "value": "Checks in gently",
@@ -59,7 +59,7 @@
       "dailySummaries": {
         "value": "Remembers with permission",
         "heading": "Context that stays useful.",
-        "body": "Products, reactions, and goals can carry between chats. Skintext asks before saving sensitive details, and you can delete them.",
+        "body": "Products, reactions, and goals can carry between chats. Zoey asks before saving sensitive details, and you can delete them.",
         "point1": "Routine status comes from verified logs, not guesses from chat.",
         "point2": "Export and delete paths are part of the same data story."
       }
@@ -101,27 +101,27 @@
   },
   "Faq": {
     "heading": "A few useful answers",
-    "q1": "Can Skintext diagnose my skin?",
-    "a1": "No. Skintext can describe visible features cautiously, explain product labels, and suggest practical routine steps. It does not diagnose or replace a clinician.",
+    "q1": "Can Zoey diagnose my skin?",
+    "a1": "No. Zoey is an AI skincare coach. She can describe visible features cautiously, explain product labels, and suggest practical routine steps, but she does not diagnose or replace a clinician.",
     "q2": "What do I need to get started?",
-    "a2": "Just an iPhone with iMessage. No app to download, no account to create. Text Skintext and set up your routine in a short chat.",
-    "q3": "What does Skintext remember?",
-    "a3": "Only context that makes future help more useful, such as your routine, goals, products, and reactions. Skintext asks before saving sensitive details, and you can ask what it remembers or delete it.",
+    "a2": "Just an iPhone with iMessage. No app to download, no account to create. Text Zoey and set up your routine in a short chat.",
+    "q3": "What does Zoey remember?",
+    "a3": "Only context that makes future help more useful, such as your routine, goals, products, and reactions. Zoey asks before saving sensitive details, and you can ask what she remembers or delete it.",
     "q4": "How does the free trial work?",
     "a4": "You get full access during the trial period. Track routines, remember products, set reminders, and review summaries. No credit card required to start.",
     "q5": "What languages are supported?",
-    "a5": "Skintext detects your language from your message and responds accordingly. English and Swedish are supported, with more languages coming soon."
+    "a5": "Zoey detects your language from your message and responds accordingly. English and Swedish are supported, with more languages coming soon."
   },
   "BottomCta": {
     "heading": "Start your routine today",
-    "subtitle": "Open iMessage and text Skintext. Your routine setup takes only a short chat.",
+    "subtitle": "Open iMessage and text Zoey. She’ll help you set up your routine in one short chat.",
     "buttonHint": "Opens iMessage on your Mac or iPhone",
     "qrLabel": "Scan with your phone"
   },
   "PhoneMockup": {
-    "header": "skintext",
+    "header": "Zoey",
     "inputPlaceholder": "iMessage",
-    "lockTitle": "skintext",
+    "lockTitle": "Zoey",
     "lockBody": "Evening routine logged.",
     "lockBodyLogging": "Got your photo. Let me check the routine fit.",
     "lockBodySummary": "Here's today's routine wrap-up.",
@@ -138,10 +138,10 @@
   "Privacy": {
     "heading": "Privacy Policy",
     "lastUpdated": "Last updated: July 2026",
-    "intro": "Skintext (\"Skintext\", \"we\", \"us\") is committed to protecting your privacy. This policy explains what data we collect, how we use it, and your rights.",
+    "intro": "Zoey (\"Zoey\", \"we\", \"us\") is committed to protecting your privacy. This policy explains what data we collect, how we use it, and your rights.",
     "dataCollection": {
       "title": "Data We Collect",
-      "body": "When you use Skintext, we collect:\n\n• Your phone number (to identify your account and deliver messages via iMessage)\n• Your confirmation that you are at least 16 during setup, never your exact age or birthdate\n• Your name, communication style, skin goals, skin type if shared, sensitivities, allergies, current products, and one-variable skincare experiments in agent memory\n• Routine updates and logs, reminders, timezone, and country for localization\n• Sanitized conversation history, which stores text and a generic marker for photo turns but not image bytes or private image URLs"
+      "body": "When you use Zoey, we collect:\n\n• Your phone number (to identify your account and deliver messages via iMessage)\n• Your confirmation that you are at least 16 during setup, never your exact age or birthdate\n• Your name, communication style, skin goals, skin type if shared, sensitivities, allergies, current products, and one-variable skincare experiments in agent memory\n• Routine updates and logs, reminders, timezone, and country for localization\n• Sanitized conversation history, which stores text and a generic marker for photo turns but not image bytes or private image URLs"
     },
     "dataUsage": {
       "title": "How We Use Your Data",
@@ -153,7 +153,7 @@
     },
     "thirdParty": {
       "title": "Third-Party Services",
-      "body": "We use the following third-party services to operate Skintext:\n\n• OpenAI — for image analysis and natural language processing\n• Sendblue — for iMessage delivery\n\nThese services process data as necessary to provide our features. We do not sell your data to third parties."
+      "body": "We use the following third-party services to operate Zoey:\n\n• OpenAI — for image analysis and natural language processing\n• Sendblue — for iMessage delivery\n\nThese services process data as necessary to provide our features. We do not sell your data to third parties."
     },
     "retention": {
       "title": "Data Retention",
@@ -161,7 +161,7 @@
     },
     "rights": {
       "title": "Your Rights",
-      "body": "You have the right to:\n\n• Ask what Skintext remembers and request a copy of your data\n• Correct or forget profile, product, and experiment details in agent memory\n• Enable or disable future photo retention, and delete saved photos\n• Request deletion of your account, including agent memory and privacy preferences\n• Withdraw consent at any time"
+      "body": "You have the right to:\n\n• Ask what Zoey remembers and request a copy of your data\n• Correct or forget profile, product, and experiment details in agent memory\n• Enable or disable future photo retention, and delete saved photos\n• Request deletion of your account, including agent memory and privacy preferences\n• Withdraw consent at any time"
     },
     "contact": {
       "title": "Contact",
@@ -171,34 +171,34 @@
   "Terms": {
     "heading": "Terms of Service",
     "lastUpdated": "Last updated: July 2026",
-    "intro": "By using Skintext (\"Skintext\", \"the Service\"), you agree to these terms. Please read them carefully.",
+    "intro": "By using Zoey (\"Zoey\", \"the Service\"), you agree to these terms. Please read them carefully.",
     "eligibility": {
       "title": "Eligibility",
-      "body": "You must be at least 16 years old and have access to an iPhone with iMessage to use Skintext. We ask only whether you are 16 or older, not for your exact age or birthdate."
+      "body": "You must be at least 16 years old and have access to an iPhone with iMessage to use Zoey. We ask only whether you are 16 or older, not for your exact age or birthdate."
     },
     "service": {
       "title": "The Service",
-      "body": "Skintext is an AI-powered skincare routine assistant that operates through iMessage. The service includes routine logging, product notes, communication preferences, one-variable skincare experiments, summaries, adherence recaps, reminders, transient photo processing, and chat-based memory controls. Photo retention is optional and requires separate consent."
+      "body": "Zoey is an AI-powered skincare routine assistant that operates through iMessage. The service includes routine logging, product notes, communication preferences, one-variable skincare experiments, summaries, adherence recaps, reminders, transient photo processing, and chat-based memory controls. Photo retention is optional and requires separate consent."
     },
     "accuracy": {
       "title": "Skincare Guidance",
-      "body": "Skintext provides routine support and conservative product guidance based on what you share. It does not diagnose, prescribe, or replace professional medical care. Consult a qualified clinician for concerning, severe, persistent, or rapidly changing symptoms."
+      "body": "Zoey provides routine support and conservative product guidance based on what you share. She does not diagnose, prescribe, or replace professional medical care. Consult a qualified clinician for concerning, severe, persistent, or rapidly changing symptoms."
     },
     "account": {
       "title": "Your Account",
-      "body": "Your account is identified by your phone number. You are responsible for all activity associated with your phone number. Do not share access to your iMessage account with others for the purpose of using Skintext."
+      "body": "Your account is identified by your phone number. You are responsible for all activity associated with your phone number. Do not share access to your iMessage account with others for the purpose of using Zoey."
     },
     "ip": {
       "title": "Intellectual Property",
-      "body": "All content, features, and functionality of Skintext are owned by Skintext and are protected by copyright and other intellectual property laws."
+      "body": "All content, features, and functionality of Zoey are owned by Zoey and are protected by copyright and other intellectual property laws."
     },
     "liability": {
       "title": "Limitation of Liability",
-      "body": "Skintext is provided \"as is\" without warranties of any kind. We are not liable for any damages arising from your use of the service, including outcomes based on routine guidance provided by the service."
+      "body": "Zoey is provided \"as is\" without warranties of any kind. We are not liable for any damages arising from your use of the service, including outcomes based on routine guidance provided by the service."
     },
     "changes": {
       "title": "Changes to Terms",
-      "body": "We may update these terms from time to time. Continued use of Skintext after changes constitutes acceptance of the new terms."
+      "body": "We may update these terms from time to time. Continued use of Zoey after changes constitutes acceptance of the new terms."
     },
     "contact": {
       "title": "Contact",
@@ -206,11 +206,11 @@
     }
   },
   "Footer": {
-    "logo": "skintext",
+    "logo": "Zoey",
     "tagline": "Skincare routines that live in your texts.",
     "privacy": "Privacy",
     "terms": "Terms",
-    "copyright": "© {year} skintext",
+    "copyright": "© {year} Zoey",
     "x": "X",
     "instagram": "Instagram",
     "tiktok": "TikTok"

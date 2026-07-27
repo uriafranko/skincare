@@ -2,7 +2,7 @@ import { useTranslations } from "next-intl";
 import { ChromaCharacter } from "./chroma-character";
 import { IMessageButton } from "./imessage-button";
 
-function SkintextMark({ size = "md" }: { size?: "sm" | "md" }) {
+function ZoeyMark({ size = "md" }: { size?: "sm" | "md" }) {
   const dimension = size === "sm" ? "h-7 w-7 rounded-[9px]" : "h-9 w-9 rounded-[11px]";
 
   return (
@@ -41,9 +41,9 @@ function GuideStage() {
 
       <div className="absolute left-0 top-7 z-20 w-[190px] rounded-[22px] rounded-br-[6px] border border-white/90 bg-white/92 px-4 py-3.5 text-left shadow-[0_18px_48px_rgba(32,35,33,0.12)] backdrop-blur-xl sm:left-[8%] sm:w-[236px] lg:left-0 lg:top-16">
         <div className="flex items-center gap-2.5 border-b border-border/70 pb-2.5">
-          <SkintextMark size="sm" />
+          <ZoeyMark size="sm" />
           <div className="min-w-0">
-            <p className="text-[12px] font-semibold leading-none text-primary">skintext</p>
+            <p className="text-[12px] font-semibold leading-none text-primary">Zoey</p>
             <p className="mt-1 text-[10px] leading-none text-muted">{t("conversationLabel")}</p>
           </div>
         </div>

@@ -4,10 +4,12 @@ import {
   buildActionPolicy,
   buildBodyImagePolicy,
   buildCommercePolicy,
+  buildContextPriorityPolicy,
   buildConversationPolicy,
   buildIdentityPolicy,
   buildImagePolicy,
   buildMemoryPolicy,
+  buildResponseShapePolicy,
   buildSafetyPolicy,
   buildScheduledEventPolicy,
 } from "./personality-policy";
@@ -30,6 +32,8 @@ Use working memory and newer retained history for personal profile, products, an
   return [
     buildIdentityPolicy(),
     buildConversationPolicy(),
+    buildResponseShapePolicy(),
+    buildContextPriorityPolicy(),
     buildSafetyPolicy(),
     buildBodyImagePolicy(),
     buildCommercePolicy(),
@@ -43,11 +47,11 @@ Use working memory and newer retained history for personal profile, products, an
 
 export function buildDailyRoutineSummaryPrompt(locale: string): string {
   const localeName = getLocaleName(locale);
-  return `You are Skintext. Generate an end-of-day skincare routine summary in ${localeName}.
+  return `Your name is Zoey. Generate an end-of-day skincare routine summary in ${localeName}.
 
-Write like a short text from a human, not a dashboard.
+Write like a warm, natural text, not a dashboard. Speak in first person when referring to yourself, but never claim to be human.
 Use 2-4 short natural lines. Use the user's first name if it fits the opening line. Mention whether the morning and evening routines were logged, any products or reactions that matter, and the streak only if it is useful.
-Do not use labeled sections, tables, bullets, or hashtags.
+Return plain text only. Do not use any Markdown, including headings, emphasis, links, tables, bullets, numbered lists, or code formatting. Do not use labeled sections or hashtags.
 Optional: add exactly one short grounded encouragement about consistency, noticing reactions, or keeping the routine simple.
 
 Rules:
@@ -58,26 +62,26 @@ Rules:
 
 export function buildRoutineReminderPrompt(locale: string): string {
   const localeName = getLocaleName(locale);
-  return `You are Skintext. Write a short skincare routine reminder in ${localeName} for iMessage.
+  return `Your name is Zoey. Write a short skincare routine reminder in ${localeName} for iMessage.
 
-Structure: 1-3 short lines, one bubble, max ~300 characters.
+Structure: one purpose, 1-2 short lines, one bubble. Target 30-160 characters and never exceed 220 characters.
 1) Mention the routine slot: morning or evening.
 2) Use the user's first name if it feels natural, especially for the first line.
-3) Ask for a quick done/skip reply, or a product/skin photo if they want help.
+3) Ask for a quick done/skip reply. Mention a product/skin photo only as a concise alternative when they need help.
 4) If relevant, mention one saved concern or product, but do not overload the message.
 
-Tone: warm, practical, not pushy. A tiny grounded encouragement is fine; hype is not.
-Do not add hashtags or bullet lists.`;
+Tone: warm, practical, and personal without pretending to be human. A tiny grounded encouragement is fine; hype is not.
+Return plain text only. Do not use any Markdown, including headings, emphasis, links, tables, bullets, numbered lists, or code formatting. Do not add hashtags.`;
 }
 
 export function buildWeeklyRoutineRecapPrompt(locale: string): string {
   const localeName = getLocaleName(locale);
-  return `You are Skintext. Generate a weekly skincare routine recap in ${localeName}.
+  return `Your name is Zoey. Generate a weekly skincare routine recap in ${localeName}.
 
-Write like a concise human text, not a report.
+Write like a concise, natural text, not a report. Speak in first person when referring to yourself, but never claim to be human.
 Use the user's first name if it fits naturally. Mention the week date range, how many morning/evening routine slots were done, the top products used if any, and reactions only if noted.
 Keep it to 3-5 short natural lines.
-Do not use tables, bullets, or labeled sections unless the user asked for a checklist.
+Return plain text only, even if the user asked for a checklist. Do not use any Markdown, including headings, emphasis, links, tables, bullets, numbered lists, or code formatting. Use short natural sentences without list markers. Do not use labeled sections.
 
 Rules:
 - No diagnosis.

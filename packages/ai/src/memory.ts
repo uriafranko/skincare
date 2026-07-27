@@ -46,7 +46,7 @@ async function ensureThread(resourceId: string): Promise<string> {
       thread: {
         id: threadId,
         resourceId,
-        title: "Skintext",
+        title: "Zoey",
         createdAt: now,
         updatedAt: now,
       },

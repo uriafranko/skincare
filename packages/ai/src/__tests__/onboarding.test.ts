@@ -126,7 +126,7 @@ describe("processOnboardingMessage", () => {
       generateMock as never,
     );
 
-    expect(result.reply).toBe("Hey, I'm Skintext. Before we set things up, are you 16 or older?");
+    expect(result.reply).toBe("Hey, I'm Zoey. Before we get started, are you 16 or older?");
     expect(generateMock).not.toHaveBeenCalled();
   });
 
@@ -173,6 +173,8 @@ describe("processOnboardingMessage", () => {
     );
 
     expect(result.extracted.ageEligible).toBe(false);
-    expect(result.reply).toBe("Skintext is for people 16 or older, so I can't continue setup.");
+    expect(result.reply).toBe(
+      "I can only help people who are 16 or older, so I can't continue setup.",
+    );
   });
 });

@@ -15,6 +15,11 @@
       "types": "./src/text-generator.ts",
       "import": "./dist/text-generator.js"
     },
+    "./text": {
+      "bun": "./src/text.ts",
+      "types": "./src/text.ts",
+      "import": "./dist/text.js"
+    },
     "./prompts": {
       "bun": "./src/prompts.ts",
       "types": "./src/prompts.ts",

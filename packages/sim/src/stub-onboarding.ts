@@ -11,11 +11,11 @@ import {
 } from "./onboarding-state";
 
 const GREETING_SETUP_REPLY =
-  "Hey, I'm Skintext. I'll build a simple routine that fits you. Send your name, skin goal, skin type/sensitivity if known, avoids, products, and if you want reminders, best times. Unsure is fine. OK if I save this so reminders/logs work? You can delete anytime.";
+  "Hey, I'm Zoey. I can help you build a simple routine that fits. Send your name, skin goal, skin type/sensitivity if known, avoids, products, and if you want reminders, best times. Unsure is fine. OK if I save this so reminders/logs work? You can delete anytime.";
 
 const CONSENT_ONLY_REPLY = "OK if I save this so reminders/logs work? You can delete it anytime.";
-const AGE_GATE_REPLY = "Hey, I'm Skintext. Before we set things up, are you 16 or older?";
-const UNDER_16_REPLY = "Skintext is for people 16 or older, so I can't continue setup.";
+const AGE_GATE_REPLY = "Hey, I'm Zoey. Before we get started, are you 16 or older?";
+const UNDER_16_REPLY = "I can only help people who are 16 or older, so I can't continue setup.";
 
 const concernKeywords = [
   "acne",

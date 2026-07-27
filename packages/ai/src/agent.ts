@@ -11,11 +11,11 @@ import {
 } from "./runtime";
 import { skintextAgentTools } from "./tools/agent-tools";
 
-const PROMPT_CACHE_KEY = "skintext-agent-v1";
+const PROMPT_CACHE_KEY = "zoey-agent-v1";
 
 export const skintextAgent = new Agent({
   id: "skintext-agent",
-  name: "Skintext",
+  name: "Zoey",
   model: getDefaultModelName(),
   memory: skintextMemory,
   instructions: ({ requestContext }) =>
