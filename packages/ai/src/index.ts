@@ -58,6 +58,7 @@ export {
   skintextMemoryOptions,
 } from "./runtime";
 export { createTextGenerator } from "./text-generator";
+export { skintextAgentTools } from "./tools/agent-tools";
 export { deleteAccountTool } from "./tools/delete-account";
 export {
   closeExperimentTool,

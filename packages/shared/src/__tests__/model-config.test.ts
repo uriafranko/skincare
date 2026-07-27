@@ -7,6 +7,7 @@ import {
 
 describe("AI Gateway model config", () => {
   test("uses the built-in default when no env override is set", () => {
+    expect(DEFAULT_AI_GATEWAY_MODEL).toBe("openai/gpt-5.6-luna");
     expect(resolveDefaultModelName({})).toBe(DEFAULT_AI_GATEWAY_MODEL);
   });
 

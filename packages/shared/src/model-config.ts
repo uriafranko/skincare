@@ -1,4 +1,4 @@
-export const DEFAULT_AI_GATEWAY_MODEL = "google/gemini-3.5-flash";
+export const DEFAULT_AI_GATEWAY_MODEL = "openai/gpt-5.6-luna";
 
 export interface AiGatewayModelEnv {
   [key: string]: string | undefined;

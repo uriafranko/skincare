@@ -9,70 +9,9 @@ import {
   type SkintextRuntime,
   skintextMemoryOptions,
 } from "./runtime";
-import { deleteAccountTool } from "./tools/delete-account";
-import {
-  closeExperimentTool,
-  getActiveExperimentTool,
-  listExperimentsTool,
-  startExperimentTool,
-} from "./tools/experiments";
-import { exportDataTool } from "./tools/export-data";
-import {
-  cancelOneOffReminderTool,
-  listOneOffRemindersTool,
-  scheduleOneOffReminderTool,
-} from "./tools/one-off-reminders";
-import {
-  clearConversationHistoryTool,
-  deleteSavedPhotosTool,
-  getPersonalizationSummaryTool,
-  saveCurrentPhotoTool,
-  setPhotoRetentionTool,
-} from "./tools/privacy";
-import {
-  deleteAllProductsTool,
-  deleteProductTool,
-  listProductsTool,
-  logProductUseTool,
-  saveProductTool,
-} from "./tools/products";
-import {
-  deleteRoutineEntryTool,
-  getTodayRoutineLogTool,
-  getWeeklyRoutineLogTool,
-  logRoutineStepTool,
-} from "./tools/routine";
-import { sendUiMessageTool } from "./tools/send-ui-message";
-import { getRemindersTool, setRemindersTool } from "./tools/set-reminders";
-import { updateProfileTool } from "./tools/update-profile";
-import { listUserImagesTool, sendUserImageTool } from "./tools/user-images";
+import { skintextAgentTools } from "./tools/agent-tools";
 
-const coreTools = {
-  logRoutineStep: logRoutineStepTool,
-  deleteRoutineEntry: deleteRoutineEntryTool,
-  getTodayRoutineLog: getTodayRoutineLogTool,
-  getWeeklyRoutineLog: getWeeklyRoutineLogTool,
-  saveProduct: saveProductTool,
-  deleteProduct: deleteProductTool,
-  deleteAllProducts: deleteAllProductsTool,
-  listProducts: listProductsTool,
-  logProductUse: logProductUseTool,
-  updateProfile: updateProfileTool,
-  setReminders: setRemindersTool,
-  getReminders: getRemindersTool,
-  listOneOffReminders: listOneOffRemindersTool,
-  cancelOneOffReminder: cancelOneOffReminderTool,
-  exportData: exportDataTool,
-  deleteAccount: deleteAccountTool,
-  listUserImages: listUserImagesTool,
-  startExperiment: startExperimentTool,
-  getActiveExperiment: getActiveExperimentTool,
-  listExperiments: listExperimentsTool,
-  closeExperiment: closeExperimentTool,
-  getPersonalizationSummary: getPersonalizationSummaryTool,
-  clearConversationHistory: clearConversationHistoryTool,
-  setPhotoRetention: setPhotoRetentionTool,
-};
+const PROMPT_CACHE_KEY = "skintext-agent-v1";
 
 export const skintextAgent = new Agent({
   id: "skintext-agent",
@@ -81,19 +20,7 @@ export const skintextAgent = new Agent({
   memory: skintextMemory,
   instructions: ({ requestContext }) =>
     buildSkintextSystemPrompt(getSkintextRuntime(requestContext).agentContext),
-  tools: ({ requestContext }) => {
-    const runtime = getSkintextRuntime(requestContext);
-    return {
-      ...coreTools,
-      ...(runtime.sendUiMessage ? { sendUiMessage: sendUiMessageTool } : {}),
-      ...(runtime.sendUserImage ? { sendUserImage: sendUserImageTool } : {}),
-      ...(runtime.saveCurrentPhoto ? { saveCurrentPhoto: saveCurrentPhotoTool } : {}),
-      ...(runtime.deleteSavedPhotos ? { deleteSavedPhotos: deleteSavedPhotosTool } : {}),
-      ...(runtime.scheduleOneOffReminderWorkflow
-        ? { scheduleOneOffReminder: scheduleOneOffReminderTool }
-        : {}),
-    };
-  },
+  tools: skintextAgentTools,
 });
 
 export const mastra = new Mastra({
@@ -132,6 +59,11 @@ export async function runSkintextAgent(input: RunSkintextAgentInput, runtime: Sk
     requestContext: createSkintextRequestContext(runtime),
     memory: skintextMemoryOptions(runtime.userId, input.hasImage),
     maxSteps: 15,
+    providerOptions: {
+      openai: {
+        promptCacheKey: PROMPT_CACHE_KEY,
+      },
+    },
   });
 
   if (input.hasImage && !runtime.accountDeleted && !runtime.clearMemoryAfterRun) {
