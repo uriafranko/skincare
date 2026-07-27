@@ -34,7 +34,7 @@
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
-    "test": "bun test"
+    "test": "bun test --isolate --preload ./src/__tests__/preload.ts"
   },
   "dependencies": {
     "@mastra/core": "^1.52.1",

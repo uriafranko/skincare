@@ -1,8 +1,11 @@
 export function createSharedMock(overrides: Record<string, unknown> = {}) {
+  const defaultGatewayModel = "openai/test-default";
+
   return {
     ADHERENCE_MILESTONES: {},
     CONSENT_VERSION: "2026-06-04",
     DAILY_SUMMARY_HOUR: 22,
+    DEFAULT_AI_GATEWAY_MODEL: defaultGatewayModel,
     PERSONALITY_POLICY_VERSION: "personality-v1",
     PHOTO_RETENTION_CONSENT_VERSION: "2026-07-26",
     ROUTINE_TIMES: [
@@ -45,6 +48,15 @@ export function createSharedMock(overrides: Record<string, unknown> = {}) {
     markRead: async () => {},
     msUntil: () => 0,
     nextLocalTime: () => new Date("2026-06-05T12:00:00.000Z"),
+    resolveDefaultModelName: (source: { AI_GATEWAY_DEFAULT_MODEL?: string }) =>
+      source.AI_GATEWAY_DEFAULT_MODEL?.trim() || defaultGatewayModel,
+    resolveMemoryModelName: (source: {
+      AI_GATEWAY_DEFAULT_MODEL?: string;
+      AI_GATEWAY_MEMORY_MODEL?: string;
+    }) =>
+      source.AI_GATEWAY_MEMORY_MODEL?.trim() ||
+      source.AI_GATEWAY_DEFAULT_MODEL?.trim() ||
+      defaultGatewayModel,
     sendImageFile: async () => {},
     sendImageMessage: async () => {},
     sendMessage: async () => {},

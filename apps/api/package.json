@@ -8,7 +8,7 @@
     "dev:inspect": "workflow inspect runs --web",
     "build": "nitro build",
     "typecheck": "tsc --noEmit",
-    "test": "bun test"
+    "test": "bun test --isolate --preload ./src/__tests__/preload.ts"
   },
   "dependencies": {
     "@skintext/ai": "*",

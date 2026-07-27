@@ -14,7 +14,7 @@
     "build": "tsup",
     "sim": "bun src/cli.ts",
     "typecheck": "tsc --noEmit",
-    "test": "bun test"
+    "test": "bun test --isolate"
   },
   "dependencies": {
     "@skintext/ai": "*",
