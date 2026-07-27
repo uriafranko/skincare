@@ -8,8 +8,10 @@ const {
   buildBodyImagePolicy,
   buildCommercePolicy,
   buildConversationPolicy,
+  buildContextPriorityPolicy,
   buildImagePolicy,
   buildMemoryPolicy,
+  buildResponseShapePolicy,
   buildSafetyPolicy,
 } = await import("../personality-policy");
 const { deriveMinimumRiskState, shouldOfferCommunicationStyle, shouldOfferPhotoRetention } =
@@ -130,5 +132,23 @@ describe("personality v1 policies", () => {
     expect(policy).toContain("capitalization, punctuation, and emoji use");
     expect(policy).toContain("never force or invent slang");
     expect(policy).toContain("safety, accuracy, and boundaries always win");
+  });
+
+  test("keeps replies direct, non-repetitive, and calibrated to the user", () => {
+    const policy = buildResponseShapePolicy();
+    expect(policy).toContain("Lead with the useful answer or action");
+    expect(policy).toContain("Do not add generic closing offers");
+    expect(policy).toContain("Do not repeat the same question or recommendation");
+    expect(policy).toContain("answer fully when safety, consent, or ambiguity requires it");
+    expect(policy).toContain("Never use emoji during escalation");
+  });
+
+  test("resolves conflicts according to the type of context", () => {
+    const policy = buildContextPriorityPolicy();
+    expect(policy).toContain("latest explicit user statement wins");
+    expect(policy).toContain("current attachment wins");
+    expect(policy).toContain("verified operational records win");
+    expect(policy).toContain("Newer retained conversation wins");
+    expect(policy).toContain("never override safety policy");
   });
 });

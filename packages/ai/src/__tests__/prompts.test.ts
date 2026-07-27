@@ -66,6 +66,8 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("You are AI, not a human");
     expect(prompt).toContain("ROLE AND IDENTITY");
     expect(prompt).toContain("CONVERSATION POLICY");
+    expect(prompt).toContain("RESPONSE SHAPE");
+    expect(prompt).toContain("CONTEXT PRIORITY");
     expect(prompt).toContain("SAFETY POLICY");
     expect(prompt).toContain("BODY-IMAGE POLICY");
     expect(prompt).toContain("COMMERCE POLICY");
@@ -141,6 +143,20 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("Keep only one active skincare experiment");
     expect(prompt).toContain("Every user-visible reply must be plain text");
     expect(prompt).toContain("Never use Markdown syntax");
+    expect(prompt).toContain("Promise a future message only after");
+    expect(prompt).toContain("one clear purpose and one obvious response");
+  });
+
+  test("defines response shape and type-specific context precedence", () => {
+    const prompt = buildSkintextSystemPrompt(makeContext());
+    expect(prompt).toContain("Do not restate or paraphrase the user's request");
+    expect(prompt).toContain('"Let me know if you need anything else"');
+    expect(prompt).toContain("Do not repeat the same question or recommendation");
+    expect(prompt).toContain("their communication style is playful_guide");
+    expect(prompt).toContain("latest explicit user statement wins");
+    expect(prompt).toContain("current attachment wins");
+    expect(prompt).toContain("verified operational records win");
+    expect(prompt).toContain("Newer retained conversation wins");
   });
 
   test("does not inject experiment state outside working memory", () => {
@@ -207,6 +223,9 @@ describe("scheduled prompts", () => {
     expect(prompt).toContain("English");
     expect(prompt).toContain("done/skip");
     expect(prompt).toContain("product/skin photo");
+    expect(prompt).toContain("one purpose");
+    expect(prompt).toContain("30-160 characters");
+    expect(prompt).toContain("never exceed 220 characters");
   });
 
   test("weekly recap is adherence focused", () => {
@@ -250,5 +269,9 @@ describe("onboarding prompt source", () => {
     expect(source).toContain("slang level");
     expect(source).toContain("Do not force slang, caricature a dialect");
     expect(source).toContain("Return plain text only. Never use Markdown");
+    expect(source).toContain("Do not restate or paraphrase the user's message");
+    expect(source).toContain("Never repeat the same question or recommendation");
+    expect(source).toContain("Do not introduce emoji unless the user used emoji");
+    expect(source).toContain("do not make every reply start with an acknowledgment");
   });
 });

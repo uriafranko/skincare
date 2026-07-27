@@ -26,10 +26,12 @@ export {
   buildActionPolicy,
   buildBodyImagePolicy,
   buildCommercePolicy,
+  buildContextPriorityPolicy,
   buildConversationPolicy,
   buildIdentityPolicy,
   buildImagePolicy,
   buildMemoryPolicy,
+  buildResponseShapePolicy,
   buildSafetyPolicy,
   buildScheduledEventPolicy,
 } from "./personality-policy";

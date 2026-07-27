@@ -65,6 +65,13 @@ describe("sendUiMessageTool", () => {
     });
   });
 
+  test("defaults to plain text and reserves cards for structured information", () => {
+    const description = (sendUiMessageTool as unknown as { description: string }).description;
+    expect(description).toContain("Default to plain text");
+    expect(description).toContain("at least three structured items");
+    expect(description).toContain("Never use a card or form for a single question");
+  });
+
   test("does not render when iMessage attachment delivery is unavailable", async () => {
     const result = await executeTool(card);
 
