@@ -12,6 +12,13 @@ export interface SendUserImageInput {
 }
 
 export type SendUserImage = (input: SendUserImageInput) => Promise<void>;
+export interface InspectUserImageInput {
+  userId: string;
+  image: UserImage;
+  question: string;
+}
+
+export type InspectUserImage = (input: InspectUserImageInput) => Promise<string>;
 export interface SendUiMessageInput {
   userId: string;
   svg: string;
@@ -52,6 +59,7 @@ export interface SkintextRuntime {
   agentContext: AgentContext;
   sendUiMessage?: SendUiMessage;
   sendUserImage?: SendUserImage;
+  inspectUserImage?: InspectUserImage;
   saveCurrentPhoto?: SaveCurrentPhoto;
   deleteSavedPhotos?: DeleteSavedPhotos;
   deleteAccountData?: DeleteAccountData;

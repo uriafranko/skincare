@@ -4,6 +4,7 @@ export {
   runSkintextAgent,
   skintextAgent,
 } from "./agent";
+export { analyzeRetainedImage } from "./image-analysis";
 export {
   deleteUserMemory,
   exportUserMemory,
@@ -51,6 +52,8 @@ export {
   createSkintextRequestContext,
   type DeleteAccountData,
   type DeleteSavedPhotos,
+  type InspectUserImage,
+  type InspectUserImageInput,
   type RecurringReminderScheduleSync,
   type SaveCurrentPhoto,
   type ScheduleOneOffReminderWorkflow,
@@ -65,7 +68,6 @@ export { normalizeAssistantText } from "./text";
 export { createTextGenerator } from "./text-generator";
 export { skintextAgentTools } from "./tools/agent-tools";
 export { deleteAccountTool } from "./tools/delete-account";
-export { exportDataTool } from "./tools/export-data";
 export {
   cancelOneOffReminderTool,
   listOneOffRemindersTool,
@@ -74,20 +76,15 @@ export {
   scheduleOneOffReminder,
   scheduleOneOffReminderTool,
 } from "./tools/one-off-reminders";
-export {
-  deleteSavedPhotosTool,
-  saveCurrentPhotoTool,
-  setPhotoRetentionTool,
-} from "./tools/privacy";
-export {
-  deleteRoutineEntryTool,
-  getTodayRoutineLogTool,
-  getWeeklyRoutineLogTool,
-  logRoutineStepTool,
-} from "./tools/routine";
+export { deleteSavedPhotosTool, managePhotoRetentionTool } from "./tools/privacy";
+export { routineTool } from "./tools/routine";
 export { sendUiMessageTool } from "./tools/send-ui-message";
 export { getRemindersTool, setRemindersTool, setTimezoneTool } from "./tools/set-reminders";
-export { listUserImagesTool, sendUserImageTool } from "./tools/user-images";
+export {
+  inspectUserImageTool,
+  listUserImagesTool,
+  sendUserImageTool,
+} from "./tools/user-images";
 export {
   USER_REMINDER_CLOSE_TAG,
   USER_REMINDER_OPEN_TAG,

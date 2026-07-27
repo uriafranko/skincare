@@ -2,6 +2,7 @@ import type {
   CancelOneOffReminderWorkflow,
   DeleteAccountData,
   DeleteSavedPhotos,
+  InspectUserImage,
   RecurringReminderScheduleSync,
   SaveCurrentPhoto,
   ScheduleOneOffReminderWorkflow,
@@ -27,6 +28,7 @@ export interface RunAgentMessageOptions {
   hasImage?: boolean;
   sendUiMessage?: SendUiMessage;
   sendUserImage?: SendUserImage;
+  inspectUserImage?: InspectUserImage;
   saveCurrentPhoto?: SaveCurrentPhoto;
   deleteSavedPhotos?: DeleteSavedPhotos;
   deleteAccountData?: DeleteAccountData;
@@ -44,6 +46,21 @@ function photoSaveFailureReply(locale: string): string {
     return "Jag kunde inte spara bilden för uppföljning. Den användes fortfarande för det här svaret, men sparades inte.";
   }
   return "I couldn't save the photo for tracking. It was still used for this reply, but it wasn't retained.";
+}
+
+function suspendedToolMessage(suspendPayload: unknown): string | null {
+  if (!suspendPayload || typeof suspendPayload !== "object") return null;
+  const payload = suspendPayload as {
+    message?: unknown;
+    suspendPayload?: unknown;
+    toolCallSuspended?: unknown;
+  };
+  if (typeof payload.message === "string" && payload.message.trim()) {
+    return payload.message;
+  }
+  return (
+    suspendedToolMessage(payload.toolCallSuspended) ?? suspendedToolMessage(payload.suspendPayload)
+  );
 }
 
 // Single main-agent entrypoint for inbound user texts and scheduled reminder events.
@@ -105,6 +122,7 @@ export async function runAgentMessage(
     agentContext,
     sendUiMessage: options.sendUiMessage,
     sendUserImage: options.sendUserImage,
+    inspectUserImage: options.inspectUserImage,
     saveCurrentPhoto: options.saveCurrentPhoto,
     deleteSavedPhotos: options.deleteSavedPhotos,
     deleteAccountData: options.deleteAccountData,
@@ -115,11 +133,12 @@ export async function runAgentMessage(
   };
 
   const result = await runSkintextAgent({ text, imageUrl: options.imageUrl, hasImage }, runtime);
-  if (shouldOfferStyle && result.text && user.styleOfferState === "pending") {
+  const resultText = result.text || suspendedToolMessage(result.suspendPayload);
+  if (shouldOfferStyle && resultText && user.styleOfferState === "pending") {
     await updateUser(user.id, { styleOfferState: "shown" });
     user.styleOfferState = "shown";
   }
-  if (offerPhotoRetention && result.text) {
+  if (offerPhotoRetention && resultText) {
     const offeredAt = new Date().toISOString();
     await updateUser(user.id, { photoRetentionOfferShownAt: offeredAt });
     user.photoRetentionOfferShownAt = offeredAt;
@@ -147,16 +166,17 @@ export async function runAgentMessage(
     },
   });
 
-  if (!result.text) return null;
+  if (!resultText) return null;
   const reply = runtime.photoSaveError
-    ? `${result.text}\n\n${photoSaveFailureReply(user.locale)}`
-    : result.text;
+    ? `${resultText}\n\n${photoSaveFailureReply(user.locale)}`
+    : resultText;
   if (hasImage && !runtime.accountDeleted) {
     try {
       await saveSanitizedImageTurn({
         resourceId: user.id,
         userText: text,
         assistantText: reply,
+        retainedPhoto: runtime.currentPhotoSaved,
       });
     } catch (error) {
       log.error(error as Error);

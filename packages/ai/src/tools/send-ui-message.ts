@@ -19,7 +19,7 @@ const messageCardSectionSchema = z.object({
 export const sendUiMessageTool = createTool({
   id: "send-ui-message",
   description:
-    "Render and immediately send a polished visual card as an iMessage image attachment. Default to plain text. Use a card when the user explicitly asks for a routine card, checklist, product guide, or progress summary, or when at least three structured items are materially easier to scan than prose. Never use a card or form for a single question. Do not use it for ordinary conversational replies, simple confirmations, urgent safety guidance, saved user photos, or right-to-left language content such as Hebrew; use plain text for those. The attachment is sent during this call; after success, do not repeat the card's full contents in the text reply.",
+    "Render and send a visual iMessage card. Use only for an explicit card/checklist/product-guide/progress request or when at least three structured items need scanning. Do not use for ordinary replies, urgent safety guidance, saved user photos, or right-to-left text. After success, do not repeat the card contents.",
   inputSchema: z.object({
     kind: z
       .enum(["routine", "product", "progress", "note"])

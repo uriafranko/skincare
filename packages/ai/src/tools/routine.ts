@@ -6,102 +6,83 @@ import {
   getWeeklyRoutineLogs,
   saveRoutineEntry,
 } from "@skintext/db";
-import { localDateString } from "@skintext/shared";
+import { generateId, localDateString, type RoutineLogEntry } from "@skintext/shared";
 import { z } from "zod";
 import { getSkintextRuntime } from "../runtime";
-import { routineSlotSchema, routineStepSchema } from "./schemas";
+import { calendarDateSchema, routineSlotSchema, routineStepSchema } from "./schemas";
 
-export const logRoutineStepTool = createTool({
-  id: "log-routine-step",
-  description:
-    "Log skincare routine completion, product use, skipped steps, or reactions for today.",
-  inputSchema: z.object({
-    slot: routineSlotSchema,
-    steps: z.array(routineStepSchema).describe("Steps or products used in this routine log"),
-    completed: z.boolean().describe("True if the routine slot was completed"),
-    reaction: z
-      .string()
-      .optional()
-      .describe("Any irritation, dryness, breakout, or other reaction"),
-    notes: z.string().optional().describe("Short user-facing note about this log"),
-    source: z.enum(["photo", "text", "manual"]),
-  }),
-  execute: async ({ slot, steps, completed, reaction, notes, source }, context) => {
-    const { userId, timezone } = getSkintextRuntime(context.requestContext);
-    const localDate = localDateString(timezone);
-    const id = `routine_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+function toolEntries(entries: RoutineLogEntry[]) {
+  return entries.map(({ id, slot, steps, completed, reaction, notes }) => ({
+    id,
+    slot,
+    steps,
+    status: completed ? ("completed" as const) : ("skipped" as const),
+    ...(reaction ? { reaction } : {}),
+    ...(notes ? { notes } : {}),
+  }));
+}
 
-    await saveRoutineEntry({
-      id,
-      userId,
-      slot,
-      steps,
-      completed,
-      reaction,
-      notes,
-      source,
-      timestamp: new Date().toISOString(),
-      localDate,
-    });
+export const routineTool = createTool({
+  id: "routine",
+  description: "Log, read, or delete verified skincare routine entries.",
+  inputSchema: z.discriminatedUnion("action", [
+    z.object({
+      action: z.literal("log"),
+      slot: routineSlotSchema,
+      status: z.enum(["completed", "skipped"]),
+      steps: z.array(routineStepSchema).max(20).default([]),
+      reaction: z.string().max(500).optional(),
+      notes: z.string().max(500).optional(),
+    }),
+    z.object({
+      action: z.literal("get"),
+      range: z.enum(["today", "seven_days"]),
+      endDate: calendarDateSchema.optional(),
+    }),
+    z.object({
+      action: z.literal("delete"),
+      entryId: z.string(),
+    }),
+  ]),
+  execute: async (input, context) => {
+    const runtime = getSkintextRuntime(context.requestContext);
+    const { userId, timezone } = runtime;
 
-    return {
-      logged: true,
-      entryId: id,
-      slot,
-      completed,
-      stepCount: steps.length,
-      productsUsed: steps.map((s) => s.productName).filter(Boolean),
-      reaction: reaction ?? null,
-      localDate,
-    };
-  },
-});
-
-export const deleteRoutineEntryTool = createTool({
-  id: "delete-routine-entry",
-  description: "Delete a previously logged skincare routine entry.",
-  inputSchema: z.object({
-    entryId: z.string().describe("Routine entry ID to delete"),
-  }),
-  execute: async ({ entryId }, context) => {
-    const { userId } = getSkintextRuntime(context.requestContext);
-    const entry = await getRoutineEntry(entryId);
-    if (!entry || entry.userId !== userId) {
-      return { deleted: false, message: "Routine entry not found." };
+    if (input.action === "log") {
+      const entryId = generateId("routine");
+      await saveRoutineEntry({
+        id: entryId,
+        userId,
+        slot: input.slot,
+        steps: input.steps,
+        completed: input.status === "completed",
+        reaction: input.reaction,
+        notes: input.notes,
+        source: runtime.hasImage ? "photo" : "text",
+        timestamp: new Date().toISOString(),
+        localDate: localDateString(timezone),
+      });
+      return { logged: true, entryId };
     }
 
-    await deleteRoutineEntry(entryId, userId, entry.localDate);
+    if (input.action === "delete") {
+      const entry = await getRoutineEntry(input.entryId);
+      if (!entry || entry.userId !== userId) {
+        return { deleted: false, message: "Routine entry not found." };
+      }
+      await deleteRoutineEntry(input.entryId, userId, entry.localDate);
+      return { deleted: true, entryId: input.entryId };
+    }
+
+    const localDate = runtime.agentContext.localDate;
+    if (input.range === "today") {
+      const log = await getRoutineLogForDate(userId, localDate);
+      return { date: localDate, entries: toolEntries(log.entries) };
+    }
+
+    const logs = await getWeeklyRoutineLogs(userId, input.endDate ?? localDate);
     return {
-      deleted: true,
-      entryId,
-      slot: entry.slot,
-      localDate: entry.localDate,
-      stepCount: entry.steps.length,
+      days: logs.map(({ date, log }) => ({ date, entries: toolEntries(log.entries) })),
     };
-  },
-});
-
-export const getTodayRoutineLogTool = createTool({
-  id: "get-today-routine-log",
-  description:
-    "Load today's verified skincare routine log when exact completion status, steps, products used, or reactions matter. Always returns TODAY's data; do not rely on conversation memory for exact log status.",
-  inputSchema: z.object({}),
-  execute: async (_input, context) => {
-    const { userId, agentContext } = getSkintextRuntime(context.requestContext);
-    const { localDate } = agentContext;
-    return await getRoutineLogForDate(userId, localDate);
-  },
-});
-
-export const getWeeklyRoutineLogTool = createTool({
-  id: "get-weekly-routine-log",
-  description:
-    "Load the past 7 days of verified skincare routine logs when the user asks about earlier steps, products, adherence, reactions, summaries, or trends. Use retained conversation memory for continuity and this tool for exact log data.",
-  inputSchema: z.object({
-    endDate: z.string().describe("The end date in YYYY-MM-DD format"),
-  }),
-  execute: async ({ endDate }, context) => {
-    const { userId } = getSkintextRuntime(context.requestContext);
-    return await getWeeklyRoutineLogs(userId, endDate);
   },
 });

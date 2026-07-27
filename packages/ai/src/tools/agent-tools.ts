@@ -1,26 +1,17 @@
 import { deleteAccountTool } from "./delete-account";
-import { exportDataTool } from "./export-data";
 import {
   cancelOneOffReminderTool,
   listOneOffRemindersTool,
   scheduleOneOffReminderTool,
 } from "./one-off-reminders";
-import { deleteSavedPhotosTool, saveCurrentPhotoTool, setPhotoRetentionTool } from "./privacy";
-import {
-  deleteRoutineEntryTool,
-  getTodayRoutineLogTool,
-  getWeeklyRoutineLogTool,
-  logRoutineStepTool,
-} from "./routine";
+import { deleteSavedPhotosTool, managePhotoRetentionTool } from "./privacy";
+import { routineTool } from "./routine";
 import { sendUiMessageTool } from "./send-ui-message";
 import { getRemindersTool, setRemindersTool, setTimezoneTool } from "./set-reminders";
-import { listUserImagesTool, sendUserImageTool } from "./user-images";
+import { inspectUserImageTool, listUserImagesTool, sendUserImageTool } from "./user-images";
 
 const routineTools = {
-  logRoutineStep: logRoutineStepTool,
-  deleteRoutineEntry: deleteRoutineEntryTool,
-  getTodayRoutineLog: getTodayRoutineLogTool,
-  getWeeklyRoutineLog: getWeeklyRoutineLogTool,
+  routine: routineTool,
 };
 
 const localizationTools = {
@@ -38,14 +29,13 @@ const reminderTools = {
 const mediaTools = {
   sendUiMessage: sendUiMessageTool,
   listUserImages: listUserImagesTool,
+  inspectUserImage: inspectUserImageTool,
   sendUserImage: sendUserImageTool,
 };
 
 const privacyAndAccountTools = {
-  setPhotoRetention: setPhotoRetentionTool,
-  saveCurrentPhoto: saveCurrentPhotoTool,
+  managePhotoRetention: managePhotoRetentionTool,
   deleteSavedPhotos: deleteSavedPhotosTool,
-  exportData: exportDataTool,
   deleteAccount: deleteAccountTool,
 };
 

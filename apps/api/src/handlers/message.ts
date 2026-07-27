@@ -1,3 +1,4 @@
+import { analyzeRetainedImage } from "@skintext/ai";
 import { deleteAllUserData } from "@skintext/db";
 import type { UserAccount } from "@skintext/shared";
 import type { RequestLogger } from "evlog";
@@ -6,7 +7,12 @@ import { runAgentMessage } from "@/agent-runner";
 import type { NormalizedImage } from "@/image";
 import { reminderRunManager } from "@/reminder-runs";
 import { sendUiMessageAttachment } from "@/ui-messages";
-import { deleteAllUserImageBlobs, saveInboundUserImage, sendStoredUserImage } from "@/user-images";
+import {
+  deleteAllUserImageBlobs,
+  loadStoredUserImageDataUrl,
+  saveInboundUserImage,
+  sendStoredUserImage,
+} from "@/user-images";
 import { oneOffReminderWorkflow } from "../../workflows/one-off-reminder";
 
 export async function handleMessage(
@@ -36,6 +42,11 @@ export async function handleMessage(
     sendUserImage: async ({ image, caption }) => {
       await sendStoredUserImage({ phone: rawPhone, image, caption });
     },
+    inspectUserImage: async ({ image, question }) =>
+      analyzeRetainedImage({
+        dataUrl: await loadStoredUserImageDataUrl(image),
+        question,
+      }),
     deleteAccountData: async (deleteUserId) => {
       await deleteAllUserImageBlobs(deleteUserId, log).catch((error) => {
         log.error(error as Error);

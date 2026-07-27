@@ -4,50 +4,51 @@ import { PHOTO_RETENTION_CONSENT_VERSION, type UserImage } from "@skintext/share
 import { z } from "zod";
 import { getSkintextRuntime } from "../runtime";
 
-export const setPhotoRetentionTool = createTool({
-  id: "set-photo-retention",
+export const managePhotoRetentionTool = createTool({
+  id: "manage-photo-retention",
   description:
-    "Enable or disable retention of future user photos. Photo-retention consent is separate from general service consent.",
-  inputSchema: z.object({
-    enabled: z.boolean(),
-  }),
-  execute: async ({ enabled }, context) => {
+    "Manage separate 30-day photo-retention consent. Use set_future_retention to enable or disable future photo storage without saving the current attachment. Use save_current only after explicit consent to save the attached current photo; it also enables future retention when needed.",
+  inputSchema: z.discriminatedUnion("action", [
+    z.object({
+      action: z.literal("set_future_retention"),
+      enabled: z.boolean(),
+    }),
+    z.object({
+      action: z.literal("save_current"),
+      consentToThirtyDayRetention: z.literal(true),
+    }),
+  ]),
+  execute: async (input, context) => {
     const runtime = getSkintextRuntime(context.requestContext);
     const account = runtime.agentContext.userAccount;
     if (!account) return { updated: false, message: "User not found." };
 
-    const now = enabled ? new Date().toISOString() : "";
-    await updateUser(runtime.userId, {
-      photoRetentionConsentedAt: now,
-      photoRetentionConsentVersion: enabled ? PHOTO_RETENTION_CONSENT_VERSION : "",
-      photoRetentionOfferShownAt: account.photoRetentionOfferShownAt ?? new Date().toISOString(),
-    });
-    account.photoRetentionConsentedAt = now || null;
-    account.photoRetentionConsentVersion = enabled ? PHOTO_RETENTION_CONSENT_VERSION : null;
-    account.photoRetentionOfferShownAt ??= new Date().toISOString();
-    runtime.photoRetentionEnabled = enabled;
-    return {
-      updated: true,
-      enabled,
-      consentVersion: enabled ? PHOTO_RETENTION_CONSENT_VERSION : null,
-      message: enabled
-        ? "Future photos may be retained for 30 days after processing."
-        : "Future photo retention is off. Previously saved photos were not deleted.",
-    };
-  },
-});
+    if (input.action === "set_future_retention") {
+      const now = input.enabled ? new Date().toISOString() : "";
+      await updateUser(runtime.userId, {
+        photoRetentionConsentedAt: now,
+        photoRetentionConsentVersion: input.enabled ? PHOTO_RETENTION_CONSENT_VERSION : "",
+        photoRetentionOfferShownAt: account.photoRetentionOfferShownAt ?? new Date().toISOString(),
+      });
+      account.photoRetentionConsentedAt = now || null;
+      account.photoRetentionConsentVersion = input.enabled ? PHOTO_RETENTION_CONSENT_VERSION : null;
+      account.photoRetentionOfferShownAt ??= new Date().toISOString();
+      runtime.photoRetentionEnabled = input.enabled;
+      if (runtime.hasImage) {
+        runtime.skipCurrentPhotoRetention = true;
+      }
+      return {
+        updated: true,
+        enabled: input.enabled,
+        consentVersion: input.enabled ? PHOTO_RETENTION_CONSENT_VERSION : null,
+        message: input.enabled
+          ? runtime.hasImage
+            ? "Future photos may be retained for 30 days after processing. The current photo was not saved."
+            : "Future photos may be retained for 30 days after processing."
+          : "Future photo retention is off. Previously saved photos were not deleted.",
+      };
+    }
 
-export const saveCurrentPhotoTool = createTool({
-  id: "save-current-photo-for-tracking",
-  description:
-    "Save the photo attached to the current message after the user explicitly consents to 30-day photo retention. Never call without an attached current photo and explicit consent.",
-  inputSchema: z.object({
-    consentToThirtyDayRetention: z.literal(true),
-  }),
-  execute: async (_input, context) => {
-    const runtime = getSkintextRuntime(context.requestContext);
-    const account = runtime.agentContext.userAccount;
-    if (!account) return { saved: false, message: "User not found." };
     if (!runtime.hasImage || !runtime.saveCurrentPhoto) {
       return { saved: false, message: "There is no current photo available to save." };
     }
@@ -94,18 +95,30 @@ export const saveCurrentPhotoTool = createTool({
 export const deleteSavedPhotosTool = createTool({
   id: "delete-saved-photos",
   description:
-    "Permanently delete all retained user photos without deleting the rest of the account. Require confirmation. Explain that text derived from past photo discussions is separate retained agent memory.",
-  inputSchema: z.object({
-    confirmed: z.boolean(),
+    "Permanently delete all retained user photos without deleting the account. This tool uses Mastra's native suspend/resume confirmation before deletion. Text derived from past photo discussions remains in agent memory.",
+  inputSchema: z.object({}),
+  suspendSchema: z.object({
+    message: z.string(),
   }),
-  execute: async ({ confirmed }, context) => {
+  resumeSchema: z.object({
+    confirmed: z.boolean().describe("Whether the user explicitly confirmed deletion."),
+  }),
+  execute: async (_input, context) => {
     const runtime = getSkintextRuntime(context.requestContext);
     runtime.skipCurrentPhotoRetention = true;
-    if (!confirmed) {
+    const warning =
+      "This permanently deletes all retained photo blobs and metadata. Text from past photo discussions remains in retained agent memory unless the whole account is deleted. Reply yes to confirm.";
+    const resumeData = context.agent?.resumeData;
+    if (!resumeData) {
+      if (context.agent) {
+        return await context.agent.suspend({ message: warning });
+      }
+      return { deleted: false, warning };
+    }
+    if (!resumeData.confirmed) {
       return {
         deleted: false,
-        warning:
-          "This permanently deletes all retained photo blobs and metadata. Text from past photo discussions remains in retained agent memory unless the whole account is deleted. Ask the user to confirm.",
+        message: "Saved photos were not deleted.",
       };
     }
     if (!runtime.deleteSavedPhotos) {

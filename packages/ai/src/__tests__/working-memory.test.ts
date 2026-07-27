@@ -6,7 +6,6 @@ describe("Skintext working memory", () => {
     const memory = buildOnboardingWorkingMemory({
       name: "Alex",
       replyLanguage: "en",
-      timezone: "Asia/Jerusalem",
       skinType: "combination",
       sensitivity: "medium",
       concerns: ["redness"],
@@ -19,6 +18,7 @@ describe("Skintext working memory", () => {
 
     expect(skintextWorkingMemorySchema.safeParse(memory).success).toBe(true);
     expect(memory.profile?.communicationStyle).toBe("straight_talk");
+    expect(memory.profile).not.toHaveProperty("timezone");
     expect(memory.products?.map((product) => product.name)).toEqual(["Barrier Cream", "Daily SPF"]);
     expect(memory.activeExperiment).toBeNull();
   });
@@ -36,5 +36,16 @@ describe("Skintext working memory", () => {
     });
 
     expect(result.success).toBe(true);
+  });
+
+  test("strips legacy timezone values from conversational working memory", () => {
+    const result = skintextWorkingMemorySchema.parse({
+      profile: {
+        name: "Alex",
+        timezone: "Asia/Jerusalem",
+      },
+    });
+
+    expect(result.profile).toEqual({ name: "Alex" });
   });
 });

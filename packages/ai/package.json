@@ -39,6 +39,7 @@
   "dependencies": {
     "@mastra/core": "^1.52.1",
     "@mastra/memory": "^1.23.1",
+    "@mastra/observability": "^1.16.2",
     "@mastra/pg": "^1.17.0",
     "@skintext/db": "*",
     "@skintext/message-ui": "*",

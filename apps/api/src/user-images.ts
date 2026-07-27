@@ -144,6 +144,14 @@ export async function sendStoredUserImage({
   await sendImageFile(phone, blob, `${image.id}.jpg`, caption);
 }
 
+export async function loadStoredUserImageDataUrl(image: UserImage): Promise<string> {
+  const stored = await getFiles().download(image.key);
+  const blob = await stored.blob();
+  const contentType = blob.type || image.contentType;
+  const data = Buffer.from(await blob.arrayBuffer()).toString("base64");
+  return `data:${contentType};base64,${data}`;
+}
+
 export async function pruneExpiredUserImageBlobs(log?: RequestLogger): Promise<{
   scanned: number;
   deleted: number;

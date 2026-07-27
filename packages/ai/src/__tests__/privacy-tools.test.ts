@@ -6,7 +6,7 @@ import { createSharedMock } from "./shared-mock";
 
 mock.module("@skintext/shared", () => createSharedMock());
 
-const { saveCurrentPhotoTool, setPhotoRetentionTool } = await import("../tools/privacy");
+const { deleteSavedPhotosTool, managePhotoRetentionTool } = await import("../tools/privacy");
 
 function account(): UserAccount {
   return {
@@ -30,13 +30,14 @@ function account(): UserAccount {
 function requestContext(
   userAccount: UserAccount,
   saveCurrentPhoto?: () => Promise<Record<string, unknown>>,
+  hasImage = true,
 ) {
   const context = new RequestContext();
   context.set("runtime", {
     userId: userAccount.id,
     timezone: "UTC",
     inputText: "save this for tracking",
-    hasImage: true,
+    hasImage,
     isScheduledEvent: false,
     agentContext: { userAccount },
     saveCurrentPhoto,
@@ -72,13 +73,13 @@ describe("photo-retention privacy tools", () => {
     const context = requestContext(user, save);
 
     const first = await execute(
-      saveCurrentPhotoTool,
-      { consentToThirtyDayRetention: true },
+      managePhotoRetentionTool,
+      { action: "save_current", consentToThirtyDayRetention: true },
       context,
     );
     const second = await execute(
-      saveCurrentPhotoTool,
-      { consentToThirtyDayRetention: true },
+      managePhotoRetentionTool,
+      { action: "save_current", consentToThirtyDayRetention: true },
       context,
     );
 
@@ -99,8 +100,8 @@ describe("photo-retention privacy tools", () => {
       throw new Error("blob unavailable");
     });
     const result = await execute(
-      saveCurrentPhotoTool,
-      { consentToThirtyDayRetention: true },
+      managePhotoRetentionTool,
+      { action: "save_current", consentToThirtyDayRetention: true },
       context,
     );
     expect(result).toEqual(
@@ -116,7 +117,11 @@ describe("photo-retention privacy tools", () => {
     user.photoRetentionConsentedAt = "2026-07-20T00:00:00.000Z";
     user.photoRetentionConsentVersion = "2026-07-26";
     const context = requestContext(user);
-    const result = await execute(setPhotoRetentionTool, { enabled: false }, context);
+    const result = await execute(
+      managePhotoRetentionTool,
+      { action: "set_future_retention", enabled: false },
+      context,
+    );
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -133,5 +138,97 @@ describe("photo-retention privacy tools", () => {
         photoRetentionConsentVersion: "",
       }),
     );
+  });
+
+  test("can enable future retention without saving the current attachment", async () => {
+    const save = mock(() => Promise.resolve({}));
+    const user = account();
+    const context = requestContext(user, save);
+    const result = await execute(
+      managePhotoRetentionTool,
+      { action: "set_future_retention", enabled: true },
+      context,
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        updated: true,
+        enabled: true,
+        message: expect.stringContaining("current photo was not saved"),
+      }),
+    );
+    expect(save).not.toHaveBeenCalled();
+    expect(context.get("runtime")).toEqual(
+      expect.objectContaining({
+        photoRetentionEnabled: true,
+        skipCurrentPhotoRetention: true,
+      }),
+    );
+  });
+
+  test("does not mention a current photo when none was attached", async () => {
+    const user = account();
+    const context = requestContext(user, undefined, false);
+    const result = await execute(
+      managePhotoRetentionTool,
+      { action: "set_future_retention", enabled: true },
+      context,
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        updated: true,
+        message: "Future photos may be retained for 30 days after processing.",
+      }),
+    );
+  });
+});
+
+describe("saved-photo deletion confirmation", () => {
+  test("uses Mastra suspension to request confirmation", async () => {
+    const context = requestContext(account());
+    const suspend = mock(() => Promise.resolve());
+    if (!deleteSavedPhotosTool.execute) throw new Error("Tool is not executable.");
+
+    await deleteSavedPhotosTool.execute({}, {
+      requestContext: context,
+      agent: {
+        agentId: "skintext-agent",
+        toolCallId: "call_delete_photos",
+        messages: [],
+        suspend,
+      },
+    } as never);
+
+    expect(suspend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringContaining("Reply yes to confirm"),
+      }),
+      undefined,
+    );
+  });
+
+  test("deletes only after Mastra resumes with confirmation", async () => {
+    const deleteSavedPhotos = mock(() =>
+      Promise.resolve({ attempted: 2, deleted: 2, queued: 0, errors: 0 }),
+    );
+    const context = requestContext(account());
+    const runtime = context.get("runtime") as Record<string, unknown>;
+    runtime.deleteSavedPhotos = deleteSavedPhotos;
+
+    if (!deleteSavedPhotosTool.execute) throw new Error("Tool is not executable.");
+    const result = await deleteSavedPhotosTool.execute({}, {
+      requestContext: context,
+      agent: {
+        agentId: "skintext-agent",
+        toolCallId: "call_delete_photos",
+        messages: [],
+        resumeData: { confirmed: true },
+        suspend: () => Promise.resolve(),
+      },
+    } as never);
+
+    expect(deleteSavedPhotos).toHaveBeenCalledWith("usr_photo");
+    expect(result).toEqual(expect.objectContaining({ deleted: true }));
   });
 });

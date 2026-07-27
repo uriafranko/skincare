@@ -1,7 +1,7 @@
 import type { MastraDBMessage } from "@mastra/core/memory";
 import { Memory } from "@mastra/memory";
 import { PostgresStore } from "@mastra/pg";
-import { env, generateId } from "@skintext/shared";
+import { env, generateId, type UserImage } from "@skintext/shared";
 import { SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS, sanitizedImageUserText } from "./memory-policy";
 import { getMemoryModelName } from "./models";
 import { type SkintextWorkingMemory, skintextWorkingMemorySchema } from "./working-memory";
@@ -88,6 +88,7 @@ export async function saveSanitizedImageTurn(input: {
   resourceId: string;
   userText: string;
   assistantText: string;
+  retainedPhoto?: Pick<UserImage, "id" | "expiresAt">;
 }): Promise<void> {
   const threadId = await ensureThread(input.resourceId);
   const createdAt = new Date();
@@ -95,7 +96,7 @@ export async function saveSanitizedImageTurn(input: {
     messages: [
       textMessage({
         role: "user",
-        text: sanitizedImageUserText(input.userText),
+        text: sanitizedImageUserText(input.userText, input.retainedPhoto),
         threadId,
         resourceId: input.resourceId,
         createdAt,

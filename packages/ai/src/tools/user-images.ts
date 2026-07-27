@@ -19,7 +19,7 @@ function imageSummary(image: UserImage) {
 export const listUserImagesTool = createTool({
   id: "list-user-images",
   description:
-    "List the user's recent saved inbound skincare/product photos that are still available. Use this before sending or referring to an old photo when you need the image ID.",
+    "List metadata for the user's recent retained skincare/product photos. This does not inspect visual contents or resend an attachment. Use it only to find an image ID for inspectUserImage or sendUserImage.",
   inputSchema: z.object({
     limit: z.number().int().min(1).max(10).optional(),
   }),
@@ -34,10 +34,52 @@ export const listUserImagesTool = createTool({
   },
 });
 
+export function createInspectUserImageTool(
+  loadImage: (userId: string, imageId: string) => Promise<UserImage | null> = getUserImage,
+) {
+  return createTool({
+    id: "inspect-user-image",
+    description:
+      "Visually inspect one retained photo and answer a specific visual question. This returns analysis text but does not resend the photo attachment. Use the retained photo ID from history when available; otherwise call listUserImages first.",
+    inputSchema: z.object({
+      imageId: z.string().describe("ID of the retained image to inspect."),
+      question: z
+        .string()
+        .min(1)
+        .max(800)
+        .describe("The specific visual question to answer from the retained image."),
+    }),
+    execute: async ({ imageId, question }, context) => {
+      const { userId, inspectUserImage } = getSkintextRuntime(context.requestContext);
+      if (!inspectUserImage) {
+        return { inspected: false, message: "Retained-photo inspection is unavailable." };
+      }
+
+      const image = await loadImage(userId, imageId);
+      if (!image) {
+        return { inspected: false, message: "Image not found or expired." };
+      }
+
+      try {
+        const analysis = await inspectUserImage({ userId, image, question });
+        return { inspected: true, image: imageSummary(image), analysis };
+      } catch {
+        return {
+          inspected: false,
+          image: imageSummary(image),
+          message: "The retained photo could not be inspected right now.",
+        };
+      }
+    },
+  });
+}
+
+export const inspectUserImageTool = createInspectUserImageTool();
+
 export const sendUserImageTool = createTool({
   id: "send-user-image",
   description:
-    "Send one of the user's saved photos back to them in iMessage. Use when the user asks to see, compare, or reference an earlier photo. Call listUserImages first if you do not know the image ID.",
+    "Resend one retained photo as an iMessage attachment. This does not inspect or compare its visual contents. Use only when the user asks to receive or see the earlier photo; call listUserImages first if its ID is unknown.",
   inputSchema: z.object({
     imageId: z.string().describe("ID of the saved image to send."),
     caption: z

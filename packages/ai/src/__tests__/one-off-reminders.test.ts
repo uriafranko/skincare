@@ -258,7 +258,34 @@ describe("one-off reminder management tools", () => {
           status: "scheduled",
         }),
       ],
+      hasMore: false,
+      returned: 1,
     });
+  });
+
+  test("bounds pending-reminder output and reports additional results", async () => {
+    listOneOffReminders.mockResolvedValueOnce(
+      Array.from({ length: 7 }, (_, index) => ({
+        id: `reminder_${index}`,
+        userId: "usr_test",
+        sendAt: `2026-06-${String(index + 5).padStart(2, "0")}T12:00:00.000Z`,
+        timezone: "America/New_York",
+        kind: "custom" as const,
+        message: `Check in ${index}`,
+        status: "scheduled" as const,
+        createdAt: "2026-06-04T12:00:00.000Z",
+      })),
+    );
+
+    const result = (await executeTool(listOneOffRemindersTool, { limit: 3 })) as {
+      reminders: unknown[];
+      hasMore: boolean;
+      returned: number;
+    };
+
+    expect(result.reminders).toHaveLength(3);
+    expect(result.hasMore).toBe(true);
+    expect(result.returned).toBe(3);
   });
 
   test("cancels the user-scoped reminder and its sleeping workflow", async () => {
@@ -275,7 +302,10 @@ describe("one-off reminder management tools", () => {
     };
     getOneOffReminder.mockResolvedValueOnce(reminder);
     cancelOneOffReminder.mockResolvedValueOnce({ ...reminder, status: "cancelled" });
-    const cancelWorkflow = mock(() => Promise.resolve(true));
+    const cancelWorkflow = mock(() => {
+      expect(cancelOneOffReminder).toHaveBeenCalledWith("usr_test", "reminder_pending");
+      return Promise.resolve(true);
+    });
 
     const result = await executeTool(
       cancelOneOffReminderTool,
@@ -284,12 +314,12 @@ describe("one-off reminder management tools", () => {
     );
 
     expect(getOneOffReminder).toHaveBeenCalledWith("usr_test", "reminder_pending");
+    expect(cancelOneOffReminder).toHaveBeenCalledWith("usr_test", "reminder_pending");
     expect(cancelWorkflow).toHaveBeenCalledWith({
       userId: "usr_test",
       reminderId: "reminder_pending",
       workflowRunId: "run_123",
     });
-    expect(cancelOneOffReminder).toHaveBeenCalledWith("usr_test", "reminder_pending");
     expect(result).toEqual(
       expect.objectContaining({
         cancelled: true,

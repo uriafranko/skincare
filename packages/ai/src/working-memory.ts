@@ -9,7 +9,6 @@ import { z } from "zod";
 export interface WorkingMemorySeed {
   name: string;
   replyLanguage: string;
-  timezone: string;
   skinType: SkinType;
   sensitivity: SensitivityLevel;
   concerns: readonly string[];
@@ -58,7 +57,6 @@ export const skintextWorkingMemorySchema = z
       .object({
         name: z.string().optional(),
         replyLanguage: z.string().optional().describe("Preferred reply language or locale."),
-        timezone: z.string().optional().describe("The user's stated current IANA timezone."),
         skinType: z.enum(["dry", "oily", "combination", "normal", "unsure"]).optional(),
         sensitivity: z.enum(["low", "medium", "high", "unsure"]).optional(),
         concerns: z.array(z.string()).optional(),
@@ -95,7 +93,7 @@ export const skintextWorkingMemorySchema = z
       .describe("Current unresolved skincare follow-ups or review conditions."),
   })
   .describe(
-    "Compact current skincare state. Do not copy routine-log history, raw photos, diagnoses, or long conversation summaries here.",
+    "Compact current skincare state. Operational timezone comes from turn context. Do not copy routine-log history, raw photos, diagnoses, or long conversation summaries here.",
   );
 
 export type SkintextWorkingMemory = z.infer<typeof skintextWorkingMemorySchema>;
@@ -105,7 +103,6 @@ export function buildOnboardingWorkingMemory(seed: WorkingMemorySeed): SkintextW
     profile: {
       name: seed.name,
       replyLanguage: seed.replyLanguage,
-      timezone: seed.timezone,
       skinType: seed.skinType,
       sensitivity: seed.sensitivity,
       concerns: [...seed.concerns],

@@ -1,5 +1,11 @@
 import { Agent } from "@mastra/core/agent";
 import { Mastra } from "@mastra/core/mastra";
+import {
+  MastraPlatformExporter,
+  MastraStorageExporter,
+  Observability,
+  SensitiveDataFilter,
+} from "@mastra/observability";
 import { mastraStorage, skintextMemory } from "./memory";
 import { getDefaultModelName } from "./models";
 import { buildSkintextSystemPrompt } from "./prompts";
@@ -26,6 +32,15 @@ export const skintextAgent = new Agent({
 export const mastra = new Mastra({
   storage: mastraStorage,
   agents: { skintextAgent },
+  observability: new Observability({
+    configs: {
+      default: {
+        serviceName: "zoey",
+        exporters: [new MastraStorageExporter(), new MastraPlatformExporter()],
+        spanOutputProcessors: [new SensitiveDataFilter()],
+      },
+    },
+  }),
 });
 
 export interface RunSkintextAgentInput {
@@ -54,32 +69,42 @@ function buildUserMessage({ text, imageUrl }: RunSkintextAgentInput) {
 }
 
 export async function runSkintextAgent(input: RunSkintextAgentInput, runtime: SkintextRuntime) {
-  const agent = mastra.getAgent("skintextAgent");
-  const result = await agent.generate(buildUserMessage(input), {
-    requestContext: createSkintextRequestContext(runtime),
-    memory: skintextMemoryOptions(runtime.userId, input.hasImage),
-    maxSteps: 15,
-    providerOptions: {
-      openai: {
-        promptCacheKey: PROMPT_CACHE_KEY,
+  try {
+    const agent = mastra.getAgent("skintextAgent");
+    const result = await agent.generate(buildUserMessage(input), {
+      requestContext: createSkintextRequestContext(runtime),
+      memory: skintextMemoryOptions(runtime.userId, input.hasImage),
+      maxSteps: 15,
+      autoResumeSuspendedTools: true,
+      toolCallConcurrency: 1,
+      tracingOptions: {
+        hideInput: true,
+        hideOutput: true,
       },
-    },
-  });
+      providerOptions: {
+        openai: {
+          promptCacheKey: PROMPT_CACHE_KEY,
+        },
+      },
+    });
 
-  if (input.hasImage && !runtime.accountDeleted) {
-    if (
-      runtime.photoRetentionEnabled &&
-      runtime.saveCurrentPhoto &&
-      !runtime.currentPhotoSaved &&
-      !runtime.skipCurrentPhotoRetention
-    ) {
-      try {
-        runtime.currentPhotoSaved = await runtime.saveCurrentPhoto();
-      } catch (error) {
-        runtime.photoSaveError = error instanceof Error ? error.message : String(error);
+    if (input.hasImage && !runtime.accountDeleted) {
+      if (
+        runtime.photoRetentionEnabled &&
+        runtime.saveCurrentPhoto &&
+        !runtime.currentPhotoSaved &&
+        !runtime.skipCurrentPhotoRetention
+      ) {
+        try {
+          runtime.currentPhotoSaved = await runtime.saveCurrentPhoto();
+        } catch (error) {
+          runtime.photoSaveError = error instanceof Error ? error.message : String(error);
+        }
       }
     }
-  }
 
-  return result;
+    return result;
+  } finally {
+    await mastra.observability.flush();
+  }
 }

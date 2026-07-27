@@ -15,9 +15,11 @@ import {
   getSkintextRuntime,
   type ScheduleOneOffReminderWorkflow,
 } from "../runtime";
+import { calendarDateSchema } from "./schemas";
 
 const MAX_HORIZON_DAYS = 180;
 const MAX_HORIZON_MS = MAX_HORIZON_DAYS * 24 * 60 * 60 * 1000;
+const DEFAULT_LIST_LIMIT = 5;
 
 const reminderKindSchema = z.enum(["routine_followup", "skin_checkin", "custom"]);
 const relativeUnitSchema = z.enum(["minutes", "hours", "days", "weeks"]);
@@ -173,7 +175,7 @@ export const scheduleOneOffReminderTool = createTool({
         }),
         z.object({
           type: z.literal("local_time"),
-          date: z.string().describe("User-local calendar date in YYYY-MM-DD format."),
+          date: calendarDateSchema.describe("User-local calendar date in YYYY-MM-DD format."),
           hour: z.number().int().min(0).max(23).describe("User-local hour in 24h format."),
           minute: z.number().int().min(0).max(59).describe("User-local minute."),
         }),
@@ -220,12 +222,17 @@ export const scheduleOneOffReminderTool = createTool({
 export const listOneOffRemindersTool = createTool({
   id: "list-one-off-reminders",
   description:
-    "List the user's pending one-off reminders. Use this before cancelling when the target reminder ID is not already known.",
-  inputSchema: z.object({}),
-  execute: async (_input, context) => {
+    "List a bounded set of the user's next pending one-off reminders. Use this before cancelling when the target reminder ID is not already known.",
+  inputSchema: z.object({
+    limit: z.number().int().min(1).max(10).optional().describe("Defaults to 5."),
+  }),
+  execute: async ({ limit = DEFAULT_LIST_LIMIT }, context) => {
     const { userId } = getSkintextRuntime(context.requestContext);
-    const reminders = (await listOneOffReminders(userId))
-      .filter((reminder) => reminder.status === "scheduled")
+    const pending = (await listOneOffReminders(userId)).filter(
+      (reminder) => reminder.status === "scheduled",
+    );
+    const reminders = pending
+      .slice(0, limit)
       .map(({ id, sendAt, timezone, kind, message, status }) => ({
         id,
         sendAt,
@@ -234,7 +241,11 @@ export const listOneOffRemindersTool = createTool({
         message,
         status,
       }));
-    return { reminders };
+    return {
+      reminders,
+      hasMore: pending.length > reminders.length,
+      returned: reminders.length,
+    };
   },
 });
 
@@ -260,14 +271,14 @@ export const cancelOneOffReminderTool = createTool({
       };
     }
 
-    const workflowCancelled = await cancelWorkflowRun(
-      runtime.cancelOneOffReminderWorkflow,
-      reminder,
-    );
     const cancelled = await cancelOneOffReminder(runtime.userId, reminderId);
     if (cancelled?.status !== "cancelled") {
       return { cancelled: false, reminderId, message: "Could not cancel reminder." };
     }
+    const workflowCancelled = await cancelWorkflowRun(
+      runtime.cancelOneOffReminderWorkflow,
+      cancelled,
+    );
 
     return {
       cancelled: true,

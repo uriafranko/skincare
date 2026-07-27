@@ -149,7 +149,6 @@ export async function handleOnboarding(
       buildOnboardingWorkingMemory({
         name: merged.name!,
         replyLanguage: merged.detectedLocale ?? locale,
-        timezone: merged.timezone!,
         skinType: merged.skinType ?? "unsure",
         sensitivity: merged.sensitivity ?? "unsure",
         concerns: merged.concerns ?? [],

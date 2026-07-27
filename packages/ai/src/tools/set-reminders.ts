@@ -74,13 +74,18 @@ export const setRemindersTool = createTool({
     times: z
       .array(
         z.object({
-          label: z.string().describe("Routine label, e.g. 'morning', 'evening', or 'custom'"),
+          label: z
+            .string()
+            .min(1)
+            .max(40)
+            .describe("Routine label, e.g. 'morning', 'evening', or 'custom'"),
           hour: z.number().min(0).max(23).describe("Hour in 24h format"),
           minute: z.number().min(0).max(59).describe("Minute"),
         }),
       )
+      .max(4)
       .describe(
-        "The complete desired reminder schedule in the user's local timezone. Use an empty array to turn reminders off.",
+        "The complete desired reminder schedule in the user's local timezone, with at most four times. Use an empty array to turn reminders off.",
       ),
   }),
   execute: async ({ enabled = true, times }, context) => {

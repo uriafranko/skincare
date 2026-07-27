@@ -106,9 +106,12 @@ mock.module("@/sendblue", () => ({
   sendImageFile: async () => {},
 }));
 
-const { deleteAllUserImageBlobs, pruneExpiredUserImageBlobs, saveInboundUserImage } = await import(
-  "../user-images"
-);
+const {
+  deleteAllUserImageBlobs,
+  loadStoredUserImageDataUrl,
+  pruneExpiredUserImageBlobs,
+  saveInboundUserImage,
+} = await import("../user-images");
 
 beforeEach(() => {
   uploaded.length = 0;
@@ -136,6 +139,21 @@ const normalizedImage = {
 };
 
 describe("user image blob storage", () => {
+  test("loads a retained image as a transient data URL for visual inspection", async () => {
+    const dataUrl = await loadStoredUserImageDataUrl({
+      id: "img_saved",
+      userId: "usr_test",
+      key: "user-images/saved.jpg",
+      contentType: "image/jpeg",
+      size: 5,
+      source: "inbound",
+      createdAt: "2026-07-27T00:00:00.000Z",
+      expiresAt: "2026-08-26T00:00:00.000Z",
+    });
+
+    expect(dataUrl).toBe("data:image/jpeg;base64,aW1hZ2U=");
+  });
+
   test("logs the provider error when a blob upload fails", async () => {
     uploadError = new Error("blob credentials missing");
     const logError = mock(() => {});

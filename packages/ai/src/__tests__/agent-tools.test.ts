@@ -4,10 +4,7 @@ import { skintextAgentTools } from "../tools/agent-tools";
 describe("Skintext agent tools", () => {
   test("uses one stable, domain-ordered tool registry", () => {
     expect(Object.keys(skintextAgentTools)).toEqual([
-      "logRoutineStep",
-      "deleteRoutineEntry",
-      "getTodayRoutineLog",
-      "getWeeklyRoutineLog",
+      "routine",
       "setTimezone",
       "setReminders",
       "getReminders",
@@ -16,11 +13,10 @@ describe("Skintext agent tools", () => {
       "cancelOneOffReminder",
       "sendUiMessage",
       "listUserImages",
+      "inspectUserImage",
       "sendUserImage",
-      "setPhotoRetention",
-      "saveCurrentPhoto",
+      "managePhotoRetention",
       "deleteSavedPhotos",
-      "exportData",
       "deleteAccount",
     ]);
   });

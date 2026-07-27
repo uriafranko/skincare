@@ -15,6 +15,21 @@ describe("image conversation privacy", () => {
     expect(text).not.toContain("private/");
     expect(text).not.toContain('"type":"image"');
   });
+
+  test("adds only an operational pointer when the photo was retained", () => {
+    const text = sanitizedImageUserText("Compare this later", {
+      id: "img_saved",
+      expiresAt: "2026-08-26T12:00:00.000Z",
+    });
+    expect(text).toContain("Retained photo reference: img_saved");
+    expect(text).toContain("available until 2026-08-26T12:00:00.000Z");
+    expect(text).not.toContain("user-images/");
+    expect(text).not.toContain("data:image");
+  });
+
+  test("does not add a retained-photo pointer when storage did not succeed", () => {
+    expect(sanitizedImageUserText("Not saved")).not.toContain("Retained photo reference");
+  });
 });
 
 describe("conversation continuity", () => {
@@ -34,6 +49,9 @@ describe("conversation continuity", () => {
     );
     expect(SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS.observation.instruction).toContain(
       "exact logs come from the routine-log tools",
+    );
+    expect(SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS.observation.instruction).toContain(
+      "retained-photo reference is only an operational pointer",
     );
   });
 
