@@ -3,6 +3,7 @@ import { initLogger } from "evlog";
 import { type EvlogVariables, evlog } from "evlog/hono";
 import { Hono } from "hono";
 import { handleIncoming } from "@/handler";
+import { errorForLogging } from "@/logging";
 import { reminderRunManager } from "@/reminder-runs";
 import { markRead, parseInbound } from "@/sendblue";
 import { pruneExpiredUserImageBlobs } from "@/user-images";
@@ -46,13 +47,13 @@ app.post("/webhooks/sendblue", async (c) => {
     if (!msg) return c.json({ ok: true });
 
     const readReceipt = markRead(msg.phone).catch((error) => {
-      log.error(error as Error);
+      log.error(errorForLogging(error));
     });
     await handleIncoming(msg.phone, msg.text, msg.imageUrl, msg.messageId);
     await readReceipt;
     return c.json({ ok: true });
   } catch (error) {
-    log.error(error as Error);
+    log.error(errorForLogging(error));
     return c.json({ error: "webhook failed" }, 500);
   }
 });

@@ -13,6 +13,7 @@ import type { RequestLogger } from "evlog";
 import { Files } from "files-sdk";
 import { vercelBlob } from "files-sdk/vercel-blob";
 import type { NormalizedImage } from "@/image";
+import { errorForLogging } from "@/logging";
 import { sendImageFile } from "@/sendblue";
 
 const USER_IMAGE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
@@ -46,7 +47,7 @@ function sourceText(text: string): string | undefined {
 }
 
 function logStorageError(log: RequestLogger | undefined, error: unknown, key?: string): void {
-  log?.error(error instanceof Error ? error : new Error(String(error)));
+  log?.error(errorForLogging(error));
   log?.set({ imageStorageError: { occurred: true, hasBlobKey: !!key } });
 }
 

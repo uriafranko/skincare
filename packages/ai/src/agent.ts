@@ -1,11 +1,6 @@
 import { Agent } from "@mastra/core/agent";
 import { Mastra } from "@mastra/core/mastra";
-import {
-  MastraPlatformExporter,
-  MastraStorageExporter,
-  Observability,
-  SensitiveDataFilter,
-} from "@mastra/observability";
+import { MastraPlatformExporter, Observability, SensitiveDataFilter } from "@mastra/observability";
 import { mastraStorage, skintextMemory } from "./memory";
 import { getDefaultModelName } from "./models";
 import { buildSkintextSystemPrompt } from "./prompts";
@@ -36,7 +31,7 @@ export const mastra = new Mastra({
     configs: {
       default: {
         serviceName: "zoey",
-        exporters: [new MastraStorageExporter(), new MastraPlatformExporter()],
+        exporters: [new MastraPlatformExporter()],
         spanOutputProcessors: [new SensitiveDataFilter()],
       },
     },

@@ -4,6 +4,7 @@ import type { RequestLogger } from "evlog";
 import { handleMessage } from "@/handlers/message";
 import { handleOnboarding } from "@/handlers/onboarding";
 import { normalizeInboundImage } from "@/image";
+import { errorForLogging } from "@/logging";
 import { pruneExpiredUserImageBlobs } from "@/user-images";
 
 export async function routeMessage(
@@ -59,7 +60,7 @@ export async function routeMessage(
 
   if (normalizedImage) {
     await pruneExpiredUserImageBlobs(log).catch((error) => {
-      log.error(error as Error);
+      log.error(errorForLogging(error));
       log.set({ imagePruneError: true });
     });
   }

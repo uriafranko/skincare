@@ -22,6 +22,7 @@ import { getAdherenceStreak, updateUser } from "@skintext/db";
 import type { AgentContext, UserAccount } from "@skintext/shared";
 import { getLocaleName, localDateString, PERSONALITY_POLICY_VERSION } from "@skintext/shared";
 import type { RequestLogger } from "evlog";
+import { errorForLogging } from "@/logging";
 
 export interface RunAgentMessageOptions {
   imageUrl?: string;
@@ -179,7 +180,7 @@ export async function runAgentMessage(
         retainedPhoto: runtime.currentPhotoSaved,
       });
     } catch (error) {
-      log.error(error as Error);
+      log.error(errorForLogging(error));
       log.set({ personality: { sanitizedHistorySaved: false } });
     }
   }

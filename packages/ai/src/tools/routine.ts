@@ -25,36 +25,31 @@ function toolEntries(entries: RoutineLogEntry[]) {
 export const routineTool = createTool({
   id: "routine",
   description: "Log, read, or delete verified skincare routine entries.",
-  inputSchema: z.discriminatedUnion("action", [
-    z.object({
-      action: z.literal("log"),
-      slot: routineSlotSchema,
-      status: z.enum(["completed", "skipped"]),
-      steps: z.array(routineStepSchema).max(20).default([]),
-      reaction: z.string().max(500).optional(),
-      notes: z.string().max(500).optional(),
-    }),
-    z.object({
-      action: z.literal("get"),
-      range: z.enum(["today", "seven_days"]),
-      endDate: calendarDateSchema.optional(),
-    }),
-    z.object({
-      action: z.literal("delete"),
-      entryId: z.string(),
-    }),
-  ]),
+  inputSchema: z.object({
+    action: z.enum(["log", "get", "delete"]),
+    slot: routineSlotSchema.optional().describe("Required for log."),
+    status: z.enum(["completed", "skipped"]).optional().describe("Required for log."),
+    steps: z.array(routineStepSchema).max(20).optional().describe("Used for log."),
+    reaction: z.string().max(500).optional().describe("Used for log."),
+    notes: z.string().max(500).optional().describe("Used for log."),
+    range: z.enum(["today", "seven_days"]).optional().describe("Used for get; defaults to today."),
+    endDate: calendarDateSchema.optional().describe("Optional end date for a seven-day get."),
+    entryId: z.string().optional().describe("Required for delete."),
+  }),
   execute: async (input, context) => {
     const runtime = getSkintextRuntime(context.requestContext);
     const { userId, timezone } = runtime;
 
     if (input.action === "log") {
+      if (!input.slot || !input.status) {
+        return { logged: false, message: "A routine slot and status are required to log." };
+      }
       const entryId = generateId("routine");
       await saveRoutineEntry({
         id: entryId,
         userId,
         slot: input.slot,
-        steps: input.steps,
+        steps: input.steps ?? [],
         completed: input.status === "completed",
         reaction: input.reaction,
         notes: input.notes,
@@ -66,6 +61,9 @@ export const routineTool = createTool({
     }
 
     if (input.action === "delete") {
+      if (!input.entryId) {
+        return { deleted: false, message: "A routine entry ID is required to delete." };
+      }
       const entry = await getRoutineEntry(input.entryId);
       if (!entry || entry.userId !== userId) {
         return { deleted: false, message: "Routine entry not found." };
@@ -75,7 +73,7 @@ export const routineTool = createTool({
     }
 
     const localDate = runtime.agentContext.localDate;
-    if (input.range === "today") {
+    if (!input.range || input.range === "today") {
       const log = await getRoutineLogForDate(userId, localDate);
       return { date: localDate, entries: toolEntries(log.entries) };
     }

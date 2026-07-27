@@ -14,6 +14,7 @@ import {
 import type { OnboardingState } from "@skintext/shared";
 import { CONSENT_VERSION, isOnboardingComplete } from "@skintext/shared";
 import type { RequestLogger } from "evlog";
+import { errorForLogging } from "@/logging";
 import { rejectUnder16PendingOnboarding } from "@/onboarding-eligibility";
 import { reminderRunManager } from "@/reminder-runs";
 
@@ -169,7 +170,7 @@ export async function handleOnboarding(
       try {
         await reminderRunManager.start(userId);
       } catch (err) {
-        log.error(err as Error);
+        log.error(errorForLogging(err));
       }
     }
 

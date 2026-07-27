@@ -1,6 +1,7 @@
 import { acquireMessageSlot } from "@skintext/db";
 import { encrypt } from "@skintext/shared";
 import { createLogger, type RequestLogger } from "evlog";
+import { errorForLogging } from "@/logging";
 import { sendReplyBubbles } from "@/replies";
 import { routeMessage } from "@/router";
 import { sendMessage, sendTyping } from "@/sendblue";
@@ -46,7 +47,7 @@ export async function handleIncoming(
 
     log.set({ output: { replies: replies.length, bubbles } });
   } catch (error) {
-    log.error(error as Error);
+    log.error(errorForLogging(error));
     try {
       await sendMessage(phone, "Oops, something went wrong. Try again in a sec! 🙏");
     } catch {

@@ -10,6 +10,7 @@ import {
 } from "@skintext/db";
 import type { RequestLogger } from "evlog";
 import { getRun, start } from "workflow/api";
+import { errorForLogging } from "@/logging";
 import { reminderLoop } from "../workflows/reminder-loop";
 
 const ACTIVE_RUN_STATUSES = new Set(["pending", "running"]);
@@ -212,7 +213,7 @@ export function createReminderRunManager(deps: ReminderRunManagerDeps = defaultD
           if (after && after !== before) migrated++;
         } catch (error) {
           failed++;
-          log.error(error as Error);
+          log.error(errorForLogging(error));
         }
       });
 

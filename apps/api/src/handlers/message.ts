@@ -5,6 +5,7 @@ import type { RequestLogger } from "evlog";
 import { getRun, start } from "workflow/api";
 import { runAgentMessage } from "@/agent-runner";
 import type { NormalizedImage } from "@/image";
+import { errorForLogging } from "@/logging";
 import { reminderRunManager } from "@/reminder-runs";
 import { sendUiMessageAttachment } from "@/ui-messages";
 import {
@@ -49,7 +50,7 @@ export async function handleMessage(
       }),
     deleteAccountData: async (deleteUserId) => {
       await deleteAllUserImageBlobs(deleteUserId, log).catch((error) => {
-        log.error(error as Error);
+        log.error(errorForLogging(error));
         log.set({ imageDeleteError: true });
       });
       await deleteAllUserData(deleteUserId);
