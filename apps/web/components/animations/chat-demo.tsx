@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import type { CSSProperties, ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -178,39 +179,28 @@ function getReminderPromptText(
 }
 
 function AppIconSquare({ size = 38, borderRadius = 10 }: { size?: number; borderRadius?: number }) {
-  const iconSize = Math.round(size * 0.52);
-  /* Silver variant: border: "0.608px solid rgba(60,60,60,0.85)", background: "linear-gradient(180deg, #C2C2C2 0%, #ABABAB 53.5%, #CACACA 100%)", boxShadow with inset shadows */
   return (
     <div
       style={{
         width: size,
         height: size,
         borderRadius,
-        border: "1px solid rgba(232,117,26,0.2)",
-        background: "linear-gradient(145deg, #f5a623 0%, #e8751a 100%)",
-        boxShadow: "0 8px 18px rgba(232,117,26,0.25)",
+        border: "1px solid rgba(255,255,255,0.82)",
+        background: "#c99b77",
+        boxShadow: "0 8px 18px rgba(105,65,42,0.24)",
         flexShrink: 0,
         transform: "scaleX(1.044)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        overflow: "hidden",
       }}
     >
-      <svg
-        width={iconSize}
-        height={iconSize}
-        viewBox="-1 -1 26 26"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <circle cx="19.1" cy="4.9" r="2.3" fill="white" />
-        <circle cx="12" cy="2" r="2.3" fill="white" />
-        <circle cx="4.9" cy="4.9" r="2.3" fill="white" />
-        <circle cx="2" cy="12" r="2.3" fill="white" />
-        <circle cx="4.9" cy="19.1" r="2.3" fill="white" />
-        <circle cx="12" cy="22" r="2.3" fill="white" />
-        <circle cx="19.1" cy="19.1" r="2.3" fill="white" />
-      </svg>
+      <Image
+        src="/character/zoey-logo-v2.png"
+        alt=""
+        width={size}
+        height={size}
+        sizes={`${size}px`}
+        className="h-full w-full object-cover"
+      />
     </div>
   );
 }
@@ -223,23 +213,21 @@ function ContactAvatar({ size = 56 }: { size?: number }) {
         width: size,
         height: size,
         borderRadius: "50%",
-        background:
-          "radial-gradient(circle at 50% 24%, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.04) 28%, rgba(0,0,0,0) 52%), #000",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.14), 0 10px 24px rgba(0,0,0,0.28)",
+        border: "1px solid rgba(255,255,255,0.82)",
+        background: "#c99b77",
+        boxShadow: "0 10px 24px rgba(105,65,42,0.24)",
         transform: "scaleX(1.044)",
+        overflow: "hidden",
       }}
     >
-      <span
-        style={{
-          color: "#FFFFFF",
-          fontSize: Math.round(size * 0.34),
-          fontWeight: 700,
-          fontFamily: SF_FONT,
-          letterSpacing: -0.4,
-        }}
-      >
-        C
-      </span>
+      <Image
+        src="/character/zoey-logo-v2.png"
+        alt=""
+        width={size}
+        height={size}
+        sizes={`${size}px`}
+        className="h-full w-full object-cover"
+      />
     </div>
   );
 }

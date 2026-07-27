@@ -1,33 +1,7 @@
 import { useTranslations } from "next-intl";
 import { ChromaCharacter } from "./chroma-character";
 import { IMessageButton } from "./imessage-button";
-
-function ZoeyMark({ size = "md" }: { size?: "sm" | "md" }) {
-  const dimension = size === "sm" ? "h-7 w-7 rounded-[9px]" : "h-9 w-9 rounded-[11px]";
-
-  return (
-    <span
-      className={`flex shrink-0 items-center justify-center border border-[#e8751a]/20 bg-[linear-gradient(145deg,#f5a623_0%,#e8751a_100%)] shadow-[0_6px_18px_rgba(232,117,26,0.2)] ${dimension}`}
-    >
-      <svg
-        width={size === "sm" ? "14" : "17"}
-        height={size === "sm" ? "14" : "17"}
-        viewBox="-1 -1 26 26"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-      >
-        <circle cx="19.1" cy="4.9" r="2.3" fill="white" />
-        <circle cx="12" cy="2" r="2.3" fill="white" />
-        <circle cx="4.9" cy="4.9" r="2.3" fill="white" />
-        <circle cx="2" cy="12" r="2.3" fill="white" />
-        <circle cx="4.9" cy="19.1" r="2.3" fill="white" />
-        <circle cx="12" cy="22" r="2.3" fill="white" />
-        <circle cx="19.1" cy="19.1" r="2.3" fill="white" />
-      </svg>
-    </span>
-  );
-}
+import { ZoeyMark } from "./zoey-mark";
 
 function GuideStage() {
   const t = useTranslations("Hero");
