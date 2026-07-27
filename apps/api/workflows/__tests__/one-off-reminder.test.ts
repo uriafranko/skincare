@@ -86,7 +86,6 @@ describe("oneOffReminderWorkflow", () => {
     reminderQueue = [];
     user = {
       id: "usr_test",
-      name: "Alice",
       locale: "en",
       timezone: "Asia/Jerusalem",
       consentedAt: "2026-06-04T12:00:00.000Z",
@@ -169,7 +168,6 @@ describe("reminderLoop", () => {
     waitMs = 0;
     user = {
       id: "usr_test",
-      name: "Alice",
       locale: "en",
       timezone: "Asia/Jerusalem",
       consentedAt: "2026-06-04T12:00:00.000Z",
@@ -211,7 +209,6 @@ describe("reminderLoop", () => {
       "morning",
       "☀️",
       "en",
-      "Alice",
       expect.any(Object),
     );
     expect(buildDailySummaryReminder).toHaveBeenCalledWith("usr_test", "en");

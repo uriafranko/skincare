@@ -35,18 +35,18 @@ Onboarding validates only that the user is 16 or older; Skintext does not divide
 
 ## Privacy and memory
 
-- Service consent covers the structured profile, logs, products, experiments, reminders, and sanitized text conversation history.
+- Service consent covers working memory, logs, reminders, and sanitized text conversation history.
 - Every image turn runs with message persistence disabled. After the reply, conversation history receives only the user's text, a generic photo marker, and the assistant reply - never image bytes or a private blob URL.
 - Photo retention is a separate adult opt-in. Retained photos use the encrypted-metadata/private-blob path and the existing 30-day expiry.
 - Observational memory cannot inspect attachments and must not infer protected attributes, attractiveness, diagnosis, pregnancy, or emotional vulnerability.
-- Structured profile, product, log, deletion, and experiment records override observational memory and older conversation claims.
-- Chat controls can summarize retained data, edit or forget profile fields, delete products/photos, change future photo retention, clear conversation history after confirmation, export data, or delete the account.
-- Deleting saved photos does not delete text derived from earlier photo conversations. Clearing conversation history is a separate confirmed action.
+- Working memory is the current source for profile details, products, communication style, experiments, and follow-ups. Newer conversation claims override stale working memory until observation reconciles it.
+- Chat controls can summarize retained data, correct or forget conversational details, delete photos, change future photo retention, export data, or delete the account.
+- Deleting saved photos does not delete text derived from earlier photo conversations. Account deletion removes both.
 
 ## Experiments
 
-Only one skincare experiment can be active at a time. It records one change, an optional neutral baseline, review timing, status, outcome, notes, and an optional linked `skin_checkin` reminder. Advice should keep other variables stable unless safety requires a change. A reminder failure does not delete the experiment.
+Only one skincare experiment can be active in working memory at a time. It records one change, an optional neutral baseline, and review timing; the latest outcome can remain compactly available while older experiment history moves into observations. An optional `skin_checkin` reminder is a separate operational record. Advice should keep other variables stable unless safety requires a change.
 
 ## Logging
 
-Personality v1 logs structured metadata only: policy version, communication style, minimum risk state, active-experiment presence, and photo-retention outcome. Never log raw symptom text or image content.
+Personality v1 logs structured metadata only: policy version, minimum risk state, working-memory personalization source, and photo-retention outcome. Never log raw symptom text or image content.

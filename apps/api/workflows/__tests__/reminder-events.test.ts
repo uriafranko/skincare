@@ -7,17 +7,15 @@ describe("buildRoutineReminderEvent", () => {
       routineLabel: "evening",
       routineEmoji: "🌙",
       userLocale: "en",
-      userName: "Noor",
       completedSlots: ["morning"],
       entryCount: 1,
       productsUsed: ["Gentle Cleanser"],
       streakDays: 3,
-      productNames: ["Gentle Cleanser", "Daily SPF"],
     });
 
     expect(event).toContain("Generate a skincare routine reminder for the evening routine.");
     expect(event).not.toContain("a evening");
     expect(event).toContain("User locale: en");
-    expect(event).toContain("Saved products: Gentle Cleanser, Daily SPF");
+    expect(event).toContain("Use working memory and retained history");
   });
 });

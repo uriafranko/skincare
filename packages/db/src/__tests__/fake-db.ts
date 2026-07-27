@@ -14,9 +14,7 @@ const tableKeys = new Map<unknown, (row: Row) => string>([
   [schema.oneOffReminders, (row) => String(row.id)],
   [schema.onboardingStates, (row) => String(row.userId)],
   [schema.phoneMappings, (row) => String(row.encryptedPhone)],
-  [schema.products, (row) => String(row.id)],
   [schema.reminderRunIds, (row) => String(row.userId)],
-  [schema.routineExperiments, (row) => String(row.id)],
   [schema.routineEntries, (row) => String(row.id)],
   [schema.userImages, (row) => String(row.id)],
   [schema.users, (row) => String(row.id)],
@@ -97,8 +95,6 @@ export function createFakeDb() {
 
   function findMany(table: Table, config?: QueryConfig): Row[] {
     const rows = Array.from(storeFor(table).values()).filter((row) => matches(row, config?.where));
-    if (table === schema.products)
-      rows.sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
     if (table === schema.oneOffReminders)
       rows.sort((a, b) => String(a.sendAt).localeCompare(String(b.sendAt)));
     if (table === schema.routineEntries)
@@ -187,9 +183,7 @@ export function createFakeDb() {
       oneOffReminders: tableQuery(schema.oneOffReminders),
       onboardingStates: tableQuery(schema.onboardingStates),
       phoneMappings: tableQuery(schema.phoneMappings),
-      products: tableQuery(schema.products),
       reminderRunIds: tableQuery(schema.reminderRunIds),
-      routineExperiments: tableQuery(schema.routineExperiments),
       routineEntries: tableQuery(schema.routineEntries),
       userImages: tableQuery(schema.userImages),
       users: tableQuery(schema.users),

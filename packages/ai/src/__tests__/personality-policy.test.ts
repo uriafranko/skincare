@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import type { AgentContext, CommunicationStyle, UserProfile } from "@skintext/shared";
+import type { AgentContext, CommunicationStyle, UserAccount } from "@skintext/shared";
 import { createSharedMock } from "./shared-mock";
 
 mock.module("@skintext/shared", () => createSharedMock());
@@ -16,24 +16,15 @@ const { deriveMinimumRiskState, shouldOfferCommunicationStyle, shouldOfferPhotoR
   await import("../risk");
 const { buildSkintextSystemPrompt } = await import("../prompts");
 
-function profile(style: CommunicationStyle = "clear_expert"): UserProfile {
+function account(): UserAccount {
   return {
     id: "usr_test",
     phone: "encrypted",
-    name: "Alex",
     locale: "en",
     timezone: "UTC",
     timezoneConfirmed: true,
     country: "US",
-    skinType: "combination",
-    sensitivity: "medium",
-    concerns: ["redness"],
-    goals: ["simpler routine"],
-    allergies: ["fragrance"],
-    currentProducts: [],
-    routinePreference: "simple",
-    communicationStyle: style,
-    styleOfferState: "chosen",
+    styleOfferState: "shown",
     photoRetentionConsentedAt: null,
     photoRetentionConsentVersion: null,
     photoRetentionOfferShownAt: null,
@@ -44,23 +35,20 @@ function profile(style: CommunicationStyle = "clear_expert"): UserProfile {
   };
 }
 
-function context(style: CommunicationStyle = "clear_expert"): AgentContext {
+function context(): AgentContext {
   return {
     userId: "usr_test",
-    userName: "Alex",
     localeName: "English",
     locale: "en",
     timezone: "UTC",
     localDate: "2026-07-26",
-    userProfile: profile(style),
+    userAccount: account(),
     riskState: "routine",
     shouldOfferStyle: false,
     shouldOfferPhotoRetention: false,
     hasImage: false,
     isScheduledEvent: false,
-    activeExperiment: null,
     streak: null,
-    products: [],
   };
 }
 
@@ -78,13 +66,12 @@ describe("personality v1 policies", () => {
       "playful_guide",
       "straight_talk",
     ];
-    const invariantPolicies = styles.map((style) => {
-      const ctx = context(style);
+    const invariantPolicies = styles.map(() => {
       return [
-        buildSafetyPolicy(ctx),
+        buildSafetyPolicy(),
         buildCommercePolicy(),
-        buildMemoryPolicy(ctx),
-        buildImagePolicy(ctx),
+        buildMemoryPolicy(),
+        buildImagePolicy(),
         buildBodyImagePolicy(),
       ].join("\n");
     });
@@ -121,30 +108,22 @@ describe("personality v1 policies", () => {
     expect(shouldOfferPhotoRetention({ ...base, text: "Save this for tracking" })).toBe(false);
   });
 
-  test("composes canonical priority and prohibited-pattern coverage into the prompt", () => {
+  test("composes working-memory priority and prohibited-pattern coverage into the prompt", () => {
     const ctx = context();
-    ctx.activeExperiment = {
-      id: "experiment_1",
-      userId: "usr_test",
-      change: "Use azelaic acid every other night",
-      startedAt: "2026-07-20T00:00:00.000Z",
-      status: "active",
-      createdAt: "2026-07-20T00:00:00.000Z",
-    };
     const prompt = buildSkintextSystemPrompt(ctx);
-    expect(prompt).toContain("Structured profile, verified products/logs");
-    expect(prompt).toContain("authoritative over conversational or observational memory");
+    expect(prompt).toContain("Working memory is the compact current source");
+    expect(prompt).toContain("latest explicit addition, correction, stop, removal, or forget");
     expect(prompt).toContain("Do not diagnose");
     expect(prompt).toContain("Never confirm that the user is ugly");
     expect(prompt).toContain("Never imply human lived experience");
     expect(prompt).toContain("Never manufacture urgency");
-    expect(prompt).toContain("Keep other variables stable");
-    expect(prompt).toContain("Never copy the existing profile into an update");
-    expect(buildConversationPolicy(ctx)).toContain("one to three prioritized actions");
+    expect(prompt).toContain("Keep only one active skincare experiment");
+    expect(prompt).toContain("Do not call an action merely to add, list, correct");
+    expect(buildConversationPolicy()).toContain("one to three prioritized actions");
   });
 
   test("matches the user's live language and conversational voice without caricature", () => {
-    const policy = buildConversationPolicy(context());
+    const policy = buildConversationPolicy();
     expect(policy).toContain("latest message as the primary voice reference");
     expect(policy).toContain("if they naturally code-switch");
     expect(policy).toContain("slang level");

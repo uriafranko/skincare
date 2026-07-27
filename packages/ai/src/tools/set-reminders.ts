@@ -3,8 +3,9 @@ import {
   deleteCustomReminderTimes,
   getCustomReminderTimes,
   setCustomReminderTimes,
+  updateUser,
 } from "@skintext/db";
-import { isValidTimeZone } from "@skintext/shared";
+import { isValidTimeZone, localDateString } from "@skintext/shared";
 import { z } from "zod";
 import { getSkintextRuntime, type RecurringReminderScheduleSync } from "../runtime";
 
@@ -13,6 +14,56 @@ function workflowRunId(result: Awaited<ReturnType<RecurringReminderScheduleSync>
   if (typeof result === "string") return result;
   return result.runId ?? null;
 }
+
+export const setTimezoneTool = createTool({
+  id: "set-operational-timezone",
+  description:
+    "Persist a user-confirmed IANA timezone when their stated city or timezone changes. Use this because local routine dates and reminder delivery are operational effects, not only conversational memory.",
+  inputSchema: z.object({
+    timezone: z
+      .string()
+      .describe(
+        "Valid IANA timezone derived from a city or timezone explicitly stated by the user, e.g. America/New_York.",
+      ),
+  }),
+  execute: async ({ timezone }, context) => {
+    const runtime = getSkintextRuntime(context.requestContext);
+    if (!isValidTimeZone(timezone)) {
+      return {
+        updated: false,
+        message: "Timezone must be a valid IANA timezone derived from the user's stated location.",
+      };
+    }
+
+    await updateUser(runtime.userId, {
+      timezone,
+      timezoneConfirmed: "true",
+    });
+    runtime.timezone = timezone;
+    runtime.agentContext.timezone = timezone;
+    runtime.agentContext.localDate = localDateString(timezone);
+    if (runtime.agentContext.userAccount) {
+      runtime.agentContext.userAccount.timezone = timezone;
+      runtime.agentContext.userAccount.timezoneConfirmed = true;
+    }
+
+    let recurringRemindersResynced = false;
+    if (runtime.syncRecurringReminderSchedule) {
+      const reminders = await getCustomReminderTimes(runtime.userId);
+      if (reminders?.length) {
+        await runtime.syncRecurringReminderSchedule({ userId: runtime.userId, enabled: true });
+        recurringRemindersResynced = true;
+      }
+    }
+
+    return {
+      updated: true,
+      timezone,
+      timezoneConfirmed: true,
+      recurringRemindersResynced,
+    };
+  },
+});
 
 export const setRemindersTool = createTool({
   id: "set-reminders",
@@ -39,7 +90,7 @@ export const setRemindersTool = createTool({
 
     if (
       shouldEnable &&
-      (!runtime.agentContext.userProfile?.timezoneConfirmed || !isValidTimeZone(runtime.timezone))
+      (!runtime.agentContext.userAccount?.timezoneConfirmed || !isValidTimeZone(runtime.timezone))
     ) {
       return {
         updated: false,
@@ -94,14 +145,14 @@ export const getRemindersTool = createTool({
         enabled: false,
         schedule: [],
         timezone: runtime.timezone,
-        timezoneConfirmed: runtime.agentContext.userProfile?.timezoneConfirmed === true,
+        timezoneConfirmed: runtime.agentContext.userAccount?.timezoneConfirmed === true,
       };
     }
     return {
       enabled: custom.length > 0,
       schedule: custom,
       timezone: runtime.timezone,
-      timezoneConfirmed: runtime.agentContext.userProfile?.timezoneConfirmed === true,
+      timezoneConfirmed: runtime.agentContext.userAccount?.timezoneConfirmed === true,
     };
   },
 });

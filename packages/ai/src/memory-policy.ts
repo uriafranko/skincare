@@ -9,8 +9,9 @@ export const SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS = {
     messageTokens: 80_000,
     bufferTokens: false,
     observeAttachments: false,
+    manageWorkingMemory: true,
     instruction:
-      "Preserve useful skincare task continuity, including established routine steps, product placement, changes being tested, explicit corrections, and pending follow-ups. Do not treat conversational memory as verified routine completion or log status; exact logs come from the routine-log tools. Never infer or retain ethnicity, attractiveness, exact age, pregnancy, diagnoses, emotional vulnerability, or private third-party facts. Treat explicit corrections and deletions as authoritative. Do not infer anything from attachment placeholders.",
+      "Preserve useful skincare task continuity, including established routine steps, product placement, changes being tested, explicit corrections, and pending follow-ups. Keep working memory as the compact current source of conversational user state: profile details, the complete current product roster, the one active experiment, the most recent experiment outcome, and unresolved follow-ups. When the user adds, corrects, stops, removes, or forgets something, update the full relevant state so the latest explicit statement wins and superseded facts are not resurrected. Keep older experiment history in observations rather than growing working memory. Do not treat conversational memory as verified routine completion or log status; exact logs come from the routine-log tools. Never infer or retain ethnicity, attractiveness, exact age, pregnancy, diagnoses, emotional vulnerability, or private third-party facts. Do not infer anything from attachment placeholders.",
   },
 } as const;
 

@@ -1,15 +1,18 @@
-import { processOnboardingMessage } from "@skintext/ai";
+import {
+  buildOnboardingWorkingMemory,
+  initializeUserWorkingMemory,
+  processOnboardingMessage,
+} from "@skintext/ai";
 import {
   createUser,
   deleteAllUserData,
   deleteOnboardingState,
   getOnboardingState,
-  saveProduct,
   setCustomReminderTimes,
   setOnboardingState,
 } from "@skintext/db";
 import type { OnboardingState } from "@skintext/shared";
-import { CONSENT_VERSION, generateId, isOnboardingComplete } from "@skintext/shared";
+import { CONSENT_VERSION, isOnboardingComplete } from "@skintext/shared";
 import type { RequestLogger } from "evlog";
 import { rejectUnder16PendingOnboarding } from "@/onboarding-eligibility";
 import { reminderRunManager } from "@/reminder-runs";
@@ -51,19 +54,6 @@ function buildReminderTimes(state: OnboardingState) {
   const evening = parseReminderTime("evening", state.eveningReminder);
 
   return [morning, evening].filter((time): time is NonNullable<typeof time> => !!time);
-}
-
-function saveInitialProducts(userId: string, products: readonly string[]) {
-  const createdAt = new Date().toISOString();
-  return products.map((name) =>
-    saveProduct({
-      id: generateId("prod"),
-      userId,
-      name,
-      source: "text",
-      createdAt,
-    }),
-  );
 }
 
 export async function handleOnboarding(
@@ -140,22 +130,11 @@ export async function handleOnboarding(
     });
 
     const reminderTimes = buildReminderTimes(merged);
-    const currentProducts = merged.currentProducts ?? [];
-
     await createUser(userId, encryptedPhone, {
-      name: merged.name!,
       locale: merged.detectedLocale ?? locale,
       timezone: merged.timezone!,
       timezoneConfirmed: merged.timezoneConfirmed === true,
       country,
-      skinType: merged.skinType ?? "unsure",
-      sensitivity: merged.sensitivity ?? "unsure",
-      concerns: [...(merged.concerns ?? [])],
-      goals: [...(merged.goals ?? [])],
-      allergies: [...(merged.allergies ?? [])],
-      currentProducts: [...(merged.currentProducts ?? [])],
-      routinePreference: merged.routinePreference ?? "simple",
-      communicationStyle: "clear_expert",
       styleOfferState: "pending",
       photoRetentionConsentedAt: null,
       photoRetentionConsentVersion: null,
@@ -165,8 +144,24 @@ export async function handleOnboarding(
       consentVersion: CONSENT_VERSION,
     });
 
+    await initializeUserWorkingMemory(
+      userId,
+      buildOnboardingWorkingMemory({
+        name: merged.name!,
+        replyLanguage: merged.detectedLocale ?? locale,
+        timezone: merged.timezone!,
+        skinType: merged.skinType ?? "unsure",
+        sensitivity: merged.sensitivity ?? "unsure",
+        concerns: merged.concerns ?? [],
+        goals: merged.goals ?? [],
+        allergiesAndAvoids: merged.allergies ?? [],
+        currentProducts: merged.currentProducts ?? [],
+        routinePreference: merged.routinePreference ?? "simple",
+        communicationStyle: "clear_expert",
+      }),
+    );
+
     await Promise.all([
-      ...saveInitialProducts(userId, currentProducts),
       reminderTimes.length > 0 ? setCustomReminderTimes(userId, reminderTimes) : Promise.resolve(),
       deleteOnboardingState(userId),
     ]);

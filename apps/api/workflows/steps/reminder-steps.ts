@@ -2,7 +2,6 @@ import { wrapUserReminder } from "@skintext/ai";
 import {
   deleteReminderRunId,
   getAdherenceStreak,
-  getAllProducts,
   getCustomReminderTimes,
   getOneOffReminder,
   getRoutineLogForDate,
@@ -13,14 +12,14 @@ import {
   markOneOffReminderSent as saveOneOffReminderSent,
   updateAdherenceStreak,
 } from "@skintext/db";
-import type { AdherenceStreak, DailyRoutineLog, UserProfile } from "@skintext/shared";
+import type { AdherenceStreak, DailyRoutineLog, UserAccount } from "@skintext/shared";
 import { decrypt, localDateString } from "@skintext/shared";
 import { createLogger } from "evlog";
 import { runAgentMessage } from "../../src/agent-runner";
 import { sendReplyBubbles } from "../../src/replies";
 import { buildRoutineReminderEvent } from "../reminder-events";
 
-export async function loadUser(userId: string): Promise<UserProfile | null> {
+export async function loadUser(userId: string): Promise<UserAccount | null> {
   "use step";
   return getUser(userId);
 }
@@ -102,23 +101,19 @@ export async function buildRoutineReminder(
   routineLabel: string,
   routineEmoji: string,
   locale: string,
-  userName: string,
   log: DailyRoutineLog,
 ): Promise<string> {
   "use step";
   const streak = await getAdherenceStreak(userId);
-  const products = await getAllProducts(userId);
 
   return buildRoutineReminderEvent({
     routineLabel,
     routineEmoji,
     userLocale: locale,
-    userName,
     completedSlots: log.completedSlots,
     entryCount: log.entryCount,
     productsUsed: log.productsUsed,
     streakDays: streak.current,
-    productNames: products.map((p) => p.name),
   });
 }
 
@@ -142,7 +137,7 @@ export async function buildDailySummaryReminder(
   const pm = log.completedSlots.includes("evening") ? "done" : "not logged";
 
   return {
-    text: `Generate an end-of-day skincare routine summary for ${user.name}.
+    text: `Generate an end-of-day skincare routine summary.
 User locale: ${locale}
 AM: ${am}
 PM: ${pm}
@@ -202,7 +197,7 @@ export async function buildWeeklyRecapReminder(
     .map(([name]) => name)
     .join(", ");
 
-  return `Generate a weekly skincare routine recap for ${user.name}.
+  return `Generate a weekly skincare routine recap.
 User locale: ${locale}
 Daily breakdown:
 ${dayLines}

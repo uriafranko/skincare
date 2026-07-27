@@ -13,53 +13,31 @@ import {
 } from "./personality-policy";
 
 export function buildSkintextSystemPrompt(ctx: AgentContext): string {
-  const activeExperiment = ctx.activeExperiment
-    ? `Active skincare experiment:
-- Change: ${ctx.activeExperiment.change}
-- Started: ${ctx.activeExperiment.startedAt}
-- Planned review: ${ctx.activeExperiment.plannedReviewAt ?? "not set"}
-- Baseline: ${ctx.activeExperiment.baseline ?? "not recorded"}
-Keep other variables stable unless safety requires stopping or changing the plan.`
-    : "Active skincare experiment: none.";
-  const profile = ctx.userProfile;
-  const canonicalContext = profile
-    ? `CANONICAL USER CONTEXT
-- Name: ${ctx.userName}
+  const account = ctx.userAccount;
+  const turnContext = `TURN CONTEXT
+- Minimum risk state: ${ctx.riskState}
 - Reply language: ${ctx.localeName} (${ctx.locale})
 - Today's local date: ${ctx.localDate}
-- Timezone: ${ctx.timezone}; user confirmed: ${profile.timezoneConfirmed ? "yes" : "no"}
-- Skin type: ${profile.skinType}
-- Sensitivity: ${profile.sensitivity}
-- Concerns: ${profile.concerns.join(", ") || "none saved"}
-- Goals: ${profile.goals.join(", ") || "none saved"}
-- Allergies/avoids: ${profile.allergies.join(", ") || "none saved"}
-- Routine preference: ${profile.routinePreference}
-- Saved products: ${
-        ctx.products.length
-          ? ctx.products
-              .map(
-                (product) => `${product.name}${product.category ? ` (${product.category})` : ""}`,
-              )
-              .join(", ")
-          : "none"
-      }
+- Operational timezone: ${ctx.timezone}; confirmed: ${account?.timezoneConfirmed ? "yes" : "no"}
+- Image attached: ${ctx.hasImage ? "yes" : "no"}
+- Scheduled event: ${ctx.isScheduledEvent ? "yes" : "no"}
+- Offer communication-style choice: ${ctx.shouldOfferStyle ? "yes" : "no"}
+- Photo retention: ${account?.photoRetentionConsentedAt ? `enabled under consent ${account.photoRetentionConsentVersion ?? "unknown"}` : "disabled"}
+- Offer photo retention: ${ctx.shouldOfferPhotoRetention ? "yes" : "no"}
 - Adherence streak: ${ctx.streak ?? "none"}
-Reply in the exact language of the latest user message. For a scheduled event, reply in the saved locale above.`
-    : `CANONICAL USER CONTEXT
-No completed profile is available. Reply in the exact language of the latest user message.`;
+Use working memory and newer retained history for personal profile, products, and experiment state. Reply in the exact language of the latest user message. For a scheduled event, reply in the saved locale above.`;
 
   return [
-    buildIdentityPolicy(ctx),
-    buildConversationPolicy(ctx),
-    buildSafetyPolicy(ctx),
+    buildIdentityPolicy(),
+    buildConversationPolicy(),
+    buildSafetyPolicy(),
     buildBodyImagePolicy(),
     buildCommercePolicy(),
-    buildMemoryPolicy(ctx),
-    buildImagePolicy(ctx),
+    buildMemoryPolicy(),
+    buildImagePolicy(),
     buildActionPolicy(),
     buildScheduledEventPolicy(),
-    canonicalContext,
-    activeExperiment,
+    turnContext,
   ].join("\n\n");
 }
 

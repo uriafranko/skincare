@@ -203,7 +203,7 @@ export const scheduleOneOffReminderTool = createTool({
         error: "Ask the user for their current city or timezone before scheduling reminders.",
       };
     }
-    if (schedule.type === "local_time" && !runtime.agentContext.userProfile?.timezoneConfirmed) {
+    if (schedule.type === "local_time" && !runtime.agentContext.userAccount?.timezoneConfirmed) {
       return {
         scheduled: false,
         needsTimezoneConfirmation: true,

@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { SKINTEXT_WORKING_MEMORY_OPTIONS } from "../memory";
 import { SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS, sanitizedImageUserText } from "../memory-policy";
 
 describe("image conversation privacy", () => {
@@ -17,6 +18,11 @@ describe("image conversation privacy", () => {
 });
 
 describe("conversation continuity", () => {
+  test("delivers resource-scoped working memory as a state signal", () => {
+    expect(SKINTEXT_WORKING_MEMORY_OPTIONS.scope).toBe("resource");
+    expect(SKINTEXT_WORKING_MEMORY_OPTIONS.useStateSignals).toBe(true);
+  });
+
   test("keeps long-term continuity in observational memory with raw-history retrieval", () => {
     expect(SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS.temporalMarkers).toBe(true);
     expect(SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS.retrieval).toBe(true);
@@ -28,6 +34,14 @@ describe("conversation continuity", () => {
     );
     expect(SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS.observation.instruction).toContain(
       "exact logs come from the routine-log tools",
+    );
+  });
+
+  test("lets observation promote current state into working memory", () => {
+    expect(SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS.observation.manageWorkingMemory).toBe(true);
+    expect(SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS.observation.bufferTokens).toBe(false);
+    expect(SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS.observation.instruction).toContain(
+      "latest explicit statement wins",
     );
   });
 });

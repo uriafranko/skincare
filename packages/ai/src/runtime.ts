@@ -59,7 +59,6 @@ export interface SkintextRuntime {
   cancelOneOffReminderWorkflow?: CancelOneOffReminderWorkflow;
   syncRecurringReminderSchedule?: RecurringReminderScheduleSync;
   accountDeleted?: boolean;
-  clearMemoryAfterRun?: boolean;
   currentPhotoSaved?: UserImage;
   skipCurrentPhotoRetention?: boolean;
   photoRetentionEnabled?: boolean;

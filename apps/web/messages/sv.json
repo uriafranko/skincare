@@ -82,7 +82,7 @@
         },
         "user1": "Kan jag använda det här serumet med min kräm?",
         "bot1": "Bildtyp: produktetikett\nSynligt: återfuktande serum, texten går delvis att läsa\nPassar: troligen efter rengöring och före kräm\nAtt tänka på: patchtesta först om huden är känslig\nNästa steg: använd några kvällar i veckan innan du ökar.",
-        "bot2": "Jag kan spara den bland dina produkter och lägga till den i kvällsrutinen.",
+        "bot2": "Jag kommer ihåg den som en av dina nuvarande produkter och loggar den i kvällsrutinen.",
         "bot3": "✅ Kväll loggad\nSerum · Kräm\nReaktion: ingen noterad"
       },
       "dailySummaries": {
@@ -108,7 +108,7 @@
     "q3": "Vad kommer Skintext ihåg?",
     "a3": "Bara sådant som gör framtida hjälp mer användbar, som din rutin, dina mål, produkter och reaktioner. Skintext frågar innan känsliga uppgifter sparas, och du kan fråga vad den minns eller radera det.",
     "q4": "Hur fungerar den gratis provperioden?",
-    "a4": "Du får full tillgång under provperioden. Följ rutiner, spara produkter, ställ in påminnelser och se sammanfattningar. Inget kreditkort krävs.",
+    "a4": "Du får full tillgång under provperioden. Följ rutiner, kom ihåg produkter, ställ in påminnelser och se sammanfattningar. Inget kreditkort krävs.",
     "q5": "Vilka språk stöds?",
     "a5": "Skintext upptäcker ditt språk från meddelandet och svarar därefter. Engelska och svenska stöds, med fler språk på väg."
   },
@@ -141,7 +141,7 @@
     "intro": "Skintext (\"Skintext\", \"vi\", \"oss\") är engagerade i att skydda din integritet. Denna policy förklarar vilken data vi samlar in, hur vi använder den och dina rättigheter.",
     "dataCollection": {
       "title": "Data vi samlar in",
-      "body": "När du använder Skintext samlar vi in:\n\n• Ditt telefonnummer (för att identifiera ditt konto och leverera meddelanden via iMessage)\n• Din bekräftelse under installationen på att du är minst 16 år, aldrig din exakta ålder eller ditt födelsedatum\n• Ditt namn, vald kommunikationsstil, hudmål, hudtyp om du delar den, känsligheter, allergier och nuvarande produkter\n• Rutinuppdateringar, produktbeskrivningar, påminnelser, tidszon och land för lokalisering\n• Rutinloggar, sparade produkter och hudvårdsexperiment med en ändring i taget\n• Rensad konversationshistorik, där fototurer innehåller text och en allmän fotomarkör men inte bilddata eller privata bildadresser"
+      "body": "När du använder Skintext samlar vi in:\n\n• Ditt telefonnummer (för att identifiera ditt konto och leverera meddelanden via iMessage)\n• Din bekräftelse under installationen på att du är minst 16 år, aldrig din exakta ålder eller ditt födelsedatum\n• Ditt namn, vald kommunikationsstil, hudmål, hudtyp om du delar den, känsligheter, allergier, nuvarande produkter och hudvårdsexperiment med en ändring i taget i agentminnet\n• Rutinuppdateringar och loggar, påminnelser, tidszon och land för lokalisering\n• Rensad konversationshistorik, där fototurer innehåller text och en allmän fotomarkör men inte bilddata eller privata bildadresser"
     },
     "dataUsage": {
       "title": "Hur vi använder din data",
@@ -149,7 +149,7 @@
     },
     "dataStorage": {
       "title": "Datalagring och säkerhet",
-      "body": "Anslutningar till vår webbplats och våra tjänster använder TLS (HTTPS). Ditt telefonnummer krypteras vid lagring med AES. Meddelandehistorik, rutinloggar, onboardingdata under uppsättning, sparade produkter, experiment och liknande lagras som krypterade applikationslager-blobbar. Profilfält lagras med strikt åtkomstkontroll. Bilder behandlas för det aktuella svaret som standard och läggs inte till i konversationshistoriken. Användare kan separat samtycka till krypterad privat bildlagring i 30 dagar."
+      "body": "Anslutningar till vår webbplats och våra tjänster använder TLS (HTTPS). Ditt telefonnummer krypteras vid lagring med AES. Rutinloggar och onboardingdata under uppsättning lagras som krypterade nyttolaster på applikationsnivå. Agentminne, meddelandehistorik och operativa kontofält lagras med strikt åtkomstkontroll. Bilder behandlas för det aktuella svaret som standard och läggs inte till i konversationshistoriken. Användare kan separat samtycka till krypterad privat bildlagring i 30 dagar."
     },
     "thirdParty": {
       "title": "Tredjepartstjänster",
@@ -157,11 +157,11 @@
     },
     "retention": {
       "title": "Datalagring",
-      "body": "Vi behåller profildata, rutinloggar, produkter, experiment och rensad konversationshistorik medan ditt konto är aktivt, om du inte raderar dem. Bilder som vuxna sparar med separat samtycke upphör efter 30 dagar. Att stänga av bildlagring påverkar framtida bilder; sparade bilder kan raderas separat. Radering av bilder tar inte bort text från tidigare bilddiskussioner om inte konversationshistoriken också rensas."
+      "body": "Vi behåller agentminne, rutinloggar, påminnelser, kontodata och rensad konversationshistorik medan ditt konto är aktivt. Bilder som sparas med separat samtycke upphör efter 30 dagar. Att stänga av bildlagring påverkar framtida bilder; sparade bilder kan raderas separat. Radering av bilder tar inte bort text från tidigare bilddiskussioner; radering av kontot tar bort båda."
     },
     "rights": {
       "title": "Dina rättigheter",
-      "body": "Du har rätt att:\n\n• Fråga vad Skintext minns och begära en kopia av din data\n• Rätta eller glömma profilfält och radera enskilda eller alla sparade produkter\n• Aktivera eller stänga av framtida bildlagring och radera sparade bilder\n• Rensa konversationshistoriken efter bekräftelse utan att radera profilen\n• Begära radering av kontot, inklusive experiment och integritetsinställningar\n• Återkalla samtycke när som helst"
+      "body": "Du har rätt att:\n\n• Fråga vad Skintext minns och begära en kopia av din data\n• Rätta eller glömma profil-, produkt- och experimentuppgifter i agentminnet\n• Aktivera eller stänga av framtida bildlagring och radera sparade bilder\n• Begära radering av kontot, inklusive agentminne och integritetsinställningar\n• Återkalla samtycke när som helst"
     },
     "contact": {
       "title": "Kontakt",

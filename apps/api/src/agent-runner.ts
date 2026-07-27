@@ -17,13 +17,8 @@ import {
   shouldOfferPhotoRetention,
   USER_REMINDER_OPEN_TAG,
 } from "@skintext/ai";
-import {
-  getActiveRoutineExperiment,
-  getAdherenceStreak,
-  getAllProducts,
-  updateUser,
-} from "@skintext/db";
-import type { AgentContext, UserProfile } from "@skintext/shared";
+import { getAdherenceStreak, updateUser } from "@skintext/db";
+import type { AgentContext, UserAccount } from "@skintext/shared";
 import { getLocaleName, localDateString, PERSONALITY_POLICY_VERSION } from "@skintext/shared";
 import type { RequestLogger } from "evlog";
 
@@ -54,16 +49,12 @@ function photoSaveFailureReply(locale: string): string {
 // Single main-agent entrypoint for inbound user texts and scheduled reminder events.
 export async function runAgentMessage(
   log: RequestLogger,
-  user: UserProfile,
+  user: UserAccount,
   text: string,
   options: RunAgentMessageOptions = {},
 ): Promise<string | null> {
   const localDate = localDateString(user.timezone);
-  const [streak, products, activeExperiment] = await Promise.all([
-    getAdherenceStreak(user.id),
-    getAllProducts(user.id),
-    getActiveRoutineExperiment(user.id),
-  ]);
+  const streak = await getAdherenceStreak(user.id);
   const hasImage = options.hasImage ?? !!options.imageUrl;
   const isScheduledEvent = text.includes(USER_REMINDER_OPEN_TAG);
   const riskState = deriveMinimumRiskState(text);
@@ -87,27 +78,23 @@ export async function runAgentMessage(
       hasImage,
       policyVersion: PERSONALITY_POLICY_VERSION,
       riskState,
-      communicationStyle: user.communicationStyle,
-      activeExperiment: !!activeExperiment,
+      personalizationSource: "working_memory",
     },
   });
 
   const agentContext: AgentContext = {
     userId: user.id,
-    userName: user.name,
     localeName: getLocaleName(user.locale),
     locale: user.locale,
     timezone: user.timezone,
     localDate,
-    userProfile: user,
+    userAccount: user,
     riskState,
     shouldOfferStyle,
     shouldOfferPhotoRetention: offerPhotoRetention,
     hasImage,
     isScheduledEvent,
-    activeExperiment,
     streak: streak.current > 0 ? streak.current : null,
-    products,
   };
   const runtime: SkintextRuntime = {
     userId: user.id,
@@ -152,9 +139,8 @@ export async function runAgentMessage(
     },
     personality: {
       policyVersion: PERSONALITY_POLICY_VERSION,
-      style: user.communicationStyle,
+      styleSource: "working_memory",
       riskState,
-      activeExperiment: !!activeExperiment,
       photoRetentionEnabled: runtime.photoRetentionEnabled ?? false,
       photoRetained: !!runtime.currentPhotoSaved,
       photoRetentionError: !!runtime.photoSaveError,
@@ -165,7 +151,7 @@ export async function runAgentMessage(
   const reply = runtime.photoSaveError
     ? `${result.text}\n\n${photoSaveFailureReply(user.locale)}`
     : result.text;
-  if (hasImage && !runtime.accountDeleted && !runtime.clearMemoryAfterRun) {
+  if (hasImage && !runtime.accountDeleted) {
     try {
       await saveSanitizedImageTurn({
         resourceId: user.id,

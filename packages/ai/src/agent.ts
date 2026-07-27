@@ -1,6 +1,6 @@
 import { Agent } from "@mastra/core/agent";
 import { Mastra } from "@mastra/core/mastra";
-import { deleteUserMemory, mastraStorage, skintextMemory } from "./memory";
+import { mastraStorage, skintextMemory } from "./memory";
 import { getDefaultModelName } from "./models";
 import { buildSkintextSystemPrompt } from "./prompts";
 import {
@@ -66,7 +66,7 @@ export async function runSkintextAgent(input: RunSkintextAgentInput, runtime: Sk
     },
   });
 
-  if (input.hasImage && !runtime.accountDeleted && !runtime.clearMemoryAfterRun) {
+  if (input.hasImage && !runtime.accountDeleted) {
     if (
       runtime.photoRetentionEnabled &&
       runtime.saveCurrentPhoto &&
@@ -79,10 +79,6 @@ export async function runSkintextAgent(input: RunSkintextAgentInput, runtime: Sk
         runtime.photoSaveError = error instanceof Error ? error.message : String(error);
       }
     }
-  }
-
-  if (runtime.accountDeleted || runtime.clearMemoryAfterRun) {
-    await deleteUserMemory(runtime.userId);
   }
 
   return result;

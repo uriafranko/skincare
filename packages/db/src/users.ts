@@ -1,33 +1,7 @@
-import type {
-  CommunicationStyle,
-  RoutinePreference,
-  SensitivityLevel,
-  SkinType,
-  StyleOfferState,
-  UserProfile,
-} from "@skintext/shared";
+import type { StyleOfferState, UserAccount } from "@skintext/shared";
 import { eq } from "drizzle-orm";
 import { getDb } from "./client";
 import { phoneMappings, users } from "./schema";
-
-function parseList(value: unknown): string[] {
-  if (!value) return [];
-  if (Array.isArray(value)) return value.map(String);
-  if (typeof value !== "string") return [];
-  try {
-    const parsed = JSON.parse(value) as unknown;
-    return Array.isArray(parsed) ? parsed.map(String) : [];
-  } catch {
-    return value
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-  }
-}
-
-function stringifyList(value: string[]): string {
-  return JSON.stringify(value);
-}
 
 export async function resolveUserId(encryptedPhone: string): Promise<string | null> {
   const row = await getDb().query.phoneMappings.findFirst({
@@ -46,24 +20,15 @@ export async function createPhoneMapping(encryptedPhone: string, userId: string)
 function pendingUserValues(
   userId: string,
   encryptedPhone: string,
-  profile: Pick<UserProfile, "locale" | "timezone" | "country">,
+  account: Pick<UserAccount, "locale" | "timezone" | "country">,
 ): typeof users.$inferInsert {
   return {
     id: userId,
     phone: encryptedPhone,
-    name: "",
-    locale: profile.locale,
-    timezone: profile.timezone,
+    locale: account.locale,
+    timezone: account.timezone,
     timezoneConfirmed: false,
-    country: profile.country,
-    skinType: "unsure",
-    sensitivity: "unsure",
-    concerns: stringifyList([]),
-    goals: stringifyList([]),
-    allergies: stringifyList([]),
-    currentProducts: stringifyList([]),
-    routinePreference: "simple",
-    communicationStyle: "clear_expert",
+    country: account.country,
     styleOfferState: "pending",
     photoRetentionConsentedAt: null,
     photoRetentionConsentVersion: null,
@@ -78,12 +43,12 @@ function pendingUserValues(
 export async function createPendingUserForPhone(
   userId: string,
   encryptedPhone: string,
-  profile: Pick<UserProfile, "locale" | "timezone" | "country">,
+  account: Pick<UserAccount, "locale" | "timezone" | "country">,
 ): Promise<string> {
   const db = getDb();
   const [inserted] = await db
     .insert(users)
-    .values(pendingUserValues(userId, encryptedPhone, profile))
+    .values(pendingUserValues(userId, encryptedPhone, account))
     .onConflictDoNothing()
     .returning({ id: users.id });
 
@@ -111,7 +76,7 @@ export async function createPendingUserForPhone(
   return resolvedUserId;
 }
 
-export async function getUser(userId: string): Promise<UserProfile | null> {
+export async function getUser(userId: string): Promise<UserAccount | null> {
   const d = await getDb().query.users.findFirst({
     where: eq(users.id, userId),
   });
@@ -119,19 +84,10 @@ export async function getUser(userId: string): Promise<UserProfile | null> {
   return {
     id: userId,
     phone: String(d.phone ?? ""),
-    name: String(d.name ?? ""),
     locale: String(d.locale ?? "en"),
     timezone: String(d.timezone ?? "UTC"),
     timezoneConfirmed: d.timezoneConfirmed === true,
     country: String(d.country ?? "US"),
-    skinType: String(d.skinType ?? "unsure") as SkinType,
-    sensitivity: String(d.sensitivity ?? "unsure") as SensitivityLevel,
-    concerns: parseList(d.concerns),
-    goals: parseList(d.goals),
-    allergies: parseList(d.allergies),
-    currentProducts: parseList(d.currentProducts),
-    routinePreference: String(d.routinePreference ?? "simple") as RoutinePreference,
-    communicationStyle: String(d.communicationStyle ?? "clear_expert") as CommunicationStyle,
     styleOfferState: String(d.styleOfferState ?? "pending") as StyleOfferState,
     photoRetentionConsentedAt: d.photoRetentionConsentedAt
       ? String(d.photoRetentionConsentedAt)
@@ -152,7 +108,7 @@ export async function getUser(userId: string): Promise<UserProfile | null> {
 export async function createUser(
   userId: string,
   encryptedPhone: string,
-  profile: Omit<UserProfile, "id" | "phone" | "createdAt">,
+  account: Omit<UserAccount, "id" | "phone" | "createdAt">,
 ): Promise<void> {
   const createdAt = new Date().toISOString();
   await getDb()
@@ -160,52 +116,34 @@ export async function createUser(
     .values({
       id: userId,
       phone: encryptedPhone,
-      name: profile.name,
-      locale: profile.locale,
-      timezone: profile.timezone,
-      timezoneConfirmed: profile.timezoneConfirmed,
-      country: profile.country,
-      skinType: profile.skinType,
-      sensitivity: profile.sensitivity,
-      concerns: stringifyList(profile.concerns),
-      goals: stringifyList(profile.goals),
-      allergies: stringifyList(profile.allergies),
-      currentProducts: stringifyList(profile.currentProducts),
-      routinePreference: profile.routinePreference,
-      communicationStyle: profile.communicationStyle,
-      styleOfferState: profile.styleOfferState,
-      photoRetentionConsentedAt: profile.photoRetentionConsentedAt,
-      photoRetentionConsentVersion: profile.photoRetentionConsentVersion,
-      photoRetentionOfferShownAt: profile.photoRetentionOfferShownAt,
-      onboardingComplete: profile.onboardingComplete,
-      consentedAt: profile.consentedAt,
-      consentVersion: profile.consentVersion,
+      locale: account.locale,
+      timezone: account.timezone,
+      timezoneConfirmed: account.timezoneConfirmed,
+      country: account.country,
+      styleOfferState: account.styleOfferState,
+      photoRetentionConsentedAt: account.photoRetentionConsentedAt,
+      photoRetentionConsentVersion: account.photoRetentionConsentVersion,
+      photoRetentionOfferShownAt: account.photoRetentionOfferShownAt,
+      onboardingComplete: account.onboardingComplete,
+      consentedAt: account.consentedAt,
+      consentVersion: account.consentVersion,
       createdAt,
     })
     .onConflictDoUpdate({
       target: users.id,
       set: {
         phone: encryptedPhone,
-        name: profile.name,
-        locale: profile.locale,
-        timezone: profile.timezone,
-        timezoneConfirmed: profile.timezoneConfirmed,
-        country: profile.country,
-        skinType: profile.skinType,
-        sensitivity: profile.sensitivity,
-        concerns: stringifyList(profile.concerns),
-        goals: stringifyList(profile.goals),
-        allergies: stringifyList(profile.allergies),
-        currentProducts: stringifyList(profile.currentProducts),
-        routinePreference: profile.routinePreference,
-        communicationStyle: profile.communicationStyle,
-        styleOfferState: profile.styleOfferState,
-        photoRetentionConsentedAt: profile.photoRetentionConsentedAt,
-        photoRetentionConsentVersion: profile.photoRetentionConsentVersion,
-        photoRetentionOfferShownAt: profile.photoRetentionOfferShownAt,
-        onboardingComplete: profile.onboardingComplete,
-        consentedAt: profile.consentedAt,
-        consentVersion: profile.consentVersion,
+        locale: account.locale,
+        timezone: account.timezone,
+        timezoneConfirmed: account.timezoneConfirmed,
+        country: account.country,
+        styleOfferState: account.styleOfferState,
+        photoRetentionConsentedAt: account.photoRetentionConsentedAt,
+        photoRetentionConsentVersion: account.photoRetentionConsentVersion,
+        photoRetentionOfferShownAt: account.photoRetentionOfferShownAt,
+        onboardingComplete: account.onboardingComplete,
+        consentedAt: account.consentedAt,
+        consentVersion: account.consentVersion,
       },
     });
   await createPhoneMapping(encryptedPhone, userId);
@@ -222,9 +160,6 @@ export async function updateUser(
       case "phone":
         updates.phone = value;
         break;
-      case "name":
-        updates.name = value;
-        break;
       case "locale":
         updates.locale = value;
         break;
@@ -236,30 +171,6 @@ export async function updateUser(
         break;
       case "country":
         updates.country = value;
-        break;
-      case "skinType":
-        updates.skinType = value;
-        break;
-      case "sensitivity":
-        updates.sensitivity = value;
-        break;
-      case "concerns":
-        updates.concerns = value;
-        break;
-      case "goals":
-        updates.goals = value;
-        break;
-      case "allergies":
-        updates.allergies = value;
-        break;
-      case "currentProducts":
-        updates.currentProducts = value;
-        break;
-      case "routinePreference":
-        updates.routinePreference = value;
-        break;
-      case "communicationStyle":
-        updates.communicationStyle = value;
         break;
       case "styleOfferState":
         updates.styleOfferState = value;

@@ -74,7 +74,6 @@ export async function reminderLoop(userId: string, generation: string) {
           routine.label,
           routine.emoji,
           locale,
-          user.name,
           log,
         );
         await sendReminderToAgent(userId, reminder, generation);

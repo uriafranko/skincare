@@ -1,32 +1,14 @@
-import { sql } from "drizzle-orm";
-import {
-  boolean,
-  index,
-  integer,
-  pgTable,
-  text,
-  timestamp,
-  uniqueIndex,
-} from "drizzle-orm/pg-core";
+import { boolean, index, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 export const users = pgTable(
   "users",
   {
     id: text("id").primaryKey(),
     phone: text("phone").notNull().unique(),
-    name: text("name").notNull(),
     locale: text("locale").notNull(),
     timezone: text("timezone").notNull(),
     timezoneConfirmed: boolean("timezone_confirmed").notNull().default(false),
     country: text("country").notNull(),
-    skinType: text("skin_type").notNull(),
-    sensitivity: text("sensitivity").notNull(),
-    concerns: text("concerns").notNull(),
-    goals: text("goals").notNull(),
-    allergies: text("allergies").notNull(),
-    currentProducts: text("current_products").notNull(),
-    routinePreference: text("routine_preference").notNull(),
-    communicationStyle: text("communication_style").notNull().default("clear_expert"),
     styleOfferState: text("style_offer_state").notNull().default("pending"),
     photoRetentionConsentedAt: text("photo_retention_consented_at"),
     photoRetentionConsentVersion: text("photo_retention_consent_version"),
@@ -48,20 +30,6 @@ export const phoneMappings = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
   },
   (table) => [index("phone_mappings_user_id_idx").on(table.userId)],
-);
-
-export const products = pgTable(
-  "products",
-  {
-    id: text("id").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    value: text("value").notNull(),
-    createdAt: text("created_at").notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
-  },
-  (table) => [index("products_user_created_at_idx").on(table.userId, table.createdAt)],
 );
 
 export const userImages = pgTable(
@@ -125,28 +93,6 @@ export const onboardingStates = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
   },
   (table) => [index("onboarding_states_expires_at_idx").on(table.expiresAt)],
-);
-
-export const routineExperiments = pgTable(
-  "routine_experiments",
-  {
-    id: text("id").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    status: text("status").notNull(),
-    reviewAt: text("review_at"),
-    value: text("value").notNull(),
-    createdAt: text("created_at").notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
-  },
-  (table) => [
-    index("routine_experiments_user_created_at_idx").on(table.userId, table.createdAt),
-    index("routine_experiments_user_review_at_idx").on(table.userId, table.reviewAt),
-    uniqueIndex("routine_experiments_one_active_user_idx")
-      .on(table.userId)
-      .where(sql`${table.status} = 'active'`),
-  ],
 );
 
 export const adherenceStreaks = pgTable("adherence_streaks", {

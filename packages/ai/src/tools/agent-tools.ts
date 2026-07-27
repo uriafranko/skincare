@@ -1,30 +1,11 @@
 import { deleteAccountTool } from "./delete-account";
-import {
-  closeExperimentTool,
-  getActiveExperimentTool,
-  listExperimentsTool,
-  startExperimentTool,
-} from "./experiments";
 import { exportDataTool } from "./export-data";
 import {
   cancelOneOffReminderTool,
   listOneOffRemindersTool,
   scheduleOneOffReminderTool,
 } from "./one-off-reminders";
-import {
-  clearConversationHistoryTool,
-  deleteSavedPhotosTool,
-  getPersonalizationSummaryTool,
-  saveCurrentPhotoTool,
-  setPhotoRetentionTool,
-} from "./privacy";
-import {
-  deleteAllProductsTool,
-  deleteProductTool,
-  listProductsTool,
-  logProductUseTool,
-  saveProductTool,
-} from "./products";
+import { deleteSavedPhotosTool, saveCurrentPhotoTool, setPhotoRetentionTool } from "./privacy";
 import {
   deleteRoutineEntryTool,
   getTodayRoutineLogTool,
@@ -32,8 +13,7 @@ import {
   logRoutineStepTool,
 } from "./routine";
 import { sendUiMessageTool } from "./send-ui-message";
-import { getRemindersTool, setRemindersTool } from "./set-reminders";
-import { updateProfileTool } from "./update-profile";
+import { getRemindersTool, setRemindersTool, setTimezoneTool } from "./set-reminders";
 import { listUserImagesTool, sendUserImageTool } from "./user-images";
 
 const routineTools = {
@@ -43,17 +23,8 @@ const routineTools = {
   getWeeklyRoutineLog: getWeeklyRoutineLogTool,
 };
 
-const productTools = {
-  saveProduct: saveProductTool,
-  deleteProduct: deleteProductTool,
-  deleteAllProducts: deleteAllProductsTool,
-  listProducts: listProductsTool,
-  logProductUse: logProductUseTool,
-};
-
-const profileTools = {
-  updateProfile: updateProfileTool,
-  getPersonalizationSummary: getPersonalizationSummaryTool,
+const localizationTools = {
+  setTimezone: setTimezoneTool,
 };
 
 const reminderTools = {
@@ -62,13 +33,6 @@ const reminderTools = {
   scheduleOneOffReminder: scheduleOneOffReminderTool,
   listOneOffReminders: listOneOffRemindersTool,
   cancelOneOffReminder: cancelOneOffReminderTool,
-};
-
-const experimentTools = {
-  startExperiment: startExperimentTool,
-  getActiveExperiment: getActiveExperimentTool,
-  listExperiments: listExperimentsTool,
-  closeExperiment: closeExperimentTool,
 };
 
 const mediaTools = {
@@ -81,7 +45,6 @@ const privacyAndAccountTools = {
   setPhotoRetention: setPhotoRetentionTool,
   saveCurrentPhoto: saveCurrentPhotoTool,
   deleteSavedPhotos: deleteSavedPhotosTool,
-  clearConversationHistory: clearConversationHistoryTool,
   exportData: exportDataTool,
   deleteAccount: deleteAccountTool,
 };
@@ -89,10 +52,8 @@ const privacyAndAccountTools = {
 // Keep this insertion order stable: tool definitions are part of the cached prompt prefix.
 export const skintextAgentTools = {
   ...routineTools,
-  ...productTools,
-  ...profileTools,
+  ...localizationTools,
   ...reminderTools,
-  ...experimentTools,
   ...mediaTools,
   ...privacyAndAccountTools,
 };

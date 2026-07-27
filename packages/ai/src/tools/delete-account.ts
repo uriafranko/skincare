@@ -16,7 +16,7 @@ export const deleteAccountTool = createTool({
       return {
         deleted: false,
         warning:
-          "This will permanently delete ALL your data including routine history, saved products, saved photos, photos-derived notes, and preferences. This cannot be undone. Reply 'yes, delete everything' to confirm.",
+          "This will permanently delete ALL your data including routine history, saved photos, retained agent memory, and preferences. This cannot be undone. Reply 'yes, delete everything' to confirm.",
       };
     }
 

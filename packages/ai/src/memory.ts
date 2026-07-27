@@ -4,6 +4,14 @@ import { PostgresStore } from "@mastra/pg";
 import { env, generateId } from "@skintext/shared";
 import { SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS, sanitizedImageUserText } from "./memory-policy";
 import { getMemoryModelName } from "./models";
+import { type SkintextWorkingMemory, skintextWorkingMemorySchema } from "./working-memory";
+
+export const SKINTEXT_WORKING_MEMORY_OPTIONS = {
+  enabled: true,
+  scope: "resource" as const,
+  schema: skintextWorkingMemorySchema,
+  useStateSignals: true,
+};
 
 export const mastraStorage = new PostgresStore({
   id: "skintext-postgres",
@@ -17,6 +25,7 @@ export const mastraStorage = new PostgresStore({
 export const skintextMemory = new Memory({
   storage: mastraStorage,
   options: {
+    workingMemory: SKINTEXT_WORKING_MEMORY_OPTIONS,
     observationalMemory: {
       model: getMemoryModelName(),
       ...SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS,
@@ -24,7 +33,7 @@ export const skintextMemory = new Memory({
   },
 });
 
-function threadIdFor(resourceId: string): string {
+export function threadIdFor(resourceId: string): string {
   return `skintext:${resourceId}`;
 }
 
@@ -66,6 +75,15 @@ function textMessage(input: {
   };
 }
 
+function parseWorkingMemory(raw: string | null): unknown {
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as unknown;
+  } catch {
+    return raw;
+  }
+}
+
 export async function saveSanitizedImageTurn(input: {
   resourceId: string;
   userText: string;
@@ -94,7 +112,7 @@ export async function saveSanitizedImageTurn(input: {
 }
 
 export async function exportUserMemory(resourceId: string) {
-  const [threads, messages] = await Promise.all([
+  const [threads, messages, workingMemory] = await Promise.all([
     skintextMemory.listThreads({
       filter: { resourceId },
       perPage: false,
@@ -104,15 +122,25 @@ export async function exportUserMemory(resourceId: string) {
       perPage: false,
       orderBy: { field: "createdAt", direction: "ASC" },
     }),
+    skintextMemory.getWorkingMemory({
+      threadId: threadIdFor(resourceId),
+      resourceId,
+    }),
   ]);
 
   return {
     threads: threads.threads,
     messages: messages.messages,
+    workingMemory: parseWorkingMemory(workingMemory),
   };
 }
 
 export async function deleteUserMemory(resourceId: string): Promise<void> {
+  await skintextMemory.updateWorkingMemory({
+    threadId: threadIdFor(resourceId),
+    resourceId,
+    workingMemory: "",
+  });
   const result = await skintextMemory.listThreads({
     filter: { resourceId },
     perPage: false,
@@ -120,13 +148,13 @@ export async function deleteUserMemory(resourceId: string): Promise<void> {
   await Promise.all(result.threads.map((thread) => skintextMemory.deleteThread(thread.id)));
 }
 
-export async function getUserConversationHistoryStatus(resourceId: string) {
-  const messages = await skintextMemory.listMessagesByResourceId({
+export async function initializeUserWorkingMemory(
+  resourceId: string,
+  workingMemory: SkintextWorkingMemory,
+): Promise<void> {
+  await skintextMemory.updateWorkingMemory({
+    threadId: threadIdFor(resourceId),
     resourceId,
-    perPage: false,
+    workingMemory: JSON.stringify(workingMemory),
   });
-  return {
-    retained: messages.messages.length > 0,
-    messageCount: messages.messages.length,
-  };
 }

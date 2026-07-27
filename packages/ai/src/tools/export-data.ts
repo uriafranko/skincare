@@ -1,10 +1,8 @@
 import { createTool } from "@mastra/core/tools";
 import {
   getAdherenceStreak,
-  getAllProducts,
   getRoutineLogForDate,
   getUser,
-  listRoutineExperiments,
   listUserImages,
   saveExportBlob,
 } from "@skintext/db";
@@ -21,13 +19,11 @@ export const exportDataTool = createTool({
   inputSchema: z.object({}),
   execute: async (_input, context) => {
     const { userId, timezone } = getSkintextRuntime(context.requestContext);
-    const [user, memory, streak, products, images, experiments] = await Promise.all([
+    const [user, memory, streak, images] = await Promise.all([
       getUser(userId),
       exportUserMemory(userId),
       getAdherenceStreak(userId),
-      getAllProducts(userId),
       listUserImages(userId, 50),
-      listRoutineExperiments(userId, 100),
     ]);
 
     if (!user) return { exported: false, message: "User not found." };
@@ -45,11 +41,9 @@ export const exportDataTool = createTool({
 
     const exportData = {
       exportedAt: new Date().toISOString(),
-      profile: { ...user, phone: "[encrypted]" },
+      account: { ...user, phone: "[encrypted]" },
       routineLogs,
-      products,
       savedImages: images,
-      experiments,
       adherenceStreak: streak,
       agentMemory: memory,
     };
@@ -65,7 +59,7 @@ export const exportDataTool = createTool({
 
     return {
       exported: true,
-      summary: `Exported ${routineDays} days of routine data (${totalEntries} entries), ${products.length} saved products, ${images.length} saved photos, ${experiments.length} experiments, and ${memory.messages.length} conversation messages.`,
+      summary: `Exported ${routineDays} days of routine data (${totalEntries} entries), ${images.length} saved photos, ${memory.messages.length} conversation messages, and current working memory.`,
       availableFor: "24 hours",
     };
   },

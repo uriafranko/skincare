@@ -1,32 +1,21 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { RequestContext } from "@mastra/core/request-context";
-import type { UserProfile } from "@skintext/shared";
+import type { UserAccount } from "@skintext/shared";
 import { updateUser } from "./db-mock";
 import { createSharedMock } from "./shared-mock";
 
 mock.module("@skintext/shared", () => createSharedMock());
 
-const { clearConversationHistoryTool, saveCurrentPhotoTool, setPhotoRetentionTool } = await import(
-  "../tools/privacy"
-);
+const { saveCurrentPhotoTool, setPhotoRetentionTool } = await import("../tools/privacy");
 
-function profile(): UserProfile {
+function account(): UserAccount {
   return {
     id: "usr_photo",
     phone: "encrypted",
-    name: "Alex",
     locale: "en",
     timezone: "UTC",
     timezoneConfirmed: true,
     country: "US",
-    skinType: "unsure",
-    sensitivity: "unsure",
-    concerns: [],
-    goals: [],
-    allergies: [],
-    currentProducts: [],
-    routinePreference: "simple",
-    communicationStyle: "clear_expert",
     styleOfferState: "shown",
     photoRetentionConsentedAt: null,
     photoRetentionConsentVersion: null,
@@ -39,17 +28,17 @@ function profile(): UserProfile {
 }
 
 function requestContext(
-  userProfile: UserProfile,
+  userAccount: UserAccount,
   saveCurrentPhoto?: () => Promise<Record<string, unknown>>,
 ) {
   const context = new RequestContext();
   context.set("runtime", {
-    userId: userProfile.id,
+    userId: userAccount.id,
     timezone: "UTC",
     inputText: "save this for tracking",
     hasImage: true,
     isScheduledEvent: false,
-    agentContext: { userProfile },
+    agentContext: { userAccount },
     saveCurrentPhoto,
     photoRetentionEnabled: false,
   });
@@ -79,7 +68,7 @@ describe("photo-retention privacy tools", () => {
       expiresAt: "2026-08-25T00:00:00.000Z",
     };
     const save = mock(() => Promise.resolve(image));
-    const user = profile();
+    const user = account();
     const context = requestContext(user, save);
 
     const first = await execute(
@@ -106,7 +95,7 @@ describe("photo-retention privacy tools", () => {
   });
 
   test("reports storage failure instead of claiming success", async () => {
-    const context = requestContext(profile(), async () => {
+    const context = requestContext(account(), async () => {
       throw new Error("blob unavailable");
     });
     const result = await execute(
@@ -123,7 +112,7 @@ describe("photo-retention privacy tools", () => {
   });
 
   test("can opt out of future retention in the same turn", async () => {
-    const user = profile();
+    const user = account();
     user.photoRetentionConsentedAt = "2026-07-20T00:00:00.000Z";
     user.photoRetentionConsentVersion = "2026-07-26";
     const context = requestContext(user);
@@ -143,21 +132,6 @@ describe("photo-retention privacy tools", () => {
         photoRetentionConsentedAt: "",
         photoRetentionConsentVersion: "",
       }),
-    );
-  });
-
-  test("requires confirmation before clearing conversation history", async () => {
-    const context = requestContext(profile());
-    const warning = await execute(clearConversationHistoryTool, { confirmed: false }, context);
-    expect(warning).toEqual(expect.objectContaining({ cleared: false }));
-    expect(
-      (context.get("runtime") as { clearMemoryAfterRun?: boolean }).clearMemoryAfterRun,
-    ).toBeUndefined();
-
-    const cleared = await execute(clearConversationHistoryTool, { confirmed: true }, context);
-    expect(cleared).toEqual(expect.objectContaining({ cleared: true }));
-    expect((context.get("runtime") as { clearMemoryAfterRun?: boolean }).clearMemoryAfterRun).toBe(
-      true,
     );
   });
 });

@@ -6,7 +6,6 @@ import {
   deleteCustomReminderTimes,
   getCustomReminderTimes,
   getOneOffReminder,
-  getUser,
   listOneOffReminders,
   markOneOffReminderFailed,
   setCustomReminderTimes,
@@ -40,8 +39,9 @@ const {
   scheduleOneOffReminder,
   scheduleOneOffReminderTool,
 } = await import("../tools/one-off-reminders");
-const { getRemindersTool, setRemindersTool } = await import("../tools/set-reminders");
-const { updateProfileTool } = await import("../tools/update-profile");
+const { getRemindersTool, setRemindersTool, setTimezoneTool } = await import(
+  "../tools/set-reminders"
+);
 
 function executeTool(
   tool: unknown,
@@ -52,30 +52,12 @@ function executeTool(
   requestContext.set("runtime", {
     userId: "usr_test",
     timezone: "America/New_York",
-    agentContext: { userProfile: { timezoneConfirmed: true } },
+    agentContext: { userAccount: { timezoneConfirmed: true } },
     ...runtime,
   });
   return (
     tool as { execute: (args: Record<string, unknown>, options: unknown) => Promise<unknown> }
   ).execute(input, { requestContext });
-}
-
-function storedProfile(overrides: Record<string, unknown> = {}) {
-  return {
-    id: "usr_test",
-    name: "Uria",
-    timezone: "Asia/Jerusalem",
-    timezoneConfirmed: false,
-    skinType: "unsure",
-    sensitivity: "unsure",
-    concerns: ["want smoother face"],
-    goals: ["smoother face"],
-    allergies: [],
-    currentProducts: [],
-    routinePreference: "simple",
-    communicationStyle: "clear_expert",
-    ...overrides,
-  };
 }
 
 describe("scheduleOneOffReminder", () => {
@@ -219,7 +201,7 @@ describe("scheduleOneOffReminder", () => {
         message: "Morning check-in.",
       },
       {
-        agentContext: { userProfile: { timezoneConfirmed: false } },
+        agentContext: { userAccount: { timezoneConfirmed: false } },
         scheduleOneOffReminderWorkflow: scheduleWorkflow,
       },
     );
@@ -395,7 +377,7 @@ describe("recurring reminder tools", () => {
     const result = await executeTool(
       setRemindersTool,
       { times: [{ label: "morning", hour: 9, minute: 30 }] },
-      { agentContext: { userProfile: { timezoneConfirmed: false } } },
+      { agentContext: { userAccount: { timezoneConfirmed: false } } },
     );
 
     expect(result).toEqual(
@@ -408,26 +390,24 @@ describe("recurring reminder tools", () => {
   });
 });
 
-describe("timezone profile updates", () => {
+describe("operational timezone updates", () => {
   beforeEach(() => {
     getCustomReminderTimes.mockClear();
-    getUser.mockClear();
     updateUser.mockClear();
   });
 
   test("validates and persists a user-stated IANA timezone as confirmed", async () => {
-    getUser.mockResolvedValueOnce({ id: "usr_test" });
     getCustomReminderTimes.mockResolvedValueOnce([{ label: "morning", hour: 8, minute: 0 }]);
     const syncSchedule = mock(() => Promise.resolve("run_123"));
 
     const result = await executeTool(
-      updateProfileTool,
+      setTimezoneTool,
       { timezone: "Asia/Jerusalem" },
       {
         agentContext: {
           timezone: "America/New_York",
           localDate: "2026-06-04",
-          userProfile: { timezone: "America/New_York", timezoneConfirmed: false },
+          userAccount: { timezone: "America/New_York", timezoneConfirmed: false },
         },
         syncRecurringReminderSchedule: syncSchedule,
       },
@@ -441,7 +421,6 @@ describe("timezone profile updates", () => {
     expect(result).toEqual(
       expect.objectContaining({
         updated: true,
-        changes: ["timezone: Asia/Jerusalem"],
         timezone: "Asia/Jerusalem",
         timezoneConfirmed: true,
         recurringRemindersResynced: true,
@@ -450,9 +429,7 @@ describe("timezone profile updates", () => {
   });
 
   test("rejects an unvalidated city label", async () => {
-    getUser.mockResolvedValueOnce({ id: "usr_test" });
-
-    const result = await executeTool(updateProfileTool, { timezone: "Jerusalem" });
+    const result = await executeTool(setTimezoneTool, { timezone: "Jerusalem" });
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -462,33 +439,19 @@ describe("timezone profile updates", () => {
     expect(updateUser).not.toHaveBeenCalled();
   });
 
-  test("persists only the stated timezone when a model copies and mutates the full profile", async () => {
-    const user = storedProfile();
+  test("accepts only the operational timezone field", async () => {
     const runtime = {
-      inputText: "Turn off photo retention - I'm in jersalem",
       agentContext: {
         timezone: "Asia/Jerusalem",
         localDate: "2026-07-26",
-        userName: "Uria",
-        userProfile: { ...user },
+        userAccount: { timezone: "Asia/Jerusalem", timezoneConfirmed: false },
       },
     };
-    getUser.mockResolvedValueOnce(user);
 
     const result = await executeTool(
-      updateProfileTool,
+      setTimezoneTool,
       {
-        name: "Uria",
         timezone: "Asia/Jerusalem",
-        skinType: "unsure",
-        sensitivity: "unsure",
-        concerns: ["want smoother face"],
-        goals: ["smoother face"],
-        allergies: [],
-        currentProducts: [],
-        routinePreference: "simple",
-        communicationStyle: "clear_expert",
-        clearFields: ["name"],
       },
       runtime,
     );
@@ -501,12 +464,8 @@ describe("timezone profile updates", () => {
     expect(result).toEqual(
       expect.objectContaining({
         updated: true,
-        changes: ["timezone: Asia/Jerusalem"],
-        rejectedChanges: [
-          "name was not cleared because the latest user message did not explicitly request it",
-        ],
+        timezone: "Asia/Jerusalem",
       }),
     );
-    expect(runtime.agentContext.userProfile.name).toBe("Uria");
   });
 });

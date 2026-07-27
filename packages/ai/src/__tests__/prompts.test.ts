@@ -23,23 +23,14 @@ const {
   wrapUserReminder,
 } = await import("../user-reminder");
 
-const baseProfile = {
+const baseAccount = {
   id: "usr_test123",
   phone: "encrypted",
-  name: "Alice",
   locale: "en",
   timezone: "America/New_York",
   timezoneConfirmed: true,
   country: "US",
-  skinType: "combination" as const,
-  sensitivity: "medium" as const,
-  concerns: ["dryness", "redness"],
-  goals: ["simple routine"],
-  allergies: ["fragrance"],
-  currentProducts: ["gentle cleanser"],
-  routinePreference: "simple" as const,
-  communicationStyle: "clear_expert" as const,
-  styleOfferState: "chosen" as const,
+  styleOfferState: "shown" as const,
   photoRetentionConsentedAt: null,
   photoRetentionConsentVersion: null,
   photoRetentionOfferShownAt: null,
@@ -51,29 +42,17 @@ const baseProfile = {
 
 const baseContext = {
   userId: "usr_test123",
-  userName: "Alice",
   localeName: "English",
   locale: "en",
   timezone: "America/New_York",
   localDate: "2026-07-26",
-  userProfile: baseProfile,
+  userAccount: baseAccount,
   riskState: "routine" as const,
   shouldOfferStyle: false,
   shouldOfferPhotoRetention: false,
   hasImage: false,
   isScheduledEvent: false,
-  activeExperiment: null,
   streak: 4,
-  products: [
-    {
-      id: "prod_1",
-      userId: "usr_test123",
-      name: "Gentle Cleanser",
-      category: "cleanser",
-      source: "text" as const,
-      createdAt: "2026-07-26T00:00:00Z",
-    },
-  ],
 };
 
 function makeContext(overrides: Record<string, unknown> = {}) {
@@ -94,14 +73,14 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("SCHEDULED EVENTS");
   });
 
-  test("includes canonical profile, product, and adherence context", () => {
+  test("keeps conversational user state in working memory instead of the system prompt", () => {
     const prompt = buildSkintextSystemPrompt(makeContext());
-    expect(prompt).toContain("CANONICAL USER CONTEXT");
-    expect(prompt).toContain("Name: Alice");
-    expect(prompt).toContain("Skin type: combination");
-    expect(prompt).toContain("Sensitivity: medium");
-    expect(prompt).toContain("Allergies/avoids: fragrance");
-    expect(prompt).toContain("Gentle Cleanser (cleanser)");
+    expect(prompt).toContain("TURN CONTEXT");
+    expect(prompt).toContain("Use working memory and newer retained history");
+    expect(prompt).not.toContain("Name: Alice");
+    expect(prompt).not.toContain("Skin type: combination");
+    expect(prompt).not.toContain("Allergies/avoids: fragrance");
+    expect(prompt).not.toContain("Gentle Cleanser");
     expect(prompt).toContain("Adherence streak: 4");
     expect(prompt).toContain("exact language of the latest user message");
   });
@@ -155,12 +134,12 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("Do not diagnose");
     expect(prompt).toContain("Never confirm that the user is ugly");
     expect(prompt).toContain('"Buy nothing"');
-    expect(prompt).toContain("authoritative over conversational or observational memory");
+    expect(prompt).toContain("latest explicit addition, correction, stop, removal, or forget");
     expect(prompt).toContain("Raw image bytes and private URLs");
-    expect(prompt).toContain("Start only one skincare experiment at a time");
+    expect(prompt).toContain("Keep only one active skincare experiment");
   });
 
-  test("injects an active experiment and keeps other variables stable", () => {
+  test("does not inject experiment state outside working memory", () => {
     const prompt = buildSkintextSystemPrompt(
       makeContext({
         activeExperiment: {
@@ -175,9 +154,9 @@ describe("buildSkintextSystemPrompt", () => {
         },
       }),
     );
-    expect(prompt).toContain("Use azelaic acid every other night");
-    expect(prompt).toContain("Redness is unchanged");
-    expect(prompt).toContain("Keep other variables stable");
+    expect(prompt).not.toContain("Use azelaic acid every other night");
+    expect(prompt).not.toContain("Redness is unchanged");
+    expect(prompt).toContain("experiment state as conversational memory");
   });
 
   test("treats scheduled reminder tags as internal input", () => {
@@ -186,7 +165,7 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("internal scheduled events");
     expect(prompt).toContain("Reply in the user's saved locale");
     expect(prompt).toContain("Continue the same user's ongoing conversation");
-    expect(prompt).toContain("retained history, observational memory");
+    expect(prompt).toContain("working memory, retained history, observational memory");
     expect(prompt).toContain("load them with the verified routine-log actions");
     expect(prompt).toContain(`Never mention ${USER_REMINDER_OPEN_TAG}`);
     expect(wrapUserReminder("Check whether irritation improved.")).toBe(

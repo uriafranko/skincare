@@ -1,5 +1,5 @@
 import { deleteAllUserData } from "@skintext/db";
-import type { UserProfile } from "@skintext/shared";
+import type { UserAccount } from "@skintext/shared";
 import type { RequestLogger } from "evlog";
 import { getRun, start } from "workflow/api";
 import { runAgentMessage } from "@/agent-runner";
@@ -11,7 +11,7 @@ import { oneOffReminderWorkflow } from "../../workflows/one-off-reminder";
 
 export async function handleMessage(
   log: RequestLogger,
-  user: UserProfile,
+  user: UserAccount,
   rawPhone: string,
   text: string,
   imageUrl?: string,

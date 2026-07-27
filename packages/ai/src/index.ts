@@ -7,10 +7,12 @@ export {
 export {
   deleteUserMemory,
   exportUserMemory,
-  getUserConversationHistoryStatus,
+  initializeUserWorkingMemory,
   mastraStorage,
+  SKINTEXT_WORKING_MEMORY_OPTIONS,
   saveSanitizedImageTurn,
   skintextMemory,
+  threadIdFor,
 } from "./memory";
 export { getDefaultModelName, getMemoryModelName, toMastraModelName } from "./models";
 export {
@@ -60,14 +62,7 @@ export {
 export { createTextGenerator } from "./text-generator";
 export { skintextAgentTools } from "./tools/agent-tools";
 export { deleteAccountTool } from "./tools/delete-account";
-export {
-  closeExperimentTool,
-  getActiveExperimentTool,
-  listExperimentsTool,
-  startExperimentTool,
-} from "./tools/experiments";
 export { exportDataTool } from "./tools/export-data";
-export { getUserProfile } from "./tools/get-profile";
 export {
   cancelOneOffReminderTool,
   listOneOffRemindersTool,
@@ -77,19 +72,10 @@ export {
   scheduleOneOffReminderTool,
 } from "./tools/one-off-reminders";
 export {
-  clearConversationHistoryTool,
   deleteSavedPhotosTool,
-  getPersonalizationSummaryTool,
   saveCurrentPhotoTool,
   setPhotoRetentionTool,
 } from "./tools/privacy";
-export {
-  deleteAllProductsTool,
-  deleteProductTool,
-  listProductsTool,
-  logProductUseTool,
-  saveProductTool,
-} from "./tools/products";
 export {
   deleteRoutineEntryTool,
   getTodayRoutineLogTool,
@@ -97,8 +83,7 @@ export {
   logRoutineStepTool,
 } from "./tools/routine";
 export { sendUiMessageTool } from "./tools/send-ui-message";
-export { getRemindersTool, setRemindersTool } from "./tools/set-reminders";
-export { updateProfileTool } from "./tools/update-profile";
+export { getRemindersTool, setRemindersTool, setTimezoneTool } from "./tools/set-reminders";
 export { listUserImagesTool, sendUserImageTool } from "./tools/user-images";
 export {
   USER_REMINDER_CLOSE_TAG,
@@ -107,3 +92,9 @@ export {
   USER_REMINDER_TAG_EXAMPLE,
   wrapUserReminder,
 } from "./user-reminder";
+export {
+  buildOnboardingWorkingMemory,
+  type SkintextWorkingMemory,
+  skintextWorkingMemorySchema,
+  type WorkingMemorySeed,
+} from "./working-memory";

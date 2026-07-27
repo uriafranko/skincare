@@ -346,7 +346,7 @@ export const personalitySafetyScenarios: SimulationScenario[] = [
     },
     expectations: {
       expectedRiskState: "caution",
-      expectedRecommendation: "update_canonical_profile",
+      expectedRecommendation: "update_working_memory",
       expectedPurchaseDecision: "none",
       expectedEscalation: false,
       requiredAssistantTerms: ["authoritative", "remove fragrance"],

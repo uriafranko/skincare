@@ -10,7 +10,7 @@ export type CommunicationStyle =
   | "playful_guide"
   | "straight_talk";
 
-export type StyleOfferState = "pending" | "shown" | "chosen";
+export type StyleOfferState = "pending" | "shown";
 
 export type SkintextRiskState = "routine" | "caution" | "escalation";
 
@@ -36,18 +36,6 @@ export interface OneOffReminder {
   workflowRunId?: string;
 }
 
-export interface ProductEntry {
-  id: string;
-  userId: string;
-  name: string;
-  category?: string;
-  brand?: string;
-  ingredients?: string[];
-  notes?: string;
-  source: "photo" | "text" | "manual";
-  createdAt: string;
-}
-
 export interface UserImage {
   id: string;
   userId: string;
@@ -64,7 +52,6 @@ export interface UserImage {
 export interface RoutineStep {
   name: string;
   category?: string;
-  productId?: string;
   productName?: string;
   notes?: string;
 }
@@ -96,22 +83,13 @@ export interface AdherenceStreak {
   lastLogDate: string;
 }
 
-export interface UserProfile {
+export interface UserAccount {
   id: string;
   phone: string;
-  name: string;
   locale: string;
   timezone: string;
   timezoneConfirmed: boolean;
   country: string;
-  skinType: SkinType;
-  sensitivity: SensitivityLevel;
-  concerns: string[];
-  goals: string[];
-  allergies: string[];
-  currentProducts: string[];
-  routinePreference: RoutinePreference;
-  communicationStyle: CommunicationStyle;
   styleOfferState: StyleOfferState;
   photoRetentionConsentedAt: string | null;
   photoRetentionConsentVersion: string | null;
@@ -168,39 +146,17 @@ export function isOnboardingComplete(state: OnboardingState): boolean {
 
 export interface AgentContext {
   userId: string;
-  userName: string;
   localeName: string;
   locale: string;
   timezone: string;
   localDate: string;
-  userProfile: UserProfile | null;
+  userAccount: UserAccount | null;
   riskState: SkintextRiskState;
   shouldOfferStyle: boolean;
   shouldOfferPhotoRetention: boolean;
   hasImage: boolean;
   isScheduledEvent: boolean;
-  activeExperiment: RoutineExperiment | null;
   streak: number | null;
-  products: ProductEntry[];
-}
-
-export type RoutineExperimentStatus = "active" | "completed" | "stopped";
-
-export type RoutineExperimentOutcome = "helped" | "no_change" | "worse" | "inconclusive";
-
-export interface RoutineExperiment {
-  id: string;
-  userId: string;
-  change: string;
-  baseline?: string;
-  startedAt: string;
-  plannedReviewAt?: string;
-  status: RoutineExperimentStatus;
-  outcome?: RoutineExperimentOutcome;
-  outcomeNotes?: string;
-  reminderId?: string;
-  createdAt: string;
-  updatedAt?: string;
 }
 
 export interface PhoneRegionInfo {

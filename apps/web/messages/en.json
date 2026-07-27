@@ -82,7 +82,7 @@
         },
         "user1": "Can I use this serum with my moisturizer?",
         "bot1": "Image type: product label\nVisible: hydrating serum label, ingredient text partly readable\nFit: likely after cleansing and before moisturizer\nWatchouts: patch test first if your skin is sensitive\nNext: use it a few nights a week before increasing.",
-        "bot2": "I can save it to your products and add it to your evening routine.",
+        "bot2": "I’ll remember it as one of your current products and log it in your evening routine.",
         "bot3": "✅ Evening logged\nSerum · Moisturizer\nReaction: none noted"
       },
       "dailySummaries": {
@@ -108,7 +108,7 @@
     "q3": "What does Skintext remember?",
     "a3": "Only context that makes future help more useful, such as your routine, goals, products, and reactions. Skintext asks before saving sensitive details, and you can ask what it remembers or delete it.",
     "q4": "How does the free trial work?",
-    "a4": "You get full access during the trial period. Track routines, save products, set reminders, and review summaries. No credit card required to start.",
+    "a4": "You get full access during the trial period. Track routines, remember products, set reminders, and review summaries. No credit card required to start.",
     "q5": "What languages are supported?",
     "a5": "Skintext detects your language from your message and responds accordingly. English and Swedish are supported, with more languages coming soon."
   },
@@ -141,7 +141,7 @@
     "intro": "Skintext (\"Skintext\", \"we\", \"us\") is committed to protecting your privacy. This policy explains what data we collect, how we use it, and your rights.",
     "dataCollection": {
       "title": "Data We Collect",
-      "body": "When you use Skintext, we collect:\n\n• Your phone number (to identify your account and deliver messages via iMessage)\n• Your confirmation that you are at least 16 during setup, never your exact age or birthdate\n• Your name, communication style, skin goals, skin type if shared, sensitivities, allergies, and current products\n• Routine updates, product descriptions, reminders, timezone, and country for localization\n• Routine logs, saved products, and one-variable skincare experiments\n• Sanitized conversation history, which stores text and a generic marker for photo turns but not image bytes or private image URLs"
+      "body": "When you use Skintext, we collect:\n\n• Your phone number (to identify your account and deliver messages via iMessage)\n• Your confirmation that you are at least 16 during setup, never your exact age or birthdate\n• Your name, communication style, skin goals, skin type if shared, sensitivities, allergies, current products, and one-variable skincare experiments in agent memory\n• Routine updates and logs, reminders, timezone, and country for localization\n• Sanitized conversation history, which stores text and a generic marker for photo turns but not image bytes or private image URLs"
     },
     "dataUsage": {
       "title": "How We Use Your Data",
@@ -149,7 +149,7 @@
     },
     "dataStorage": {
       "title": "Data Storage & Security",
-      "body": "Connections to our website and services use TLS (HTTPS). Your phone number is encrypted at rest using AES. Message history, routine log content, onboarding data during setup, saved products, experiments, and similar payloads are stored as encrypted application-layer blobs. Profile fields are stored with strict access controls. Photos are processed for the current reply by default and are not added to conversation history. Users may separately opt into encrypted private photo retention for 30 days."
+      "body": "Connections to our website and services use TLS (HTTPS). Your phone number is encrypted at rest using AES. Routine log content and onboarding data during setup are stored as encrypted application-layer payloads. Agent memory, message history, and operational account fields are stored with strict access controls. Photos are processed for the current reply by default and are not added to conversation history. Users may separately opt into encrypted private photo retention for 30 days."
     },
     "thirdParty": {
       "title": "Third-Party Services",
@@ -157,11 +157,11 @@
     },
     "retention": {
       "title": "Data Retention",
-      "body": "We retain profile data, routine logs, products, experiments, and sanitized conversation history while your account is active unless you delete them. Photos retained with separate consent expire after 30 days. Turning off photo retention affects future photos; saved photos can be deleted separately. Deleting saved photos does not remove text derived from earlier photo discussions unless conversation history is also cleared."
+      "body": "We retain agent memory, routine logs, reminders, account data, and sanitized conversation history while your account is active. Photos retained with separate consent expire after 30 days. Turning off photo retention affects future photos; saved photos can be deleted separately. Deleting saved photos does not remove text derived from earlier photo discussions; deleting the account removes both."
     },
     "rights": {
       "title": "Your Rights",
-      "body": "You have the right to:\n\n• Ask what Skintext remembers and request a copy of your data\n• Correct or forget profile fields and delete individual or all saved products\n• Enable or disable future photo retention, and delete saved photos\n• Clear conversation history after confirmation without deleting your profile\n• Request deletion of your account, including experiments and privacy preferences\n• Withdraw consent at any time"
+      "body": "You have the right to:\n\n• Ask what Skintext remembers and request a copy of your data\n• Correct or forget profile, product, and experiment details in agent memory\n• Enable or disable future photo retention, and delete saved photos\n• Request deletion of your account, including agent memory and privacy preferences\n• Withdraw consent at any time"
     },
     "contact": {
       "title": "Contact",

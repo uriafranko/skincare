@@ -3,13 +3,6 @@ export { deleteExpiredExportBlobs, saveExportBlob } from "./exports";
 export { acquireMessageSlot } from "./message-slots";
 export { deleteOnboardingState, getOnboardingState, setOnboardingState } from "./onboarding";
 export {
-  deleteAllProducts,
-  deleteProduct,
-  getAllProducts,
-  getProduct,
-  saveProduct,
-} from "./products";
-export {
   type CustomReminderTime,
   cancelOneOffReminder,
   claimReminderRunMigration,
@@ -33,15 +26,6 @@ export {
   setOneOffReminderWorkflowRunId,
   setReminderRunId,
 } from "./reminders";
-export {
-  closeRoutineExperiment,
-  createRoutineExperiment,
-  deleteAllRoutineExperiments,
-  getActiveRoutineExperiment,
-  getRoutineExperiment,
-  listRoutineExperiments,
-  saveRoutineExperiment,
-} from "./routine-experiments";
 export {
   deleteRoutineEntry,
   getRoutineEntry,
