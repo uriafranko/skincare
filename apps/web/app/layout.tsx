@@ -1,5 +1,8 @@
-import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Geist, Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 const inter = Inter({
   subsets: ["latin"],
@@ -15,7 +18,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html className={`${inter.variable} ${plusJakartaSans.variable}`}>
+    <html className={cn(inter.variable, plusJakartaSans.variable, "font-sans", geist.variable)}>
       <body>{children}</body>
     </html>
   );

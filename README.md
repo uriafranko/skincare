@@ -1,4 +1,4 @@
-# Zoey
+# Lily
 
 iMessage skincare routine assistant powered by AI.
 
@@ -93,7 +93,7 @@ skintext/
 
 ## How It Works
 
-1. User texts Zoey via iMessage.
+1. User texts Lily via iMessage.
 2. Sendblue forwards the message via webhook.
 3. New users confirm they are 16 or older, then go through conversational onboarding for skin goals, sensitivities, products, reminders, and service consent.
 4. Returning users interact with the AI assistant.

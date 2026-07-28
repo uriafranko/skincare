@@ -1,24 +1,31 @@
 {
   "Metadata": {
-    "title": "Zoey - Your skincare coach in iMessage",
-    "description": "Meet Zoey, your skincare coach in iMessage. Get a simpler routine, clear product answers, and gentle help staying consistent.",
-    "ogTitle": "Zoey - Your skincare coach in iMessage",
-    "ogDescription": "Meet Zoey, your skincare coach in iMessage. Get a simpler routine, clear product answers, and gentle help staying consistent."
+    "title": "Lily - Your skincare coach in iMessage",
+    "description": "Meet Lily, your skincare coach in iMessage. Get a simpler routine, clear product answers, and gentle help staying consistent.",
+    "ogTitle": "Lily - Your skincare coach in iMessage",
+    "ogDescription": "Meet Lily, your skincare coach in iMessage. Get a simpler routine, clear product answers, and gentle help staying consistent."
   },
   "Nav": {
-    "logo": "Zoey",
+    "logo": "Lily",
     "features": "How it works",
     "faqs": "FAQs",
-    "getStarted": "Text Zoey"
+    "getStarted": "Text Lily"
   },
   "Hero": {
-    "eyebrow": "A skincare coach in iMessage",
-    "headline": "Skincare, one clear step at a time.",
-    "subtitle": "Send the shelf. Get a simple plan.",
-    "trustLine": "No app · No sales pressure · You choose what Zoey remembers",
+    "eyebrow": "Little steps with Lily",
+    "headline": "Better skin every day, guided by research.",
+    "subtitle": "A simpler routine for smoother, calmer, more consistent skin days.",
+    "resultLines": [
+      "Smoother skin every morning.",
+      "A routine you’ll actually keep.",
+      "Less guessing. More good skin days.",
+      "Know what to use tonight.",
+      "Clear next steps for calmer skin."
+    ],
+    "trustLine": "No app · No sales pressure · You choose what Lily remembers",
     "socialProof": "Built for short, practical iMessage help",
     "conversationLabel": "iMessage",
-    "guideLabel": "Animated Zoey skincare guide",
+    "guideLabel": "Animated Lily skincare guide",
     "demo": {
       "prompt": "What would help today?",
       "shelfLabel": "Your shelf",
@@ -53,7 +60,7 @@
     }
   },
   "Guide": {
-    "toggleLabel": "Show another tip from Zoey",
+    "toggleLabel": "Show another tip from Lily",
     "tips": {
       "start": "Start small. Keep what works.",
       "memory": "Your routine can change. Your memory stays yours.",
@@ -61,15 +68,15 @@
     }
   },
   "IMessageButton": {
-    "label": "Text Zoey in Messages",
-    "shortLabel": "Text Zoey",
+    "label": "Text Lily in Messages",
+    "shortLabel": "Text Lily",
     "smsBody": "Hi — help me build a simple skincare routine."
   },
   "Features": {
     "story": {
       "eyebrow": "Skincare that fits real life",
       "heading": "Less guessing. More calm, consistent skin days.",
-      "subtitle": "Ask a question, send a photo, or say what you used. Zoey turns the mess into one clear next step.",
+      "subtitle": "Ask a question, send a photo, or say what you used. Lily turns the mess into one clear next step.",
       "snapOrText": {
         "value": "Start with confidence",
         "heading": "A routine simple enough to stick with.",
@@ -129,27 +136,27 @@
   },
   "Faq": {
     "heading": "A few useful answers",
-    "q1": "Can Zoey diagnose my skin?",
-    "a1": "No. Zoey is an AI skincare coach. She can describe visible features cautiously, explain product labels, and suggest practical routine steps, but she does not diagnose or replace a clinician.",
+    "q1": "Can Lily diagnose my skin?",
+    "a1": "No. Lily is an AI skincare coach. She can describe visible features cautiously, explain product labels, and suggest practical routine steps, but she does not diagnose or replace a clinician.",
     "q2": "What do I need to get started?",
-    "a2": "Just an iPhone with iMessage. No app to download, no account to create. Text Zoey and set up your routine in a short chat.",
-    "q3": "What does Zoey remember?",
-    "a3": "Only context that makes future help more useful, such as your routine, goals, products, and reactions. Zoey asks before saving sensitive details, and you can ask what she remembers or delete it.",
+    "a2": "Just an iPhone with iMessage. No app to download, no account to create. Text Lily and set up your routine in a short chat.",
+    "q3": "What does Lily remember?",
+    "a3": "Only context that makes future help more useful, such as your routine, goals, products, and reactions. Lily asks before saving sensitive details, and you can ask what she remembers or delete it.",
     "q4": "How does the free trial work?",
     "a4": "You get full access during the trial period. Track routines, remember products, set reminders, and review summaries. No credit card required to start.",
     "q5": "What languages are supported?",
-    "a5": "Zoey detects your language from your message and responds accordingly. English and Swedish are supported, with more languages coming soon."
+    "a5": "Lily detects your language from your message and responds accordingly. English and Swedish are supported, with more languages coming soon."
   },
   "BottomCta": {
     "heading": "Start your routine today",
-    "subtitle": "Open iMessage and text Zoey. She’ll help you set up your routine in one short chat.",
+    "subtitle": "Open iMessage and text Lily. She’ll help you set up your routine in one short chat.",
     "buttonHint": "Opens iMessage on your Mac or iPhone",
     "qrLabel": "Scan with your phone"
   },
   "PhoneMockup": {
-    "header": "Zoey",
+    "header": "Lily",
     "inputPlaceholder": "iMessage",
-    "lockTitle": "Zoey",
+    "lockTitle": "Lily",
     "lockBody": "Evening routine logged.",
     "lockBodyLogging": "Got your photo. Let me check the routine fit.",
     "lockBodySummary": "Here's today's routine wrap-up.",
@@ -166,10 +173,10 @@
   "Privacy": {
     "heading": "Privacy Policy",
     "lastUpdated": "Last updated: July 2026",
-    "intro": "Zoey (\"Zoey\", \"we\", \"us\") is committed to protecting your privacy. This policy explains what data we collect, how we use it, and your rights.",
+    "intro": "Lily (\"Lily\", \"we\", \"us\") is committed to protecting your privacy. This policy explains what data we collect, how we use it, and your rights.",
     "dataCollection": {
       "title": "Data We Collect",
-      "body": "When you use Zoey, we collect:\n\n• Your phone number (to identify your account and deliver messages via iMessage)\n• Your confirmation that you are at least 16 during setup, never your exact age or birthdate\n• Your name, communication style, skin goals, skin type if shared, sensitivities, allergies, current products, and one-variable skincare experiments in agent memory\n• Routine updates and logs, reminders, timezone, and country for localization\n• Sanitized conversation history, which stores text and a generic marker for photo turns but not image bytes or private image URLs"
+      "body": "When you use Lily, we collect:\n\n• Your phone number (to identify your account and deliver messages via iMessage)\n• Your confirmation that you are at least 16 during setup, never your exact age or birthdate\n• Your name, communication style, skin goals, skin type if shared, sensitivities, allergies, current products, and one-variable skincare experiments in agent memory\n• Routine updates and logs, reminders, timezone, and country for localization\n• Sanitized conversation history, which stores text and a generic marker for photo turns but not image bytes or private image URLs"
     },
     "dataUsage": {
       "title": "How We Use Your Data",
@@ -181,7 +188,7 @@
     },
     "thirdParty": {
       "title": "Third-Party Services",
-      "body": "We use the following third-party services to operate Zoey:\n\n• OpenAI — for image analysis and natural language processing\n• Sendblue — for iMessage delivery\n\nThese services process data as necessary to provide our features. We do not sell your data to third parties."
+      "body": "We use the following third-party services to operate Lily:\n\n• OpenAI — for image analysis and natural language processing\n• Sendblue — for iMessage delivery\n\nThese services process data as necessary to provide our features. We do not sell your data to third parties."
     },
     "retention": {
       "title": "Data Retention",
@@ -189,7 +196,7 @@
     },
     "rights": {
       "title": "Your Rights",
-      "body": "You have the right to:\n\n• Ask what Zoey remembers and request a copy of your data\n• Correct or forget profile, product, and experiment details in agent memory\n• Enable or disable future photo retention, and delete saved photos\n• Request deletion of your account, including agent memory and privacy preferences\n• Withdraw consent at any time"
+      "body": "You have the right to:\n\n• Ask what Lily remembers and request a copy of your data\n• Correct or forget profile, product, and experiment details in agent memory\n• Enable or disable future photo retention, and delete saved photos\n• Request deletion of your account, including agent memory and privacy preferences\n• Withdraw consent at any time"
     },
     "contact": {
       "title": "Contact",
@@ -199,34 +206,34 @@
   "Terms": {
     "heading": "Terms of Service",
     "lastUpdated": "Last updated: July 2026",
-    "intro": "By using Zoey (\"Zoey\", \"the Service\"), you agree to these terms. Please read them carefully.",
+    "intro": "By using Lily (\"Lily\", \"the Service\"), you agree to these terms. Please read them carefully.",
     "eligibility": {
       "title": "Eligibility",
-      "body": "You must be at least 16 years old and have access to an iPhone with iMessage to use Zoey. We ask only whether you are 16 or older, not for your exact age or birthdate."
+      "body": "You must be at least 16 years old and have access to an iPhone with iMessage to use Lily. We ask only whether you are 16 or older, not for your exact age or birthdate."
     },
     "service": {
       "title": "The Service",
-      "body": "Zoey is an AI-powered skincare routine assistant that operates through iMessage. The service includes routine logging, product notes, communication preferences, one-variable skincare experiments, summaries, adherence recaps, reminders, transient photo processing, and chat-based memory controls. Photo retention is optional and requires separate consent."
+      "body": "Lily is an AI-powered skincare routine assistant that operates through iMessage. The service includes routine logging, product notes, communication preferences, one-variable skincare experiments, summaries, adherence recaps, reminders, transient photo processing, and chat-based memory controls. Photo retention is optional and requires separate consent."
     },
     "accuracy": {
       "title": "Skincare Guidance",
-      "body": "Zoey provides routine support and conservative product guidance based on what you share. She does not diagnose, prescribe, or replace professional medical care. Consult a qualified clinician for concerning, severe, persistent, or rapidly changing symptoms."
+      "body": "Lily provides routine support and conservative product guidance based on what you share. She does not diagnose, prescribe, or replace professional medical care. Consult a qualified clinician for concerning, severe, persistent, or rapidly changing symptoms."
     },
     "account": {
       "title": "Your Account",
-      "body": "Your account is identified by your phone number. You are responsible for all activity associated with your phone number. Do not share access to your iMessage account with others for the purpose of using Zoey."
+      "body": "Your account is identified by your phone number. You are responsible for all activity associated with your phone number. Do not share access to your iMessage account with others for the purpose of using Lily."
     },
     "ip": {
       "title": "Intellectual Property",
-      "body": "All content, features, and functionality of Zoey are owned by Zoey and are protected by copyright and other intellectual property laws."
+      "body": "All content, features, and functionality of Lily are owned by Lily and are protected by copyright and other intellectual property laws."
     },
     "liability": {
       "title": "Limitation of Liability",
-      "body": "Zoey is provided \"as is\" without warranties of any kind. We are not liable for any damages arising from your use of the service, including outcomes based on routine guidance provided by the service."
+      "body": "Lily is provided \"as is\" without warranties of any kind. We are not liable for any damages arising from your use of the service, including outcomes based on routine guidance provided by the service."
     },
     "changes": {
       "title": "Changes to Terms",
-      "body": "We may update these terms from time to time. Continued use of Zoey after changes constitutes acceptance of the new terms."
+      "body": "We may update these terms from time to time. Continued use of Lily after changes constitutes acceptance of the new terms."
     },
     "contact": {
       "title": "Contact",
@@ -234,11 +241,11 @@
     }
   },
   "Footer": {
-    "logo": "Zoey",
+    "logo": "Lily",
     "tagline": "Skincare routines that live in your texts.",
     "privacy": "Privacy",
     "terms": "Terms",
-    "copyright": "© {year} Zoey",
+    "copyright": "© {year} Lily",
     "x": "X",
     "instagram": "Instagram",
     "tiktok": "TikTok"

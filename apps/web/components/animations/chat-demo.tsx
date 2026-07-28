@@ -194,7 +194,7 @@ function AppIconSquare({ size = 38, borderRadius = 10 }: { size?: number; border
       }}
     >
       <Image
-        src="/character/zoey-logo-v2.png"
+        src="/character/lily-logo-v2.png"
         alt=""
         width={size}
         height={size}
@@ -221,7 +221,7 @@ function ContactAvatar({ size = 56 }: { size?: number }) {
       }}
     >
       <Image
-        src="/character/zoey-logo-v2.png"
+        src="/character/lily-logo-v2.png"
         alt=""
         width={size}
         height={size}

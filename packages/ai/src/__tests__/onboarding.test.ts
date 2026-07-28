@@ -126,7 +126,7 @@ describe("processOnboardingMessage", () => {
       generateMock as never,
     );
 
-    expect(result.reply).toBe("Hey, I'm Zoey. Before we get started, are you 16 or older?");
+    expect(result.reply).toBe("Hey, I'm Lily. Before we get started, are you 16 or older?");
     expect(generateMock).not.toHaveBeenCalled();
   });
 

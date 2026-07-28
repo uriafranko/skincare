@@ -62,7 +62,7 @@ function makeContext(overrides: Record<string, unknown> = {}) {
 describe("buildSkintextSystemPrompt", () => {
   test("composes every trusted-core policy module", () => {
     const prompt = buildSkintextSystemPrompt(makeContext());
-    expect(prompt).toContain("Your name is Zoey");
+    expect(prompt).toContain("Your name is Lily");
     expect(prompt).toContain("You are AI, not a human");
     expect(prompt).toContain("ROLE AND IDENTITY");
     expect(prompt).toContain("CONVERSATION POLICY");

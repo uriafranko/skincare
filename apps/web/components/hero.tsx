@@ -6,7 +6,9 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { ChromaCharacter } from "./chroma-character";
 import { IMessageButton } from "./imessage-button";
-import { ZoeyMark } from "./zoey-mark";
+import { LilyMark } from "./lily-mark";
+import { Highlighter } from "./ui/highlighter";
+import { TypingAnimation } from "./ui/typing-animation";
 
 const DEMO_SCENARIOS = [
   { id: "simplify", Icon: Sparkles },
@@ -92,11 +94,7 @@ function HandDrawnArrow() {
   );
 }
 
-function MiniBottle({
-  bottle,
-}: {
-  bottle: (typeof SHELF_BOTTLES)[number];
-}) {
+function MiniBottle({ bottle }: { bottle: (typeof SHELF_BOTTLES)[number] }) {
   return (
     <span
       className="relative block shrink-0 rounded-[4px_4px_6px_6px] shadow-[0_5px_10px_rgba(71,54,38,0.12)]"
@@ -205,13 +203,7 @@ function ProductBottle({
   );
 }
 
-function InputVisual({
-  scenario,
-  compact = false,
-}: {
-  scenario: DemoScenario;
-  compact?: boolean;
-}) {
+function InputVisual({ scenario, compact = false }: { scenario: DemoScenario; compact?: boolean }) {
   const t = useTranslations("Hero");
   const heightClass = compact ? "h-[96px]" : "h-[118px]";
 
@@ -223,11 +215,7 @@ function InputVisual({
         aria-label={t("demo.product.question")}
       >
         <div className="absolute inset-3 rounded-[12px] border border-dashed border-white/75" />
-        <ProductBottle
-          kind="serum"
-          label={t("demo.products.serum")}
-          compact={compact}
-        />
+        <ProductBottle kind="serum" label={t("demo.products.serum")} compact={compact} />
         <span className="absolute right-3 top-3 rounded-full bg-white/80 px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.12em] text-secondary">
           {t("demo.photoLabel")}
         </span>
@@ -284,13 +272,7 @@ function InputVisual({
   );
 }
 
-function PlanVisual({
-  scenario,
-  compact = false,
-}: {
-  scenario: DemoScenario;
-  compact?: boolean;
-}) {
+function PlanVisual({ scenario, compact = false }: { scenario: DemoScenario; compact?: boolean }) {
   const t = useTranslations("Hero");
 
   return (
@@ -299,23 +281,11 @@ function PlanVisual({
         compact ? "h-[76px] gap-2 px-2 pb-1.5" : "h-[116px] gap-5 px-3 pb-2 sm:gap-7"
       }`}
     >
-      <ProductBottle
-        kind="cleanser"
-        label={t("demo.products.cleanser")}
-        compact={compact}
-      />
+      <ProductBottle kind="cleanser" label={t("demo.products.cleanser")} compact={compact} />
       {scenario === "product" ? (
-        <ProductBottle
-          kind="serum"
-          label={t("demo.products.serum")}
-          compact={compact}
-        />
+        <ProductBottle kind="serum" label={t("demo.products.serum")} compact={compact} />
       ) : null}
-      <ProductBottle
-        kind="moisturizer"
-        label={t("demo.products.moisturizer")}
-        compact={compact}
-      />
+      <ProductBottle kind="moisturizer" label={t("demo.products.moisturizer")} compact={compact} />
       {scenario === "consistency" ? (
         <span className="absolute right-2.5 top-2.5 flex h-6 w-6 items-center justify-center rounded-full bg-accent text-xs font-bold text-white shadow-sm">
           ✓
@@ -358,7 +328,7 @@ function MobileGuideStage({ activeScenario }: { activeScenario: DemoScenario }) 
 
           <div className="relative min-h-[164px] overflow-hidden rounded-[19px] bg-[#f8f3ea] p-2.5">
             <div className="mb-1.5 flex items-center gap-2">
-              <ZoeyMark size="sm" />
+              <LilyMark size="sm" />
               <p className="max-w-[72%] text-[10px] font-semibold leading-[1.35] text-[#34352f]">
                 {t(`demo.${activeScenario}.answer`)}
               </p>
@@ -414,7 +384,7 @@ function DesktopGuideStage({ activeScenario }: { activeScenario: DemoScenario })
 
           <div className="mt-2 rounded-[22px] border border-white/90 bg-white/92 p-3 shadow-[0_20px_52px_rgba(72,55,38,0.13)] backdrop-blur-xl">
             <div className="mb-2.5 flex items-center gap-2">
-              <ZoeyMark size="sm" />
+              <LilyMark size="sm" />
               <span className="flex items-center gap-1 rounded-full bg-elevated/80 px-2 py-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-muted/55" />
                 <span className="h-1.5 w-1.5 rounded-full bg-muted/55" />
@@ -430,7 +400,7 @@ function DesktopGuideStage({ activeScenario }: { activeScenario: DemoScenario })
 
           <div className="mt-[56px] rounded-[22px] border border-white/90 bg-white/94 p-3 shadow-[0_20px_52px_rgba(72,55,38,0.13)] backdrop-blur-xl">
             <div className="mb-2.5 flex items-center gap-2.5">
-              <ZoeyMark size="sm" />
+              <LilyMark size="sm" />
               <p className="text-[11px] font-medium leading-[1.4] text-primary sm:text-[12px]">
                 {t(`demo.${activeScenario}.answer`)}
               </p>
@@ -468,8 +438,7 @@ function ScenarioPicker({
   const t = useTranslations("Hero");
 
   return (
-    <div
-      role="group"
+    <fieldset
       aria-label={t("demo.prompt")}
       className={
         floating
@@ -520,25 +489,19 @@ function ScenarioPicker({
                   : "text-[9px] min-[480px]:text-[10px] sm:text-[11px]"
               }`}
             >
-              <span className={floating ? "" : "xl:hidden"}>
-                {t(`demo.${id}.shortLabel`)}
-              </span>
-              {!floating ? (
-                <span className="hidden xl:inline">{t(`demo.${id}.label`)}</span>
-              ) : null}
+              <span className={floating ? "" : "xl:hidden"}>{t(`demo.${id}.shortLabel`)}</span>
+              {!floating ? <span className="hidden xl:inline">{t(`demo.${id}.label`)}</span> : null}
             </span>
             <ArrowRight
               className={`size-3.5 shrink-0 transition-transform ${
                 floating ? "hidden" : "hidden xl:block"
-              } ${
-                isActive ? "text-accent" : "text-muted group-hover:translate-x-0.5"
-              }`}
+              } ${isActive ? "text-accent" : "text-muted group-hover:translate-x-0.5"}`}
               aria-hidden="true"
             />
           </button>
         );
       })}
-    </div>
+    </fieldset>
   );
 }
 
@@ -584,13 +547,39 @@ export function Hero() {
 
       <div className="mx-auto grid w-full max-w-[1320px] items-center gap-8 px-5 sm:px-7 lg:grid-cols-[0.88fr_1.12fr] lg:gap-5 xl:px-8">
         <div className="relative z-30 min-w-0 text-left">
+          <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.14em] text-[#6f5f4f] sm:text-[13px]">
+            <Highlighter
+              action="underline"
+              color="#FF9800"
+              strokeWidth={2.5}
+              animationDuration={700}
+              padding={3}
+            >
+              {t("eyebrow")}
+            </Highlighter>
+          </p>
           <h1
             className={`max-w-[680px] text-[3.25rem] font-normal leading-[0.91] tracking-[-0.05em] text-primary min-[480px]:text-[4rem] sm:text-[5rem] lg:max-w-[610px] lg:text-[4.35rem] xl:text-[5.7rem] ${EDITORIAL_FONT}`}
           >
             {t("headline")}
           </h1>
-          <p className="mt-6 max-w-[540px] text-[18px] leading-[1.5] text-secondary min-[480px]:text-[20px] sm:text-[22px] lg:mt-7">
-            {t("subtitle")}
+          <p className="mt-6 min-h-[54px] max-w-[540px] text-[18px] font-medium leading-[1.5] text-[#5f6c63] min-[480px]:min-h-[36px] min-[480px]:text-[20px] sm:text-[22px] lg:mt-7">
+            <span className="sr-only">{t("subtitle")}</span>
+            <TypingAnimation
+              words={t.raw("resultLines") as string[]}
+              typeSpeed={52}
+              deleteSpeed={28}
+              delay={320}
+              pauseDelay={1800}
+              loop
+              startOnView={false}
+              cursorStyle="line"
+              aria-hidden="true"
+              className="leading-[1.5] motion-reduce:hidden"
+            />
+            <span className="hidden motion-reduce:inline" aria-hidden="true">
+              {(t.raw("resultLines") as string[])[0]}
+            </span>
           </p>
 
           <div className="relative mt-7 flex flex-col items-start gap-3 lg:mt-8">
@@ -627,11 +616,7 @@ export function Hero() {
             exit={{ opacity: 0, y: 18 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
           >
-            <ScenarioPicker
-              activeScenario={activeScenario}
-              onSelect={setActiveScenario}
-              floating
-            />
+            <ScenarioPicker activeScenario={activeScenario} onSelect={setActiveScenario} floating />
           </motion.div>
         ) : null}
       </AnimatePresence>

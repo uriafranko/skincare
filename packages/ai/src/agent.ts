@@ -14,7 +14,7 @@ import {
 } from "./runtime";
 import { skintextAgentTools } from "./tools/agent-tools";
 
-const PROMPT_CACHE_KEY = "zoey-agent-v1";
+const PROMPT_CACHE_KEY = "lily-agent-v1";
 const CONFIRMATION_TOOL_NAMES = new Set([
   "deleteAccount",
   "deleteSavedPhotos",
@@ -39,7 +39,7 @@ function createMastraPubSub() {
 
 export const skintextAgent = new Agent({
   id: "skintext-agent",
-  name: "Zoey",
+  name: "Lily",
   model: getDefaultModelName(),
   memory: skintextMemory,
   instructions: ({ requestContext }) =>
@@ -56,7 +56,7 @@ export const mastra = new Mastra({
   observability: new Observability({
     configs: {
       default: {
-        serviceName: "zoey",
+        serviceName: "lily",
         exporters: [new MastraPlatformExporter()],
         spanOutputProcessors: [new SensitiveDataFilter()],
       },

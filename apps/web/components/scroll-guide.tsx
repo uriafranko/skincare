@@ -100,7 +100,7 @@ export function ScrollGuide() {
           aria-live="polite"
         >
           <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.14em] text-accent">
-            Zoey
+            Lily
           </span>
           {t(`tips.${currentTip}`)}
         </div>

@@ -38,7 +38,7 @@ async function ensureThread(resourceId: string): Promise<string> {
   const threadId = skintextThreadId(resourceId);
   const existing = await skintextMemory.getThreadById({ threadId, resourceId });
   if (!existing) {
-    await skintextMemory.createThread({ threadId, resourceId, title: "Zoey" });
+    await skintextMemory.createThread({ threadId, resourceId, title: "Lily" });
   }
   return threadId;
 }

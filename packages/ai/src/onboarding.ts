@@ -67,7 +67,7 @@ export type OnboardingGenerator = (prompt: string) => Promise<OnboardingExtracti
 function createGenerator(model: MastraModelConfig): OnboardingGenerator {
   const agent = new Agent({
     id: "skintext-onboarding",
-    name: "Zoey Onboarding",
+    name: "Lily Onboarding",
     model,
     instructions: "Extract onboarding details and write the next concise iMessage reply.",
   });
@@ -100,7 +100,7 @@ const CONSENT_ASK_DESCRIPTION =
   "Ask whether it is OK to save setup details so reminders/logs work, and say they can delete it anytime.";
 const CONSENT_ONLY_REPLY_INSTRUCTION = `${CONSENT_ASK_DESCRIPTION} Ask this in the user's language, with no other setup asks.`;
 
-const ENGLISH_AGE_GATE_REPLY = "Hey, I'm Zoey. Before we get started, are you 16 or older?";
+const ENGLISH_AGE_GATE_REPLY = "Hey, I'm Lily. Before we get started, are you 16 or older?";
 const ENGLISH_UNDER_16_REPLY =
   "I can only help people who are 16 or older, so I can't continue setup.";
 
@@ -214,7 +214,7 @@ export async function processOnboardingMessage(
 - If the message establishes they are 16 or older, acknowledge it briefly and ask for only the next one or two missing setup essentials. Extract any other details they volunteered, but do not ask for more than those next essentials.
 Keep this to one short bubble.`;
   } else if (ctx.isFirstMessage) {
-    situation = `This is the user's FIRST message. Welcome them as Zoey, their skincare routine assistant in iMessage. Introduce yourself naturally in first person, never like a product or company.
+    situation = `This is the user's FIRST message. Welcome them as Lily, their skincare routine assistant in iMessage. Introduce yourself naturally in first person, never like a product or company.
 
 CONTENT (keep SHORT -- 2-3 short sentences, one bubble when possible):
 - Lead with the payoff in plain language: you can help them build a practical routine and keep reminders/logs by text.
@@ -250,7 +250,7 @@ In your reply: ask only for what is still missing -- one or two asks at a time i
   }
 
   const output =
-    await generate(`Your name is Zoey. You are a friendly AI skincare routine assistant in iMessage. ${replyLang}
+    await generate(`Your name is Lily. You are a friendly AI skincare routine assistant in iMessage. ${replyLang}
 ${conversationContext}
 USER MESSAGE: "${text}"
 
@@ -290,7 +290,7 @@ REPLY INSTRUCTIONS:
 - If reminder times are present but no user-stated timezone is confirmed, ask for their current city or timezone and do not say reminders are set.
 - Be direct like a friend texting, not formal.
 - Speak naturally in first person. Never refer to yourself as a product, company, "the assistant", or in the third person.
-- If you introduce yourself, say "I'm Zoey" or the natural equivalent in the user's language.
+- If you introduce yourself, say "I'm Lily" or the natural equivalent in the user's language.
 - Do not claim to be human or imply human lived experience.
 - Make the user feel seen through one relevant detail or grounded compliment, not generic hype.
 - Never use romantic, intense, dependency-building, or appearance-based flattery.

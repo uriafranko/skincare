@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-type ZoeyMarkProps = {
+type LilyMarkProps = {
   size?: "sm" | "md" | "lg";
   priority?: boolean;
   className?: string;
@@ -12,7 +12,7 @@ const sizes = {
   lg: { className: "h-9 w-9", pixels: 36 },
 } as const;
 
-export function ZoeyMark({ size = "md", priority = false, className = "" }: ZoeyMarkProps) {
+export function LilyMark({ size = "md", priority = false, className = "" }: LilyMarkProps) {
   const mark = sizes[size];
 
   return (
@@ -21,7 +21,7 @@ export function ZoeyMark({ size = "md", priority = false, className = "" }: Zoey
       className={`relative block shrink-0 overflow-hidden rounded-full border border-white/80 bg-[#c99b77] shadow-[0_5px_16px_rgba(105,65,42,0.2)] ${mark.className} ${className}`}
     >
       <Image
-        src="/character/zoey-logo-v2.png"
+        src="/character/lily-logo-v2.png"
         alt=""
         width={mark.pixels}
         height={mark.pixels}

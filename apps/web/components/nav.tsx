@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import { IMessageButton } from "./imessage-button";
-import { ZoeyMark } from "./zoey-mark";
+import { LilyMark } from "./lily-mark";
 
 export function Nav() {
   const t = useTranslations("Nav");
@@ -10,7 +10,7 @@ export function Nav() {
       <div className="mx-auto max-w-[1320px]">
         <div className="flex items-center justify-between rounded-full border border-white/80 bg-bg/76 px-2.5 py-2 shadow-[0_10px_30px_rgba(44,40,37,0.08),inset_0_1px_0_rgba(255,255,255,0.75)] backdrop-blur-2xl sm:px-3">
           <a href="/" className="flex items-center gap-2" aria-label={t("logo")}>
-            <ZoeyMark priority />
+            <LilyMark priority />
             <span className="text-[1.25rem] leading-none font-normal tracking-[-0.035em] text-primary [font-family:'Iowan_Old_Style','Palatino_Linotype','Book_Antiqua',Georgia,serif]">
               {t("logo")}
             </span>
