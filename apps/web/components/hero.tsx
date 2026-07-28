@@ -296,7 +296,7 @@ function PlanVisual({
   return (
     <div
       className={`relative flex items-end justify-center rounded-[14px] bg-[#eef1e8] ${
-        compact ? "h-[76px] gap-2 px-2 pb-1.5" : "h-[92px] gap-5 px-3 pb-2 sm:gap-7"
+        compact ? "h-[76px] gap-2 px-2 pb-1.5" : "h-[116px] gap-5 px-3 pb-2 sm:gap-7"
       }`}
     >
       <ProductBottle
@@ -402,13 +402,13 @@ function DesktopGuideStage({ activeScenario }: { activeScenario: DemoScenario })
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={activeScenario}
-          className="absolute left-0 top-2 z-20 w-[270px] text-left sm:left-[2%] sm:w-[330px] lg:left-0 lg:w-[350px]"
+          className="absolute left-0 top-2 z-20 w-[285px] text-left xl:w-[350px]"
           initial={{ opacity: 0, y: 10, scale: 0.985 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -8, scale: 0.985 }}
           transition={{ duration: 0.24, ease: "easeOut" }}
         >
-          <div className="ml-auto w-[205px] rounded-[18px] rounded-br-[5px] bg-[#0057b8] px-3.5 py-2.5 text-[11px] leading-[1.4] text-white shadow-[0_12px_25px_rgba(0,87,184,0.2)] sm:w-[230px] sm:text-[12px]">
+          <div className="ml-auto w-[190px] rounded-[18px] rounded-br-[5px] bg-[#0057b8] px-3.5 py-2.5 text-[11px] leading-[1.4] text-white shadow-[0_12px_25px_rgba(0,87,184,0.2)] xl:w-[230px] xl:text-[12px]">
             {t(`demo.${activeScenario}.question`)}
           </div>
 
@@ -424,7 +424,7 @@ function DesktopGuideStage({ activeScenario }: { activeScenario: DemoScenario })
             <InputVisual scenario={activeScenario} />
           </div>
 
-          <div className="pointer-events-none absolute left-[70%] top-[250px] z-30 h-[86px] w-[86px] sm:left-[75%] sm:top-[268px] sm:h-[94px] sm:w-[94px]">
+          <div className="pointer-events-none absolute left-[50%] top-[238px] z-30 h-[82px] w-[82px] xl:left-[70%] xl:top-[250px] xl:h-[94px] xl:w-[94px]">
             <HandDrawnArrow />
           </div>
 
@@ -441,7 +441,7 @@ function DesktopGuideStage({ activeScenario }: { activeScenario: DemoScenario })
       </AnimatePresence>
 
       <motion.div
-        className="absolute right-[-12%] top-[12%] z-10 w-[66%] sm:right-[-6%] sm:w-[64%] lg:right-[-8%] lg:top-[8%] lg:w-[66%]"
+        className="absolute right-[-3%] top-[16%] z-10 w-[58%] xl:right-[-8%] xl:top-[8%] xl:w-[66%]"
         animate={activeScenario}
         variants={{
           simplify: { y: [0, -7, 0], rotate: [0, -1.2, 0] },
@@ -489,7 +489,7 @@ function ScenarioPicker({
             className={`group flex min-w-0 items-center justify-center overflow-hidden border text-center transition-all ${
               floating
                 ? "min-h-[52px] flex-col gap-1 rounded-[18px] px-1 py-1.5"
-                : "min-h-[76px] gap-1.5 rounded-[18px] px-2 py-3 sm:justify-between sm:gap-2 sm:px-3.5 sm:text-left"
+                : "min-h-[76px] gap-1.5 rounded-[18px] px-2 py-3 sm:justify-between sm:text-left xl:gap-2 xl:px-3.5"
             } ${
               isActive
                 ? floating
@@ -520,16 +520,16 @@ function ScenarioPicker({
                   : "text-[9px] min-[480px]:text-[10px] sm:text-[11px]"
               }`}
             >
-              <span className={floating ? "" : "min-[480px]:hidden"}>
+              <span className={floating ? "" : "xl:hidden"}>
                 {t(`demo.${id}.shortLabel`)}
               </span>
               {!floating ? (
-                <span className="hidden min-[480px]:inline">{t(`demo.${id}.label`)}</span>
+                <span className="hidden xl:inline">{t(`demo.${id}.label`)}</span>
               ) : null}
             </span>
             <ArrowRight
               className={`size-3.5 shrink-0 transition-transform ${
-                floating ? "hidden" : "hidden sm:block"
+                floating ? "hidden" : "hidden xl:block"
               } ${
                 isActive ? "text-accent" : "text-muted group-hover:translate-x-0.5"
               }`}
@@ -585,7 +585,7 @@ export function Hero() {
       <div className="mx-auto grid w-full max-w-[1320px] items-center gap-8 px-5 sm:px-7 lg:grid-cols-[0.88fr_1.12fr] lg:gap-5 xl:px-8">
         <div className="relative z-30 min-w-0 text-left">
           <h1
-            className={`max-w-[680px] text-[3.25rem] font-normal leading-[0.91] tracking-[-0.05em] text-primary min-[480px]:text-[4rem] sm:text-[5rem] lg:max-w-[610px] lg:text-[5.7rem] ${EDITORIAL_FONT}`}
+            className={`max-w-[680px] text-[3.25rem] font-normal leading-[0.91] tracking-[-0.05em] text-primary min-[480px]:text-[4rem] sm:text-[5rem] lg:max-w-[610px] lg:text-[4.35rem] xl:text-[5.7rem] ${EDITORIAL_FONT}`}
           >
             {t("headline")}
           </h1>
