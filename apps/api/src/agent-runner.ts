@@ -134,6 +134,10 @@ export async function runAgentMessage(
   };
 
   const result = await runSkintextAgent({ text, imageUrl: options.imageUrl, hasImage }, runtime);
+  if (!result) {
+    log.set({ agent: { signal: "delivered_to_active_run" } });
+    return null;
+  }
   const resultText = result.text || suspendedToolMessage(result.suspendPayload);
   if (shouldOfferStyle && resultText && user.styleOfferState === "pending") {
     await updateUser(user.id, { styleOfferState: "shown" });

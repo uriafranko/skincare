@@ -1,6 +1,6 @@
 export { getDb } from "./client";
 export { deleteExpiredExportBlobs, saveExportBlob } from "./exports";
-export { acquireMessageSlot } from "./message-slots";
+export { reserveInboundMessage, tryAcquireMessageLock } from "./message-slots";
 export { deleteOnboardingState, getOnboardingState, setOnboardingState } from "./onboarding";
 export {
   type CustomReminderTime,

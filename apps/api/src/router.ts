@@ -7,6 +7,34 @@ import { normalizeInboundImage } from "@/image";
 import { errorForLogging } from "@/logging";
 import { pruneExpiredUserImageBlobs } from "@/user-images";
 
+/**
+ * Routes a plain-text message around the per-phone lock when an existing user
+ * already has an active Mastra thread. Onboarding and images keep the lock
+ * because they carry turn-local persistence and media callbacks.
+ */
+export async function routeConcurrentMessage(
+  log: RequestLogger,
+  encryptedPhone: string,
+  rawPhone: string,
+  text: string,
+  rawImageUrl?: string,
+  messageId?: string,
+): Promise<string[] | undefined> {
+  if (rawImageUrl) return;
+
+  const userId = await resolveUserId(encryptedPhone);
+  if (!userId) return;
+
+  const user = await getUser(userId);
+  if (!user?.onboardingComplete || !user.consentedAt) {
+    return;
+  }
+
+  log.set({ userId, route: "message", concurrent: true });
+  const reply = await handleMessage(log, user, rawPhone, text, undefined, undefined, messageId);
+  return reply ? [reply] : [];
+}
+
 export async function routeMessage(
   log: RequestLogger,
   encryptedPhone: string,

@@ -23,38 +23,17 @@ async function pruneExpiredKeys(): Promise<void> {
   await getDb().delete(expiringKeys).where(lte(expiringKeys.expiresAt, new Date()));
 }
 
-/**
- * Checks webhook deduplication and acquires a per-phone processing lock.
- * On "acquired", caller MUST call the returned `release` function when done.
- */
-/** @param encryptedPhone deterministic ciphertext from `encrypt(phone)`, never raw E.164 */
-export async function acquireMessageSlot(
-  encryptedPhone: string,
-  messageId?: string,
-): Promise<{ status: "duplicate" | "locked" | "acquired"; release: () => Promise<void> }> {
-  const lockKey = `lock:${encryptedPhone}`;
-  const dedupKey = messageId ? `dedup:${messageId}` : null;
-
+export async function reserveInboundMessage(messageId?: string): Promise<boolean> {
   await pruneExpiredKeys();
+  return messageId ? trySetExpiringKey(`dedup:${messageId}`, "dedup", DEDUP_TTL) : true;
+}
 
-  const noop = async () => {};
-  const dedupOk = dedupKey ? await trySetExpiringKey(dedupKey, "dedup", DEDUP_TTL) : true;
+/** @param encryptedPhone deterministic ciphertext from `encrypt(phone)`, never raw E.164 */
+export async function tryAcquireMessageLock(
+  encryptedPhone: string,
+): Promise<(() => Promise<void>) | null> {
+  await pruneExpiredKeys();
+  const lockKey = `lock:${encryptedPhone}`;
   const lockOk = await trySetExpiringKey(lockKey, "lock", LOCK_TTL);
-
-  if (!dedupOk) {
-    if (lockOk) await deleteExpiringKey(lockKey);
-    return { status: "duplicate", release: noop };
-  }
-
-  if (!lockOk) {
-    if (dedupKey) await deleteExpiringKey(dedupKey);
-    return { status: "locked", release: noop };
-  }
-
-  return {
-    status: "acquired",
-    release: async () => {
-      await deleteExpiringKey(lockKey);
-    },
-  };
+  return lockOk ? () => deleteExpiringKey(lockKey) : null;
 }
