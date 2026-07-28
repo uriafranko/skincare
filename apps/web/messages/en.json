@@ -1,9 +1,9 @@
 {
   "Metadata": {
     "title": "Zoey - Your skincare coach in iMessage",
-    "description": "Meet Zoey, your AI skincare coach in iMessage. She remembers what you try, checks in without judgment, and helps you change one thing at a time.",
+    "description": "Meet Zoey, your skincare coach in iMessage. Get a simpler routine, clear product answers, and gentle help staying consistent.",
     "ogTitle": "Zoey - Your skincare coach in iMessage",
-    "ogDescription": "Meet Zoey, your AI skincare coach in iMessage. She remembers what you try, checks in without judgment, and helps you change one thing at a time."
+    "ogDescription": "Meet Zoey, your skincare coach in iMessage. Get a simpler routine, clear product answers, and gentle help staying consistent."
   },
   "Nav": {
     "logo": "Zoey",
@@ -14,15 +14,43 @@
   "Hero": {
     "eyebrow": "A skincare coach in iMessage",
     "headline": "Skincare, one clear step at a time.",
-    "subtitle": "Meet Zoey, your AI skincare coach in iMessage. She remembers what you try, checks in without judgment, and helps you change one thing at a time.",
-    "trustLine": "No app · No sales pressure · You control memory",
+    "subtitle": "Send the shelf. Get a simple plan.",
+    "trustLine": "No app · No sales pressure · You choose what Zoey remembers",
     "socialProof": "Built for short, practical iMessage help",
     "conversationLabel": "iMessage",
-    "userMessage": "I keep changing products. Where do I start?",
-    "assistantMessage": "Start with less: cleanser and moisturizer for two weeks.",
-    "assistantFollowup": "If your skin stays comfortable, we’ll choose one next step.",
-    "privacyNote": "Remembers only what you want · Delete anytime",
-    "guideLabel": "Animated Zoey skincare guide"
+    "guideLabel": "Animated Zoey skincare guide",
+    "demo": {
+      "prompt": "What would help today?",
+      "shelfLabel": "Your shelf",
+      "planLabel": "Your simple plan",
+      "photoLabel": "Photo",
+      "products": {
+        "cleanser": "Cleanser",
+        "moisturizer": "Moisturizer",
+        "serum": "Serum"
+      },
+      "simplify": {
+        "label": "Simplify my shelf",
+        "shortLabel": "Simplify",
+        "question": "Too many products. Where do I start?",
+        "answer": "Start with cleanser + moisturizer.",
+        "followup": "If your skin feels good, we’ll choose one next step."
+      },
+      "product": {
+        "label": "Check a product",
+        "shortLabel": "Product check",
+        "question": "Can I use this serum with my moisturizer?",
+        "answer": "Send me the label and I’ll show you where it fits.",
+        "followup": "We’ll add one new thing at a time so you know what works."
+      },
+      "consistency": {
+        "label": "Stay on track",
+        "shortLabel": "Stay on track",
+        "question": "I’m good for three days, then I forget.",
+        "answer": "I can check in when it’s useful—never to make you feel guilty.",
+        "followup": "Reply done, skip, or ask for help anytime."
+      }
+    }
   },
   "Guide": {
     "toggleLabel": "Show another tip from Zoey",
@@ -39,27 +67,27 @@
   },
   "Features": {
     "story": {
-      "eyebrow": "Built for real routines",
-      "heading": "Helpful, without becoming another thing to manage.",
-      "subtitle": "Zoey talks like a person: warm, clear, and brief enough for real life. She stays careful when something may need a professional.",
+      "eyebrow": "Skincare that fits real life",
+      "heading": "Less guessing. More calm, consistent skin days.",
+      "subtitle": "Ask a question, send a photo, or say what you used. Zoey turns the mess into one clear next step.",
       "snapOrText": {
-        "value": "Starts small",
-        "heading": "A routine you can live with.",
-        "body": "Two steps you actually do beat ten that feel overwhelming. Zoey helps you change one thing at a time so you can see what works.",
+        "value": "Start with confidence",
+        "heading": "A routine simple enough to stick with.",
+        "body": "Focus on the few products your skin actually needs, so you can stop restarting every week and start noticing what works.",
         "point1": "She describes visible details cautiously and avoids diagnosis.",
         "point2": "When a product should be remembered, she asks before saving it."
       },
       "smartReminders": {
-        "value": "Checks in gently",
-        "heading": "Follow-ups, never guilt.",
-        "body": "No streaks, shame, or sales pressure. Just a useful check-in when you want one, with reminders that stay opt-in.",
+        "value": "Keep going",
+        "heading": "Gentle support when life gets busy.",
+        "body": "Get a helpful nudge when you want one. Miss a night and simply pick up where you left off—no streaks, pressure, or guilt.",
         "point1": "No invented morning or evening reminder defaults.",
         "point2": "One-off follow-ups and recurring reminders stay separate."
       },
       "dailySummaries": {
-        "value": "Remembers with permission",
-        "heading": "Context that stays useful.",
-        "body": "Products, reactions, and goals can carry between chats. Zoey asks before saving sensitive details, and you can delete them.",
+        "value": "Stop second-guessing",
+        "heading": "Try new products with a clear plan.",
+        "body": "Send a product or skin photo and learn where it fits, what to watch for, and whether now is the right time to add it.",
         "point1": "Routine status comes from verified logs, not guesses from chat.",
         "point2": "Export and delete paths are part of the same data story."
       }

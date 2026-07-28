@@ -5,15 +5,15 @@
   --font-body: var(--font-inter);
   --font-logo: var(--font-jakarta);
 
-  --color-bg: #f7faf8;
-  --color-card: #ffffff;
-  --color-elevated: #eef3ef;
-  --color-primary: #202321;
-  --color-secondary: #5f6c64;
-  --color-muted: #8b968f;
-  --color-accent: #2fbf63;
-  --color-accent-hover: #28a957;
-  --color-border: #dce5df;
+  --color-bg: #fbf8f1;
+  --color-card: #fffdf8;
+  --color-elevated: #f1eee5;
+  --color-primary: #24231f;
+  --color-secondary: #66685f;
+  --color-muted: #92948c;
+  --color-accent: #3d9f58;
+  --color-accent-hover: #33894b;
+  --color-border: #e5dfd3;
   --color-imessage: #34c759;
   --color-imessage-gray: #dce5df;
 
@@ -55,7 +55,9 @@ html {
 @layer base {
   body {
     @apply bg-bg text-primary font-body antialiased;
-    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.24), transparent 22rem);
+    background-image:
+      radial-gradient(circle at 20% 0%, rgba(244, 187, 107, 0.09), transparent 28rem),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 24rem);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;

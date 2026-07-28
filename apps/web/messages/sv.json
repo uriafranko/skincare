@@ -1,9 +1,9 @@
 {
   "Metadata": {
     "title": "Zoey - Din hudvårdscoach i iMessage",
-    "description": "Möt Zoey, din AI-hudvårdscoach i iMessage. Hon kommer ihåg vad du provar, följer upp utan skuld och hjälper dig ändra en sak i taget.",
+    "description": "Möt Zoey, din hudvårdscoach i iMessage. Få en enklare rutin, tydliga produktsvar och vänlig hjälp att hålla i.",
     "ogTitle": "Zoey - Din hudvårdscoach i iMessage",
-    "ogDescription": "Möt Zoey, din AI-hudvårdscoach i iMessage. Hon kommer ihåg vad du provar, följer upp utan skuld och hjälper dig ändra en sak i taget."
+    "ogDescription": "Möt Zoey, din hudvårdscoach i iMessage. Få en enklare rutin, tydliga produktsvar och vänlig hjälp att hålla i."
   },
   "Nav": {
     "logo": "Zoey",
@@ -14,15 +14,43 @@
   "Hero": {
     "eyebrow": "En hudvårdscoach i iMessage",
     "headline": "Hudvård, ett tydligt steg i taget.",
-    "subtitle": "Möt Zoey, din AI-hudvårdscoach i iMessage. Hon kommer ihåg vad du provar, följer upp utan skuld och hjälper dig ändra en sak i taget.",
-    "trustLine": "Ingen app · Ingen säljpress · Du styr minnet",
+    "subtitle": "Skicka hyllan. Få en enkel plan.",
+    "trustLine": "Ingen app · Ingen säljpress · Du väljer vad Zoey minns",
     "socialProof": "Byggt för kort, praktisk iMessage-hjälp",
     "conversationLabel": "iMessage",
-    "userMessage": "Jag byter hela tiden produkter. Var börjar jag?",
-    "assistantMessage": "Börja med mindre: rengöring och fuktkräm i två veckor.",
-    "assistantFollowup": "Om huden känns bra väljer vi ett nästa steg.",
-    "privacyNote": "Minns bara det du vill · Radera när du vill",
-    "guideLabel": "Animerad hudvårdsguide från Zoey"
+    "guideLabel": "Animerad hudvårdsguide från Zoey",
+    "demo": {
+      "prompt": "Vad skulle hjälpa idag?",
+      "shelfLabel": "Din hylla",
+      "planLabel": "Din enkla plan",
+      "photoLabel": "Bild",
+      "products": {
+        "cleanser": "Rengöring",
+        "moisturizer": "Fuktkräm",
+        "serum": "Serum"
+      },
+      "simplify": {
+        "label": "Förenkla hyllan",
+        "shortLabel": "Förenkla",
+        "question": "För många produkter. Var börjar jag?",
+        "answer": "Börja med rengöring + fuktkräm.",
+        "followup": "Om huden känns bra väljer vi ett nästa steg."
+      },
+      "product": {
+        "label": "Kolla en produkt",
+        "shortLabel": "Produktkoll",
+        "question": "Kan jag använda serumet med min fuktkräm?",
+        "answer": "Skicka etiketten så visar jag var det passar.",
+        "followup": "Vi lägger till en ny sak i taget så du ser vad som fungerar."
+      },
+      "consistency": {
+        "label": "Håll rutinen",
+        "shortLabel": "Håll rutinen",
+        "question": "Det går bra i tre dagar, sedan glömmer jag.",
+        "answer": "Jag kan följa upp när det hjälper—aldrig för att ge dig dåligt samvete.",
+        "followup": "Svara klar, hoppar över eller be om hjälp när som helst."
+      }
+    }
   },
   "Guide": {
     "toggleLabel": "Visa ett annat tips från Zoey",
@@ -39,27 +67,27 @@
   },
   "Features": {
     "story": {
-      "eyebrow": "Byggt för verkliga rutiner",
-      "heading": "Hjälpsam, utan att bli ännu en sak att sköta.",
-      "subtitle": "Zoey skriver som en person: varmt, tydligt och kort nog för vardagen. Hon är försiktig när något kan behöva professionell hjälp.",
+      "eyebrow": "Hudvård som passar livet",
+      "heading": "Mindre gissande. Fler lugna, jämna huddagar.",
+      "subtitle": "Ställ en fråga, skicka en bild eller berätta vad du använde. Zoey gör röran till ett tydligt nästa steg.",
       "snapOrText": {
-        "value": "Börjar enkelt",
-        "heading": "En rutin du kan leva med.",
-        "body": "Två steg du faktiskt gör slår tio som känns överväldigande. Zoey hjälper dig ändra en sak i taget så du kan se vad som fungerar.",
+        "value": "Börja med trygghet",
+        "heading": "En rutin enkel nog att hålla fast vid.",
+        "body": "Fokusera på de få produkter huden faktiskt behöver, så du kan sluta börja om varje vecka och se vad som fungerar.",
         "point1": "Hon beskriver synliga detaljer försiktigt och undviker diagnoser.",
         "point2": "När en produkt bör kommas ihåg frågar hon innan den sparas."
       },
       "smartReminders": {
-        "value": "Följer upp vänligt",
-        "heading": "Uppföljning, aldrig skuld.",
-        "body": "Inga streaks, skuldkänslor eller säljpress. Bara en användbar avstämning när du vill ha den, med påminnelser som alltid är frivilliga.",
+        "value": "Fortsätt framåt",
+        "heading": "Vänligt stöd när livet kommer emellan.",
+        "body": "Få en hjälpsam påminnelse när du vill. Missa en kväll och fortsätt bara där du var—utan streaks, press eller skuldkänslor.",
         "point1": "Inga påhittade standardtider för morgon eller kväll.",
         "point2": "Engångsuppföljningar och återkommande påminnelser hålls isär."
       },
       "dailySummaries": {
-        "value": "Minne med ditt samtycke",
-        "heading": "Sammanhang som förblir användbart.",
-        "body": "Produkter, reaktioner och mål kan följa med mellan samtal. Zoey frågar innan känsliga uppgifter sparas, och du kan radera dem.",
+        "value": "Sluta gissa",
+        "heading": "Prova nya produkter med en tydlig plan.",
+        "body": "Skicka en produkt- eller hudbild och se var den passar, vad du ska hålla koll på och om det är rätt läge att lägga till den.",
         "point1": "Rutinstatus kommer från verifierade loggar, inte gissningar från chatten.",
         "point2": "Export och radering ingår i samma datahistoria."
       }

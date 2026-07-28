@@ -6,14 +6,14 @@ export function ChatShowcase() {
   const t = useTranslations("Features");
 
   return (
-    <section id="features" className="border-y border-border/80 bg-white/38 py-16 sm:py-20">
+    <section id="features" className="border-b border-border/80 bg-white/44 py-16 sm:py-20">
       <div className="mx-auto max-w-6xl px-5 sm:px-6">
         <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20">
           <div className="max-w-lg">
             <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-accent">
               {t("story.eyebrow")}
             </p>
-            <h2 className="mt-4 font-heading text-3xl font-bold leading-[1.08] tracking-[-0.04em] text-primary sm:text-[2.75rem]">
+            <h2 className="mt-4 text-4xl font-normal leading-[1.02] tracking-[-0.045em] text-primary [font-family:'Iowan_Old_Style','Palatino_Linotype','Book_Antiqua',Georgia,serif] sm:text-[3.35rem]">
               {t("story.heading")}
             </h2>
             <p className="mt-4 text-[16px] leading-[1.65] text-secondary">{t("story.subtitle")}</p>
