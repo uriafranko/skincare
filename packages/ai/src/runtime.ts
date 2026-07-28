@@ -39,7 +39,7 @@ export type DeleteAccountData = (userId: string) => Promise<void>;
 export type ScheduleOneOffReminderWorkflow = (input: {
   userId: string;
   reminderId: string;
-}) => Promise<{ runId?: string } | string | undefined>;
+}) => Promise<string | undefined>;
 export type CancelOneOffReminderWorkflow = (input: {
   userId: string;
   reminderId: string;
@@ -48,14 +48,9 @@ export type CancelOneOffReminderWorkflow = (input: {
 export type RecurringReminderScheduleSync = (input: {
   userId: string;
   enabled: boolean;
-}) => Promise<{ runId?: string } | string | undefined>;
+}) => Promise<string | undefined>;
 
 export interface SkintextRuntime {
-  userId: string;
-  timezone: string;
-  inputText: string;
-  hasImage: boolean;
-  isScheduledEvent: boolean;
   agentContext: AgentContext;
   sendUiMessage?: SendUiMessage;
   sendUserImage?: SendUserImage;
@@ -80,10 +75,11 @@ export interface SkintextRequestContext {
 }
 
 export function createSkintextRequestContext(runtime: SkintextRuntime) {
+  const { userId } = runtime.agentContext;
   const requestContext = new RequestContext<SkintextRequestContext>();
   requestContext.set("runtime", runtime);
-  requestContext.set(MASTRA_RESOURCE_ID_KEY, runtime.userId);
-  requestContext.set(MASTRA_THREAD_ID_KEY, skintextThreadId(runtime.userId));
+  requestContext.set(MASTRA_RESOURCE_ID_KEY, userId);
+  requestContext.set(MASTRA_THREAD_ID_KEY, skintextThreadId(userId));
   return requestContext;
 }
 

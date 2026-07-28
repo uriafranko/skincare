@@ -16,6 +16,7 @@ export const managePhotoRetentionTool = createTool({
   execute: async (input, context) => {
     const runtime = getSkintextRuntime(context.requestContext);
     const account = runtime.agentContext.userAccount;
+    const { hasImage, userId } = runtime.agentContext;
     if (!account) return { updated: false, message: "User not found." };
 
     if (input.action === "set_future_retention") {
@@ -23,7 +24,7 @@ export const managePhotoRetentionTool = createTool({
         return { updated: false, message: "A retention setting is required." };
       }
       const now = input.enabled ? new Date().toISOString() : "";
-      await updateUser(runtime.userId, {
+      await updateUser(userId, {
         photoRetentionConsentedAt: now,
         photoRetentionConsentVersion: input.enabled ? PHOTO_RETENTION_CONSENT_VERSION : "",
         photoRetentionOfferShownAt: account.photoRetentionOfferShownAt ?? new Date().toISOString(),
@@ -32,7 +33,7 @@ export const managePhotoRetentionTool = createTool({
       account.photoRetentionConsentVersion = input.enabled ? PHOTO_RETENTION_CONSENT_VERSION : null;
       account.photoRetentionOfferShownAt ??= new Date().toISOString();
       runtime.photoRetentionEnabled = input.enabled;
-      if (runtime.hasImage) {
+      if (hasImage) {
         runtime.skipCurrentPhotoRetention = true;
       }
       return {
@@ -40,7 +41,7 @@ export const managePhotoRetentionTool = createTool({
         enabled: input.enabled,
         consentVersion: input.enabled ? PHOTO_RETENTION_CONSENT_VERSION : null,
         message: input.enabled
-          ? runtime.hasImage
+          ? hasImage
             ? "Future photos may be retained for 30 days after processing. The current photo was not saved."
             : "Future photos may be retained for 30 days after processing."
           : "Future photo retention is off. Previously saved photos were not deleted.",
@@ -50,7 +51,7 @@ export const managePhotoRetentionTool = createTool({
     if (input.consentToThirtyDayRetention !== true) {
       return { saved: false, message: "Explicit 30-day retention consent is required." };
     }
-    if (!runtime.hasImage || !runtime.saveCurrentPhoto) {
+    if (!hasImage || !runtime.saveCurrentPhoto) {
       return { saved: false, message: "There is no current photo available to save." };
     }
     if (runtime.currentPhotoSaved) {
@@ -59,7 +60,7 @@ export const managePhotoRetentionTool = createTool({
 
     if (!account.photoRetentionConsentedAt) {
       const now = new Date().toISOString();
-      await updateUser(runtime.userId, {
+      await updateUser(userId, {
         photoRetentionConsentedAt: now,
         photoRetentionConsentVersion: PHOTO_RETENTION_CONSENT_VERSION,
         photoRetentionOfferShownAt: account.photoRetentionOfferShownAt ?? now,
@@ -106,6 +107,7 @@ export const deleteSavedPhotosTool = createTool({
   }),
   execute: async (_input, context) => {
     const runtime = getSkintextRuntime(context.requestContext);
+    const { userId } = runtime.agentContext;
     runtime.skipCurrentPhotoRetention = true;
     const warning =
       "This permanently deletes all retained photo blobs and metadata. Text from past photo discussions remains in retained agent memory unless the whole account is deleted. Reply yes to confirm.";
@@ -125,7 +127,7 @@ export const deleteSavedPhotosTool = createTool({
     if (!runtime.deleteSavedPhotos) {
       return { deleted: false, message: "Saved-photo deletion is unavailable." };
     }
-    const result = await runtime.deleteSavedPhotos(runtime.userId);
+    const result = await runtime.deleteSavedPhotos(userId);
     return {
       ...result,
       deleted: result.errors === 0,

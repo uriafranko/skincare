@@ -67,7 +67,6 @@ export const mastra = new Mastra({
 export interface RunSkintextAgentInput {
   text: string;
   imageUrl?: string;
-  hasImage?: boolean;
 }
 
 function imageMediaType(imageUrl: string): string {
@@ -122,9 +121,10 @@ function confirmationRun(runs: AgentRun[]): AgentRun | undefined {
 }
 
 function streamOptions(runtime: SkintextRuntime) {
+  const { hasImage, userId } = runtime.agentContext;
   return {
     requestContext: createSkintextRequestContext(runtime),
-    memory: skintextMemoryOptions(runtime.userId, runtime.hasImage),
+    memory: skintextMemoryOptions(userId, hasImage),
     maxSteps: 15,
     autoResumeSuspendedTools: true,
     toolCallConcurrency: 1,
@@ -162,8 +162,9 @@ async function resumeConfirmation(
 export async function runSkintextAgent(input: RunSkintextAgentInput, runtime: SkintextRuntime) {
   try {
     const agent = mastra.getAgent("skintextAgent");
-    const threadId = skintextMemoryOptions(runtime.userId).thread;
-    const target = { resourceId: runtime.userId, threadId };
+    const { hasImage, isScheduledEvent, userId } = runtime.agentContext;
+    const threadId = skintextMemoryOptions(userId).thread;
+    const target = { resourceId: userId, threadId };
     const suspended = await agent.listSuspendedRuns({
       ...target,
       perPage: 10,
@@ -180,8 +181,8 @@ export async function runSkintextAgent(input: RunSkintextAgentInput, runtime: Sk
         behavior: "deliver",
         attributes: {
           minimumRiskState: runtime.agentContext.riskState,
-          imageAttached: input.hasImage === true,
-          scheduledEvent: runtime.isScheduledEvent,
+          imageAttached: hasImage,
+          scheduledEvent: isScheduledEvent,
         },
       },
       ifIdle: {
@@ -213,7 +214,7 @@ export async function runSkintextAgent(input: RunSkintextAgentInput, runtime: Sk
     const result = withSeparatedStepText(await accepted.output.getFullOutput(), accepted.runId);
 
     if (
-      input.hasImage &&
+      hasImage &&
       !runtime.accountDeleted &&
       runtime.photoRetentionEnabled &&
       runtime.saveCurrentPhoto &&

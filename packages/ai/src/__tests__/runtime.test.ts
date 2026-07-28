@@ -4,12 +4,9 @@ import { createSkintextRequestContext, skintextMemoryOptions } from "../runtime"
 describe("Skintext request context", () => {
   test("pins Mastra memory scope to the authenticated user", () => {
     const requestContext = createSkintextRequestContext({
-      userId: "usr_test",
-      timezone: "UTC",
-      inputText: "hello",
-      hasImage: false,
-      isScheduledEvent: false,
-      agentContext: {} as never,
+      agentContext: {
+        userId: "usr_test",
+      } as never,
     });
 
     expect(requestContext.get("mastra__resourceId") as string).toBe("usr_test");

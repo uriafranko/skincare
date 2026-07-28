@@ -13,7 +13,6 @@ export {
   SKINTEXT_WORKING_MEMORY_OPTIONS,
   saveSanitizedImageTurn,
   skintextMemory,
-  threadIdFor,
 } from "./memory";
 export { getDefaultModelName, getMemoryModelName, toMastraModelName } from "./models";
 export {
@@ -63,6 +62,7 @@ export {
   type SendUserImageInput,
   type SkintextRuntime,
   skintextMemoryOptions,
+  skintextThreadId,
 } from "./runtime";
 export { normalizeAssistantText } from "./text";
 export { createTextGenerator } from "./text-generator";

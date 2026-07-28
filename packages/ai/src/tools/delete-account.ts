@@ -30,7 +30,8 @@ export const deleteAccountTool = createTool({
       return { deleted: false, message: "Your account was not deleted." };
     }
 
-    const { userId, deleteAccountData } = runtime;
+    const { deleteAccountData } = runtime;
+    const { userId } = runtime.agentContext;
     await (deleteAccountData ?? deleteAllUserData)(userId);
     await deleteUserMemory(userId);
     runtime.accountDeleted = true;

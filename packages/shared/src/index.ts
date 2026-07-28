@@ -4,6 +4,7 @@ export { env } from "./env";
 export { generateId } from "./id";
 export * from "./locale";
 export * from "./model-config";
+export * from "./onboarding";
 export {
   markRead,
   sendImageFile,

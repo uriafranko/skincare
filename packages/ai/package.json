@@ -50,6 +50,7 @@
   },
   "devDependencies": {
     "@types/node": "^25",
+    "ai": "^6.0.196",
     "typescript": "^6.0.2"
   }
 }

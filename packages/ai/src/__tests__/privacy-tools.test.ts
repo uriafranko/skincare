@@ -34,12 +34,13 @@ function requestContext(
 ) {
   const context = new RequestContext();
   context.set("runtime", {
-    userId: userAccount.id,
-    timezone: "UTC",
-    inputText: "save this for tracking",
-    hasImage,
-    isScheduledEvent: false,
-    agentContext: { userAccount },
+    agentContext: {
+      userId: userAccount.id,
+      timezone: "UTC",
+      hasImage,
+      isScheduledEvent: false,
+      userAccount,
+    },
     saveCurrentPhoto,
     photoRetentionEnabled: false,
   });

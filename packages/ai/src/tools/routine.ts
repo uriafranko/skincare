@@ -38,7 +38,7 @@ export const routineTool = createTool({
   }),
   execute: async (input, context) => {
     const runtime = getSkintextRuntime(context.requestContext);
-    const { userId, timezone } = runtime;
+    const { hasImage, localDate, timezone, userId } = runtime.agentContext;
 
     if (input.action === "log") {
       if (!input.slot || !input.status) {
@@ -53,7 +53,7 @@ export const routineTool = createTool({
         completed: input.status === "completed",
         reaction: input.reaction,
         notes: input.notes,
-        source: runtime.hasImage ? "photo" : "text",
+        source: hasImage ? "photo" : "text",
         timestamp: new Date().toISOString(),
         localDate: localDateString(timezone),
       });
@@ -72,7 +72,6 @@ export const routineTool = createTool({
       return { deleted: true, entryId: input.entryId };
     }
 
-    const localDate = runtime.agentContext.localDate;
     if (!input.range || input.range === "today") {
       const log = await getRoutineLogForDate(userId, localDate);
       return { date: localDate, entries: toolEntries(log.entries) };

@@ -20,80 +20,17 @@ describe("reply bubble splitting", () => {
     );
   });
 
-  test("splits conversational replies at sentence boundaries", () => {
+  test("preserves the agent's intentional response shape", () => {
     const text =
       "Start with the cleanser tonight. Skip the exfoliant for two days. Add moisturizer while the redness settles.";
 
-    expect(
-      splitReplyIntoBubbles(text, {
-        minChars: 25,
-        maxChars: 75,
-      }),
-    ).toEqual([
-      "Start with the cleanser tonight. Skip the exfoliant for two days.",
-      "Add moisturizer while the redness settles.",
-    ]);
-  });
-
-  test("prefers paragraph boundaries for longer replies", () => {
-    const text =
-      "That sounds like irritation from too much at once.\n\nPause the scrub and retinoid tonight.\n\nUse cleanser, moisturizer, and sunscreen tomorrow.";
-
-    expect(
-      splitReplyIntoBubbles(text, {
-        minChars: 20,
-        maxChars: 80,
-      }),
-    ).toEqual([
-      "That sounds like irritation from too much at once.",
-      "Pause the scrub and retinoid tonight.",
-      "Use cleanser, moisturizer, and sunscreen tomorrow.",
-    ]);
-  });
-
-  test("breaks onboarding-style replies with a short opener into natural bubbles", () => {
-    const text =
-      "No worries \u{1f60a} Send me your skin goals/concerns, your skin type if you know it (or \u201cunsure\u201d), and whether you\u2019re okay with me storing your skincare info so reminders and logs work. You can delete it anytime.";
-
-    expect(splitReplyIntoBubbles(text)).toEqual([
-      "No worries \u{1f60a}",
-      'Send me your skin goals/concerns, your skin type if you know it (or "unsure"), and whether you\'re okay with me storing your skincare info so reminders and logs work.',
-      "You can delete it anytime.",
-    ]);
-  });
-
-  test("splits natural photo guidance into readable bubbles", () => {
-    const text =
-      "I can only go by the photo, but your skin looks a little shiny around the forehead and cheek. Keep it simple tonight with cleanser and moisturizer. Use sunscreen in the morning.";
-
-    expect(
-      splitReplyIntoBubbles(text, {
-        minChars: 40,
-        maxChars: 90,
-      }),
-    ).toEqual([
-      "I can only go by the photo, but your skin looks a little shiny around the forehead and cheek.",
-      "Keep it simple tonight with cleanser and moisturizer. Use sunscreen in the morning.",
-    ]);
-  });
-
-  test("does not split structured status replies for style", () => {
-    const text = "Today\nAM: done\nPM: not logged\nProducts: cleanser\nNotes: none";
-
-    expect(
-      splitReplyIntoBubbles(text, {
-        minChars: 10,
-        maxChars: 20,
-      }),
-    ).toEqual([text]);
+    expect(splitReplyIntoBubbles(text)).toEqual([text]);
   });
 
   test("hard-splits oversized text when no natural boundary exists", () => {
     const text = "x".repeat(95);
     const chunks = splitReplyIntoBubbles(text, {
       hardMaxChars: 40,
-      maxChars: 30,
-      minChars: 10,
     });
 
     expect(chunks.every((chunk) => chunk.length <= 40)).toBe(true);
@@ -107,11 +44,9 @@ describe("reply bubble delivery", () => {
 
     const sent = await sendReplyBubbles(
       "+15551234567",
-      ["First sentence. Second sentence. Third sentence."],
+      ["First sentence.", "Second sentence.", "Third sentence."],
       {
         delayMs: () => 123,
-        maxChars: 25,
-        minChars: 10,
         send: async (_phone, text) => {
           events.push(`send:${text}`);
         },

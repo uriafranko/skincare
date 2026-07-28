@@ -1,47 +1,13 @@
 import type { OnboardingState } from "@skintext/shared";
+import {
+  getMissingFields,
+  isOnboardingComplete,
+  mergeOnboardingState,
+} from "@skintext/shared/onboarding";
 
-export type LocalOnboardingField =
-  | "age_eligibility"
-  | "name"
-  | "skin_goals"
-  | "skin_profile"
-  | "consent";
-
-function mergeList(existing?: readonly string[], incoming?: readonly string[]): string[] {
-  return Array.from(
-    new Set(
-      [...(existing ?? []), ...(incoming ?? [])].map((value) => value.trim()).filter(Boolean),
-    ),
-  );
-}
-
-export function mergeOnboardingState(
-  state: OnboardingState,
-  extracted: Partial<OnboardingState>,
-): OnboardingState {
-  return {
-    ...state,
-    ...extracted,
-    concerns: mergeList(state.concerns, extracted.concerns),
-    goals: mergeList(state.goals, extracted.goals),
-    allergies: mergeList(state.allergies, extracted.allergies),
-    currentProducts: mergeList(state.currentProducts, extracted.currentProducts),
-  };
-}
-
-export function getMissingOnboardingFields(state: OnboardingState): LocalOnboardingField[] {
-  const missing: LocalOnboardingField[] = [];
-  if (state.ageEligible !== true) missing.push("age_eligibility");
-  if (!state.name) missing.push("name");
-  if (!state.concerns?.length && !state.goals?.length) missing.push("skin_goals");
-  if (!state.skinType && !state.sensitivity) missing.push("skin_profile");
-  if (missing.length === 0 && !state.consented) missing.push("consent");
-  return missing;
-}
-
-export function isLocalOnboardingComplete(state: OnboardingState): boolean {
-  return getMissingOnboardingFields(state).length === 0 && state.consented === true;
-}
+export { mergeOnboardingState };
+export const getMissingOnboardingFields = getMissingFields;
+export const isLocalOnboardingComplete = isOnboardingComplete;
 
 export function summarizeOnboardingState(state?: OnboardingState): string {
   if (!state) return "none";

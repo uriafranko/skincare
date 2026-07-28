@@ -11,6 +11,7 @@ let cancelled: string[];
 let woken: string[];
 let staleRuns: ReminderRunRecord[];
 let runStatuses: Map<string, string>;
+let startError: Error | null;
 
 function currentRecord(): ReminderRunRecord | null {
   return record ? { ...record } : null;
@@ -82,6 +83,7 @@ function createManager() {
       },
     }),
     startWorkflow: async (userId, generation) => {
+      if (startError) throw startError;
       started.push({ userId, generation });
       const runId = `run_new_${started.length}`;
       runStatuses.set(runId, "running");
@@ -103,6 +105,16 @@ describe("recurring reminder run manager", () => {
     woken = [];
     staleRuns = [];
     runStatuses = new Map();
+    startError = null;
+  });
+
+  test("rolls back prepared ownership when workflow startup fails", async () => {
+    startError = new Error("workflow unavailable");
+
+    await expect(createManager().start("usr_test")).rejects.toThrow("workflow unavailable");
+
+    expect(deleted).toEqual([{ userId: "usr_test", generation: "generation_1" }]);
+    expect(record).toBeNull();
   });
 
   test("replaces a stale deployment run with a latest-deployment run", async () => {

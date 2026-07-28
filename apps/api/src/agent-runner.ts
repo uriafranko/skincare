@@ -1,15 +1,4 @@
-import type {
-  CancelOneOffReminderWorkflow,
-  DeleteAccountData,
-  DeleteSavedPhotos,
-  InspectUserImage,
-  RecurringReminderScheduleSync,
-  SaveCurrentPhoto,
-  ScheduleOneOffReminderWorkflow,
-  SendUiMessage,
-  SendUserImage,
-  SkintextRuntime,
-} from "@skintext/ai";
+import type { SkintextRuntime } from "@skintext/ai";
 import {
   deriveMinimumRiskState,
   runSkintextAgent,
@@ -24,19 +13,20 @@ import { getLocaleName, localDateString, PERSONALITY_POLICY_VERSION } from "@ski
 import type { RequestLogger } from "evlog";
 import { errorForLogging } from "@/logging";
 
-export interface RunAgentMessageOptions {
+type RuntimeService =
+  | "sendUiMessage"
+  | "sendUserImage"
+  | "inspectUserImage"
+  | "saveCurrentPhoto"
+  | "deleteSavedPhotos"
+  | "deleteAccountData"
+  | "scheduleOneOffReminderWorkflow"
+  | "cancelOneOffReminderWorkflow"
+  | "syncRecurringReminderSchedule";
+
+export type RunAgentMessageOptions = Pick<SkintextRuntime, RuntimeService> & {
   imageUrl?: string;
-  hasImage?: boolean;
-  sendUiMessage?: SendUiMessage;
-  sendUserImage?: SendUserImage;
-  inspectUserImage?: InspectUserImage;
-  saveCurrentPhoto?: SaveCurrentPhoto;
-  deleteSavedPhotos?: DeleteSavedPhotos;
-  deleteAccountData?: DeleteAccountData;
-  scheduleOneOffReminderWorkflow?: ScheduleOneOffReminderWorkflow;
-  cancelOneOffReminderWorkflow?: CancelOneOffReminderWorkflow;
-  syncRecurringReminderSchedule?: RecurringReminderScheduleSync;
-}
+};
 
 function photoSaveFailureReply(locale: string): string {
   const language = locale.toLowerCase();
@@ -73,7 +63,7 @@ export async function runAgentMessage(
 ): Promise<string | null> {
   const localDate = localDateString(user.timezone);
   const streak = await getAdherenceStreak(user.id);
-  const hasImage = options.hasImage ?? !!options.imageUrl;
+  const hasImage = !!options.imageUrl;
   const isScheduledEvent = text.includes(USER_REMINDER_OPEN_TAG);
   const riskState = deriveMinimumRiskState(text);
   const shouldOfferStyle = shouldOfferCommunicationStyle({
@@ -115,11 +105,6 @@ export async function runAgentMessage(
     streak: streak.current > 0 ? streak.current : null,
   };
   const runtime: SkintextRuntime = {
-    userId: user.id,
-    timezone: user.timezone,
-    inputText: text,
-    hasImage,
-    isScheduledEvent,
     agentContext,
     sendUiMessage: options.sendUiMessage,
     sendUserImage: options.sendUserImage,
@@ -133,7 +118,7 @@ export async function runAgentMessage(
     photoRetentionEnabled: !!user.photoRetentionConsentedAt,
   };
 
-  const result = await runSkintextAgent({ text, imageUrl: options.imageUrl, hasImage }, runtime);
+  const result = await runSkintextAgent({ text, imageUrl: options.imageUrl }, runtime);
   if (!result) {
     log.set({ agent: { signal: "delivered_to_active_run" } });
     return null;

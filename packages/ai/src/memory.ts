@@ -4,6 +4,7 @@ import { PostgresStore } from "@mastra/pg";
 import { env, generateId, type UserImage } from "@skintext/shared";
 import { SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS, sanitizedImageUserText } from "./memory-policy";
 import { getMemoryModelName } from "./models";
+import { skintextThreadId } from "./runtime";
 import { type SkintextWorkingMemory, skintextWorkingMemorySchema } from "./working-memory";
 
 export const SKINTEXT_WORKING_MEMORY_OPTIONS = {
@@ -33,24 +34,11 @@ export const skintextMemory = new Memory({
   },
 });
 
-export function threadIdFor(resourceId: string): string {
-  return `skintext:${resourceId}`;
-}
-
 async function ensureThread(resourceId: string): Promise<string> {
-  const threadId = threadIdFor(resourceId);
+  const threadId = skintextThreadId(resourceId);
   const existing = await skintextMemory.getThreadById({ threadId, resourceId });
   if (!existing) {
-    const now = new Date();
-    await skintextMemory.saveThread({
-      thread: {
-        id: threadId,
-        resourceId,
-        title: "Zoey",
-        createdAt: now,
-        updatedAt: now,
-      },
-    });
+    await skintextMemory.createThread({ threadId, resourceId, title: "Zoey" });
   }
   return threadId;
 }
@@ -124,7 +112,7 @@ export async function exportUserMemory(resourceId: string) {
       orderBy: { field: "createdAt", direction: "ASC" },
     }),
     skintextMemory.getWorkingMemory({
-      threadId: threadIdFor(resourceId),
+      threadId: skintextThreadId(resourceId),
       resourceId,
     }),
   ]);
@@ -138,7 +126,7 @@ export async function exportUserMemory(resourceId: string) {
 
 export async function deleteUserMemory(resourceId: string): Promise<void> {
   await skintextMemory.updateWorkingMemory({
-    threadId: threadIdFor(resourceId),
+    threadId: skintextThreadId(resourceId),
     resourceId,
     workingMemory: "",
   });
@@ -154,7 +142,7 @@ export async function initializeUserWorkingMemory(
   workingMemory: SkintextWorkingMemory,
 ): Promise<void> {
   await skintextMemory.updateWorkingMemory({
-    threadId: threadIdFor(resourceId),
+    threadId: skintextThreadId(resourceId),
     resourceId,
     workingMemory: JSON.stringify(workingMemory),
   });

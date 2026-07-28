@@ -33,7 +33,7 @@ function execute(
   if (!inspectUserImageTool.execute) throw new Error("Tool is not executable.");
   const requestContext = new RequestContext();
   requestContext.set("runtime", {
-    userId: "usr_test",
+    agentContext: { userId: "usr_test" },
     inspectUserImage,
   });
   return inspectUserImageTool.execute(input, { requestContext } as never);
