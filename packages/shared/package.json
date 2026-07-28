@@ -13,6 +13,11 @@
       "bun": "./src/model-config.ts",
       "types": "./src/model-config.ts",
       "import": "./dist/model-config.js"
+    },
+    "./onboarding": {
+      "bun": "./src/onboarding.ts",
+      "types": "./src/onboarding.ts",
+      "import": "./dist/onboarding.js"
     }
   },
   "scripts": {

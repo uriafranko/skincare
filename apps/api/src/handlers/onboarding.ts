@@ -11,34 +11,16 @@ import {
   setCustomReminderTimes,
   setOnboardingState,
 } from "@skintext/db";
-import type { OnboardingState } from "@skintext/shared";
-import { CONSENT_VERSION, isOnboardingComplete } from "@skintext/shared";
+import {
+  CONSENT_VERSION,
+  isOnboardingComplete,
+  mergeOnboardingState,
+  type OnboardingState,
+} from "@skintext/shared";
 import type { RequestLogger } from "evlog";
 import { errorForLogging } from "@/logging";
 import { rejectUnder16PendingOnboarding } from "@/onboarding-eligibility";
 import { reminderRunManager } from "@/reminder-runs";
-
-function mergeList(existing?: readonly string[], incoming?: readonly string[]): string[] {
-  return Array.from(
-    new Set(
-      [...(existing ?? []), ...(incoming ?? [])].map((value) => value.trim()).filter(Boolean),
-    ),
-  );
-}
-
-function mergeOnboardingState(
-  state: OnboardingState,
-  extracted: Partial<OnboardingState>,
-): OnboardingState {
-  return {
-    ...state,
-    ...extracted,
-    concerns: mergeList(state.concerns, extracted.concerns),
-    goals: mergeList(state.goals, extracted.goals),
-    allergies: mergeList(state.allergies, extracted.allergies),
-    currentProducts: mergeList(state.currentProducts, extracted.currentProducts),
-  };
-}
 
 function parseReminderTime(label: string, time?: string) {
   if (!time) return null;

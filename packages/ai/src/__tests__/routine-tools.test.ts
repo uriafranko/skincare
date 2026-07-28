@@ -13,12 +13,16 @@ const { routineTool } = await import("../tools/routine");
 function execute(input: Record<string, unknown>, runtime: Record<string, unknown> = {}) {
   if (!routineTool.execute) throw new Error("Tool is not executable.");
   const requestContext = new RequestContext();
+  const { agentContext, ...runtimeServices } = runtime;
   requestContext.set("runtime", {
-    userId: "usr_routine",
-    timezone: "Asia/Jerusalem",
-    hasImage: false,
-    agentContext: { localDate: "2026-07-27" },
-    ...runtime,
+    agentContext: {
+      userId: "usr_routine",
+      timezone: "Asia/Jerusalem",
+      hasImage: false,
+      localDate: "2026-07-27",
+      ...(agentContext as Record<string, unknown> | undefined),
+    },
+    ...runtimeServices,
   });
   return routineTool.execute(input as never, { requestContext } as never);
 }
@@ -88,7 +92,7 @@ describe("routineTool", () => {
         status: "completed",
         steps: [{ name: "cleanse", productName: "Gentle Cleanser" }],
       },
-      { hasImage: true },
+      { agentContext: { hasImage: true } },
     );
 
     expect(saveRoutineEntry).toHaveBeenCalledWith(

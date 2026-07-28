@@ -19,7 +19,7 @@ function execute(
   if (!deleteAccountTool.execute) throw new Error("Tool is not executable.");
   const requestContext = new RequestContext();
   requestContext.set("runtime", {
-    userId: "usr_delete",
+    agentContext: { userId: "usr_delete" },
     ...runtime,
   });
   return deleteAccountTool.execute({}, {

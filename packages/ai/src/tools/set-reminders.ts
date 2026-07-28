@@ -7,13 +7,7 @@ import {
 } from "@skintext/db";
 import { isValidTimeZone, localDateString } from "@skintext/shared";
 import { z } from "zod";
-import { getSkintextRuntime, type RecurringReminderScheduleSync } from "../runtime";
-
-function workflowRunId(result: Awaited<ReturnType<RecurringReminderScheduleSync>>): string | null {
-  if (!result) return null;
-  if (typeof result === "string") return result;
-  return result.runId ?? null;
-}
+import { getSkintextRuntime } from "../runtime";
 
 export const setTimezoneTool = createTool({
   id: "set-operational-timezone",
@@ -28,6 +22,7 @@ export const setTimezoneTool = createTool({
   }),
   execute: async ({ timezone }, context) => {
     const runtime = getSkintextRuntime(context.requestContext);
+    const { userId } = runtime.agentContext;
     if (!isValidTimeZone(timezone)) {
       return {
         updated: false,
@@ -35,11 +30,10 @@ export const setTimezoneTool = createTool({
       };
     }
 
-    await updateUser(runtime.userId, {
+    await updateUser(userId, {
       timezone,
       timezoneConfirmed: "true",
     });
-    runtime.timezone = timezone;
     runtime.agentContext.timezone = timezone;
     runtime.agentContext.localDate = localDateString(timezone);
     if (runtime.agentContext.userAccount) {
@@ -49,9 +43,9 @@ export const setTimezoneTool = createTool({
 
     let recurringRemindersResynced = false;
     if (runtime.syncRecurringReminderSchedule) {
-      const reminders = await getCustomReminderTimes(runtime.userId);
+      const reminders = await getCustomReminderTimes(userId);
       if (reminders?.length) {
-        await runtime.syncRecurringReminderSchedule({ userId: runtime.userId, enabled: true });
+        await runtime.syncRecurringReminderSchedule({ userId, enabled: true });
         recurringRemindersResynced = true;
       }
     }
@@ -90,12 +84,13 @@ export const setRemindersTool = createTool({
   }),
   execute: async ({ enabled = true, times }, context) => {
     const runtime = getSkintextRuntime(context.requestContext);
-    const { userId, syncRecurringReminderSchedule } = runtime;
+    const { syncRecurringReminderSchedule } = runtime;
+    const { timezone, userId } = runtime.agentContext;
     const shouldEnable = enabled && times.length > 0;
 
     if (
       shouldEnable &&
-      (!runtime.agentContext.userAccount?.timezoneConfirmed || !isValidTimeZone(runtime.timezone))
+      (!runtime.agentContext.userAccount?.timezoneConfirmed || !isValidTimeZone(timezone))
     ) {
       return {
         updated: false,
@@ -112,9 +107,8 @@ export const setRemindersTool = createTool({
       await deleteCustomReminderTimes(userId);
     }
 
-    const runId = workflowRunId(
-      await syncRecurringReminderSchedule?.({ userId, enabled: shouldEnable }),
-    );
+    const runId =
+      (await syncRecurringReminderSchedule?.({ userId, enabled: shouldEnable })) ?? null;
     const schedule = times.map(
       (t) => `${t.label}: ${String(t.hour).padStart(2, "0")}:${String(t.minute).padStart(2, "0")}`,
     );
@@ -124,14 +118,14 @@ export const setRemindersTool = createTool({
           updated: true,
           enabled: true,
           schedule,
-          timezone: runtime.timezone,
+          timezone,
           workflowRunId: runId,
         }
       : {
           updated: true,
           enabled: false,
           schedule: [],
-          timezone: runtime.timezone,
+          timezone,
           workflowRunId: runId,
         };
   },
@@ -143,20 +137,20 @@ export const getRemindersTool = createTool({
   inputSchema: z.object({}),
   execute: async (_input, context) => {
     const runtime = getSkintextRuntime(context.requestContext);
-    const { userId } = runtime;
+    const { timezone, userId } = runtime.agentContext;
     const custom = await getCustomReminderTimes(userId);
     if (!custom) {
       return {
         enabled: false,
         schedule: [],
-        timezone: runtime.timezone,
+        timezone,
         timezoneConfirmed: runtime.agentContext.userAccount?.timezoneConfirmed === true,
       };
     }
     return {
       enabled: custom.length > 0,
       schedule: custom,
-      timezone: runtime.timezone,
+      timezone,
       timezoneConfirmed: runtime.agentContext.userAccount?.timezoneConfirmed === true,
     };
   },

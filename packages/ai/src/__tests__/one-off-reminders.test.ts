@@ -49,11 +49,15 @@ function executeTool(
   runtime: Record<string, unknown> = {},
 ) {
   const requestContext = new RequestContext();
+  const { agentContext, ...runtimeServices } = runtime;
   requestContext.set("runtime", {
-    userId: "usr_test",
-    timezone: "America/New_York",
-    agentContext: { userAccount: { timezoneConfirmed: true } },
-    ...runtime,
+    agentContext: {
+      userId: "usr_test",
+      timezone: "America/New_York",
+      userAccount: { timezoneConfirmed: true },
+      ...(agentContext as Record<string, unknown> | undefined),
+    },
+    ...runtimeServices,
   });
   return (
     tool as { execute: (args: Record<string, unknown>, options: unknown) => Promise<unknown> }

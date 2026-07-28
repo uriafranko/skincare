@@ -20,9 +20,7 @@ function executeTool(
 ) {
   const requestContext = new RequestContext();
   requestContext.set("runtime", {
-    userId: "usr_test",
-    timezone: "UTC",
-    agentContext: {},
+    agentContext: { userId: "usr_test", timezone: "UTC" },
     sendUiMessage,
   });
 

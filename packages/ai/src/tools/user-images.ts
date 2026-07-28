@@ -24,7 +24,7 @@ export const listUserImagesTool = createTool({
     limit: z.number().int().min(1).max(10).optional(),
   }),
   execute: async ({ limit }, context) => {
-    const { userId } = getSkintextRuntime(context.requestContext);
+    const { userId } = getSkintextRuntime(context.requestContext).agentContext;
     const images = await listUserImages(userId, limit ?? 6);
     if (images.length === 0) {
       return { images: [], message: "No saved user images are currently available." };
@@ -50,7 +50,9 @@ export function createInspectUserImageTool(
         .describe("The specific visual question to answer from the retained image."),
     }),
     execute: async ({ imageId, question }, context) => {
-      const { userId, inspectUserImage } = getSkintextRuntime(context.requestContext);
+      const runtime = getSkintextRuntime(context.requestContext);
+      const { inspectUserImage } = runtime;
+      const { userId } = runtime.agentContext;
       if (!inspectUserImage) {
         return { inspected: false, message: "Retained-photo inspection is unavailable." };
       }
@@ -89,7 +91,9 @@ export const sendUserImageTool = createTool({
       .describe("Optional short plain-text caption to send with the image. Never use Markdown."),
   }),
   execute: async ({ imageId, caption }, context) => {
-    const { userId, sendUserImage } = getSkintextRuntime(context.requestContext);
+    const runtime = getSkintextRuntime(context.requestContext);
+    const { sendUserImage } = runtime;
+    const { userId } = runtime.agentContext;
     if (!sendUserImage) return { sent: false, message: "Image sending is unavailable." };
 
     const image = await getUserImage(userId, imageId);

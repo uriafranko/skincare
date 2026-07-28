@@ -47,12 +47,6 @@ export interface ScheduleOneOffReminderInput {
   kind?: OneOffReminderKind;
 }
 
-function workflowRunId(result: Awaited<ReturnType<ScheduleOneOffReminderWorkflow>>): string | null {
-  if (!result) return null;
-  if (typeof result === "string") return result;
-  return result.runId ?? null;
-}
-
 async function cancelWorkflowRun(
   cancelWorkflow: CancelOneOffReminderWorkflow | undefined,
   reminder: OneOffReminder,
@@ -130,9 +124,7 @@ export async function scheduleOneOffReminder(
   await createOneOffReminder(reminder);
 
   try {
-    const runId = workflowRunId(
-      await scheduleWorkflow({ userId: input.userId, reminderId: reminder.id }),
-    );
+    const runId = await scheduleWorkflow({ userId: input.userId, reminderId: reminder.id });
     if (runId) {
       await setOneOffReminderWorkflowRunId(input.userId, reminder.id, runId);
       reminder.workflowRunId = runId;
@@ -194,7 +186,8 @@ export const scheduleOneOffReminderTool = createTool({
   }),
   execute: async ({ schedule, kind, message }, context) => {
     const runtime = getSkintextRuntime(context.requestContext);
-    const { userId, timezone, scheduleOneOffReminderWorkflow } = runtime;
+    const { scheduleOneOffReminderWorkflow } = runtime;
+    const { timezone, userId } = runtime.agentContext;
     if (!scheduleOneOffReminderWorkflow) {
       return { scheduled: false, error: "Reminder scheduling is unavailable." };
     }
@@ -227,7 +220,7 @@ export const listOneOffRemindersTool = createTool({
     limit: z.number().int().min(1).max(10).optional().describe("Defaults to 5."),
   }),
   execute: async ({ limit = DEFAULT_LIST_LIMIT }, context) => {
-    const { userId } = getSkintextRuntime(context.requestContext);
+    const { userId } = getSkintextRuntime(context.requestContext).agentContext;
     const pending = (await listOneOffReminders(userId)).filter(
       (reminder) => reminder.status === "scheduled",
     );
@@ -258,7 +251,8 @@ export const cancelOneOffReminderTool = createTool({
   }),
   execute: async ({ reminderId }, context) => {
     const runtime = getSkintextRuntime(context.requestContext);
-    const reminder = await getOneOffReminder(runtime.userId, reminderId);
+    const { userId } = runtime.agentContext;
+    const reminder = await getOneOffReminder(userId, reminderId);
     if (!reminder) {
       return { cancelled: false, reminderId, message: "Pending reminder not found." };
     }
@@ -271,7 +265,7 @@ export const cancelOneOffReminderTool = createTool({
       };
     }
 
-    const cancelled = await cancelOneOffReminder(runtime.userId, reminderId);
+    const cancelled = await cancelOneOffReminder(userId, reminderId);
     if (cancelled?.status !== "cancelled") {
       return { cancelled: false, reminderId, message: "Could not cancel reminder." };
     }

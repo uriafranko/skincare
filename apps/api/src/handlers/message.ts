@@ -27,7 +27,6 @@ export async function handleMessage(
 ): Promise<string | null> {
   return runAgentMessage(log, user, text, {
     imageUrl,
-    hasImage: !!imageUrl,
     sendUiMessage: (input) => sendUiMessageAttachment(rawPhone, input),
     saveCurrentPhoto: currentImage
       ? async () =>

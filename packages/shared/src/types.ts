@@ -127,23 +127,6 @@ export type OnboardingFieldKey =
   | "timezone"
   | "consent";
 
-export function getMissingFields(state: OnboardingState): OnboardingFieldKey[] {
-  const missing: OnboardingFieldKey[] = [];
-  if (state.ageEligible !== true) missing.push("age_eligibility");
-  if (!state.name) missing.push("name");
-  if (!state.concerns?.length && !state.goals?.length) missing.push("skin_goals");
-  if (!state.skinType && !state.sensitivity) missing.push("skin_profile");
-  if ((state.morningReminder || state.eveningReminder) && !state.timezoneConfirmed) {
-    missing.push("timezone");
-  }
-  if (missing.length === 0 && !state.consented) missing.push("consent");
-  return missing;
-}
-
-export function isOnboardingComplete(state: OnboardingState): boolean {
-  return getMissingFields(state).length === 0 && state.consented === true;
-}
-
 export interface AgentContext {
   userId: string;
   localeName: string;

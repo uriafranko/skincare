@@ -51,7 +51,9 @@ export const sendUiMessageTool = createTool({
     message: z.string().optional(),
   }),
   execute: async (card, context) => {
-    const { userId, sendUiMessage } = getSkintextRuntime(context.requestContext);
+    const runtime = getSkintextRuntime(context.requestContext);
+    const { sendUiMessage } = runtime;
+    const { userId } = runtime.agentContext;
     if (!sendUiMessage) {
       return { sent: false, message: "Visual iMessage attachments are unavailable." };
     }

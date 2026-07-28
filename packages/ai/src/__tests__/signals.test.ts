@@ -10,11 +10,6 @@ afterEach(() => {
 
 function runtime(): SkintextRuntime {
   return {
-    userId: "usr_signals",
-    timezone: "UTC",
-    inputText: "hello",
-    hasImage: false,
-    isScheduledEvent: false,
     agentContext: {
       userId: "usr_signals",
       localeName: "English",

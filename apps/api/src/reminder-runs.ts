@@ -90,6 +90,45 @@ export function createReminderRunManager(deps: ReminderRunManagerDeps = defaultD
     if (ACTIVE_RUN_STATUSES.has(await run.status)) await run.cancel();
   }
 
+  async function replaceRun({
+    userId,
+    expectedRunId,
+    deploymentId,
+    generation,
+    beforeStart,
+    rollback,
+  }: {
+    userId: string;
+    expectedRunId: string;
+    deploymentId: string;
+    generation: string;
+    beforeStart?: () => Promise<void>;
+    rollback: () => Promise<void>;
+  }): Promise<string | undefined> {
+    let newRunId: string | undefined;
+    try {
+      await beforeStart?.();
+      const run = await deps.startWorkflow(userId, generation);
+      newRunId = run.runId;
+      const completed = await deps.completeStart({
+        userId,
+        expectedRunId,
+        deploymentId,
+        generation,
+        runId: newRunId,
+      });
+      if (!completed) {
+        await cancelIfActive(newRunId);
+        return (await deps.getRunRecord(userId))?.runId;
+      }
+      return newRunId;
+    } catch (error) {
+      if (newRunId) await cancelIfActive(newRunId).catch(() => undefined);
+      await rollback();
+      throw error;
+    }
+  }
+
   async function startFresh(userId: string): Promise<string | undefined> {
     const deploymentId = deps.deploymentId();
     const generation = deps.generation();
@@ -97,27 +136,13 @@ export function createReminderRunManager(deps: ReminderRunManagerDeps = defaultD
     const prepared = await deps.prepareStart({ userId, deploymentId, generation });
     if (!prepared) return (await deps.getRunRecord(userId))?.runId;
 
-    let newRunId: string | undefined;
-    try {
-      const run = await deps.startWorkflow(userId, generation);
-      newRunId = run.runId;
-      const completed = await deps.completeStart({
-        userId,
-        expectedRunId: pendingRunId,
-        deploymentId,
-        generation,
-        runId: run.runId,
-      });
-      if (!completed) {
-        await cancelIfActive(run.runId);
-        return (await deps.getRunRecord(userId))?.runId;
-      }
-      return run.runId;
-    } catch (error) {
-      if (newRunId) await cancelIfActive(newRunId).catch(() => undefined);
-      await deps.deleteRun(userId, generation);
-      throw error;
-    }
+    return replaceRun({
+      userId,
+      expectedRunId: pendingRunId,
+      deploymentId,
+      generation,
+      rollback: () => deps.deleteRun(userId, generation),
+    });
   }
 
   async function migrate(record: ReminderRunRecord): Promise<string | undefined> {
@@ -132,32 +157,19 @@ export function createReminderRunManager(deps: ReminderRunManagerDeps = defaultD
     });
     if (!claimed) return (await deps.getRunRecord(record.userId))?.runId;
 
-    let newRunId: string | undefined;
-    try {
-      await cancelIfActive(record.runId);
-      const run = await deps.startWorkflow(record.userId, migrationId);
-      newRunId = run.runId;
-      const completed = await deps.completeStart({
-        userId: record.userId,
-        expectedRunId: record.runId,
-        deploymentId,
-        generation: migrationId,
-        runId: run.runId,
-      });
-      if (!completed) {
-        await cancelIfActive(run.runId);
-        return (await deps.getRunRecord(record.userId))?.runId;
-      }
-      return run.runId;
-    } catch (error) {
-      if (newRunId) await cancelIfActive(newRunId).catch(() => undefined);
-      await deps.releaseMigration({
-        userId: record.userId,
-        runId: record.runId,
-        migrationId,
-      });
-      throw error;
-    }
+    return replaceRun({
+      userId: record.userId,
+      expectedRunId: record.runId,
+      deploymentId,
+      generation: migrationId,
+      beforeStart: () => cancelIfActive(record.runId),
+      rollback: () =>
+        deps.releaseMigration({
+          userId: record.userId,
+          runId: record.runId,
+          migrationId,
+        }),
+    });
   }
 
   return {
