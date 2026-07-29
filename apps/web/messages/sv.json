@@ -136,16 +136,16 @@
   },
   "Faq": {
     "heading": "Några bra svar",
-    "q1": "Kan Lily diagnostisera min hud?",
-    "a1": "Nej. Lily är en AI-hudvårdscoach. Hon kan beskriva synliga saker försiktigt, förklara produktetiketter och föreslå praktiska rutinsteg, men hon diagnostiserar inte och ersätter inte vårdpersonal.",
+    "q1": "Hur kan Lily hjälpa mig med min hud?",
+    "a1": "Lily kan titta på hudbilder och beskriva synliga drag, förklara produktetiketter och föreslå praktiska rutinsteg anpassade efter dina mål. Om något behöver medicinsk bedömning hjälper hon dig att förstå när det är bra att kontakta vården.",
     "q2": "Vad behöver jag för att komma igång?",
     "a2": "Bara en iPhone med iMessage. Ingen app att ladda ner, inget konto att skapa. Skriv till Lily och sätt upp rutinen i en kort chatt.",
     "q3": "Vad kommer Lily ihåg?",
     "a3": "Bara sådant som gör framtida hjälp mer användbar, som din rutin, dina mål, produkter och reaktioner. Lily frågar innan känsliga uppgifter sparas, och du kan fråga vad hon minns eller radera det.",
     "q4": "Hur fungerar den gratis provperioden?",
-    "a4": "Du får full tillgång under provperioden. Följ rutiner, kom ihåg produkter, ställ in påminnelser och se sammanfattningar. Inget kreditkort krävs.",
+    "a4": "Din kostnadsfria provperiod anpassas efter dig, med tillräckligt med tid för att uppleva Lily innan en prenumeration krävs.",
     "q5": "Vilka språk stöds?",
-    "a5": "Lily upptäcker ditt språk från meddelandet och svarar därefter. Engelska och svenska stöds, med fler språk på väg."
+    "a5": "Lily stöder alla språk. Skriv bara till henne på det språk du föredrar, så svarar hon på samma språk."
   },
   "BottomCta": {
     "heading": "Starta din rutin idag",
@@ -172,72 +172,152 @@
   },
   "Privacy": {
     "heading": "Integritetspolicy",
-    "lastUpdated": "Senast uppdaterad: juli 2026",
-    "intro": "Lily (\"Lily\", \"vi\", \"oss\") är engagerade i att skydda din integritet. Denna policy förklarar vilken data vi samlar in, hur vi använder den och dina rättigheter.",
+    "lastUpdated": "Senast uppdaterad: 29 juli 2026",
+    "intro": "Denna integritetspolicy förklarar hur operatören av Lily (\"Lily\", \"vi\", \"oss\") samlar in, använder, lämnar ut, behåller och skyddar personuppgifter när du besöker vår webbplats eller använder Lily via iMessage. Eftersom hudvårdsuppgifter och bilder kan avslöja hälsouppgifter behandlar vi dem som känsliga uppgifter.",
+    "scope": {
+      "title": "Vilka vi är och policyns omfattning",
+      "body": "Lily är en AI-baserad konsumenttjänst för hudvårdsrutiner och uppföljning. Lilys operatör ansvarar för personuppgifterna som beskrivs i denna policy och är personuppgiftsansvarig eller motsvarande där dessa begrepp gäller.\n\nPolicyn omfattar Lilys webbplats, iMessage-konversationer, rutinverktyg, påminnelser, minne, bildfunktioner, support och relaterade tjänster. Apple, Sendblue och andra tredjepartstjänster har egna integritetsvillkor för uppgifter som de behandlar självständigt."
+    },
     "dataCollection": {
-      "title": "Data vi samlar in",
-      "body": "När du använder Lily samlar vi in:\n\n• Ditt telefonnummer (för att identifiera ditt konto och leverera meddelanden via iMessage)\n• Din bekräftelse under installationen på att du är minst 16 år, aldrig din exakta ålder eller ditt födelsedatum\n• Ditt namn, vald kommunikationsstil, hudmål, hudtyp om du delar den, känsligheter, allergier, nuvarande produkter och hudvårdsexperiment med en ändring i taget i agentminnet\n• Rutinuppdateringar och loggar, påminnelser, tidszon och land för lokalisering\n• Rensad konversationshistorik, där fototurer innehåller text och en allmän fotomarkör men inte bilddata eller privata bildadresser"
+      "title": "Uppgifter vi samlar in och deras källor",
+      "body": "Vi samlar in uppgifter från dig, från meddelande- och värdtjänsterna som levererar dina förfrågningar samt från Lilys svar och slutsatser:\n\n• Konto- och kontaktuppgifter: telefonnummer, internt konto-ID, språk, land, tidszon, samtyckesloggar och bekräftelse på att du är minst 16 år. Vi frågar bara efter 16+-bekräftelse, men information som du frivilligt skriver i ett meddelande kan finnas kvar i meddelandehistoriken.\n• Meddelanden och innehåll: text som du skickar, Lilys svar, produktnamn och etiketter, supportärenden samt en rensad bildmarkör i stället för råa bilddata i konversationshistoriken.\n• Hudvårds- och hälsouppgifter: mål, hudtyp, känslighet, allergier eller ingredienser att undvika, synliga hudproblem som du beskriver eller frågar om, reaktioner, rutiner, produktanvändning, experiment, loggar och framstegsanteckningar.\n• Bilder: hud-, ansikts-, produkt- eller etikettbilder som du väljer att skicka och begränsad metadata som behövs för att behandla eller, med separat samtycke, behålla dem.\n• Påminnelse- och aktivitetsdata: påminnelsetider, genomförda rutiner, följsamhetssammanfattningar och schemalagda uppföljningar.\n• Tjänstedata: meddelande-ID och leveransstatus, tidsstämplar, funktionsåtgärder, säkerhetshändelser, fel- och användningsdata samt IP-adress, webbläsar-/enhets- och förfrågningsdata som vår webbvärd, innehållsleverantörer eller meddelandeleverantörer tar emot automatiskt."
+    },
+    "sensitiveData": {
+      "title": "Känsliga uppgifter och konsumenthälsodata",
+      "body": "Hudproblem, allergier, reaktioner, rutiner, produktanvändning, meddelanden och bilder kan vara hälsouppgifter eller känsliga personuppgifter enligt vissa lagar. Vi samlar in dem från dig och använder dem endast för de syften som beskrivs här. När samtycke krävs som rättslig grund ber vi om det innan uppgifter från installationen lagras och ber separat om samtycke innan 30 dagars bildlagring aktiveras. Du kan återkalla samtycket, men Lily kan då inte tillhandahålla funktioner som behöver uppgifterna.\n\nOm vi inte uttryckligen skriftligen kommer överens om annat tillhandahålls Lily inte av eller för en vårdgivare eller sjukförsäkring och är inte avsedd som en HIPAA-omfattad tjänst. Uppgifter du skickar kanske därför inte får samma skydd som patientjournaler hos en HIPAA-omfattad vårdgivare."
     },
     "dataUsage": {
-      "title": "Hur vi använder din data",
-      "body": "Vi använder din data för att:\n\n• Tillhandahålla rutinhjälp och produktvägledning\n• Komma ihåg din kommunikationsstil och relevant rutinkontext\n• Följa hudvårdsexperiment med en ändring och valfria uppföljningspåminnelser\n• Generera rutinsammandrag, veckokoll och påminnelser\n• Behandla produktetiketter och hudbilder för det aktuella svaret\n• Kommunicera med dig via iMessage"
+      "title": "Hur vi använder uppgifter och rättsliga grunder",
+      "body": "Vi använder personuppgifter för att tillhandahålla och anpassa Lily, förstå dina meddelanden, skapa AI-svar, analysera produktetiketter och bilder, upprätthålla konversationsminne, skapa loggar, påminnelser, sammanfattningar och exporter, leverera och felsöka meddelanden, motverka missbruk och skydda tjänsten, hantera integritets- och supportärenden, följa lag samt fastställa, göra gällande eller försvara rättsliga anspråk.\n\nBeroende på var du bor stödjer vi oss på: ditt samtycke för känsliga hudvårdsuppgifter och valfri bildlagring; fullgörande av avtalet med dig för begärda funktioner; våra berättigade intressen av att driva, skydda och förbättra Lily när dessa inte väger lättare än dina rättigheter; samt rättsliga skyldigheter. Lily fattar inte beslut som har rättsliga eller liknande betydande konsekvenser för dig."
     },
-    "dataStorage": {
-      "title": "Datalagring och säkerhet",
-      "body": "Anslutningar till vår webbplats och våra tjänster använder TLS (HTTPS). Ditt telefonnummer krypteras vid lagring med AES. Rutinloggar och onboardingdata under uppsättning lagras som krypterade nyttolaster på applikationsnivå. Agentminne, meddelandehistorik och operativa kontofält lagras med strikt åtkomstkontroll. Bilder behandlas för det aktuella svaret som standard och läggs inte till i konversationshistoriken. Användare kan separat samtycka till krypterad privat bildlagring i 30 dagar."
+    "aiAndPhotos": {
+      "title": "AI-behandling, minne och bilder",
+      "body": "Lily använder automatiserade AI-system. Relevanta meddelanden, profilkontext och den aktuella bilden kan skickas via våra AI-infrastrukturleverantörer för att skapa ett svar. AI-leverantörer kan behålla förfrågningsdata för säkerhets- eller missbruksövervakning enligt sina företags-/API-inställningar och rättsliga skyldigheter. Skicka inte uppgifter som du inte vill ska behandlas på detta sätt.\n\nSom standard behandlas en bild för det aktuella svaret och läggs inte avsiktligt till i Lilys konversationshistorik eller bildlagring. Texten som skickas med bilden, Lilys svar, en allmän bildmarkör och, om bilden sparas, en intern bildreferens kan finnas kvar i historiken. Om du samtycker separat kan Lily behålla en privat kopia i upp till 30 dagar så att du kan hänvisa till den senare. Om du stänger av lagring påverkar det framtida bilder; be Lily separat att radera redan sparade bilder. Meddelande- och AI-leverantörer kan fortfarande tillfälligt behandla överförda bilder enligt sina egna lagringsregler."
     },
     "thirdParty": {
-      "title": "Tredjepartstjänster",
-      "body": "Vi använder följande tredjepartstjänster för att driva Lily:\n\n• OpenAI — för bildanalys och naturlig språkbehandling\n• Sendblue — för iMessage-leverans\n\nDessa tjänster behandlar data som är nödvändig för att tillhandahålla våra funktioner. Vi säljer inte din data till tredje part."
+      "title": "Hur vi lämnar ut uppgifter",
+      "body": "Vi lämnar endast ut de kategorier av uppgifter som behövs för respektive syfte:\n\n• Sendblue och Apple behandlar telefonnummer, meddelandeinnehåll, bilder, leveransdata och enhets-/kontouppgifter för att leverera iMessage-kommunikation.\n• Vercel tillhandahåller hosting, arbetsflöden, privat fillagring, loggar och AI-dirigering och kan behandla tjänstedata, meddelanden, svar och bilder.\n• OpenAI och andra AI-leverantörer som vi medvetet aktiverar behandlar prompter, relevant kontext, svar och aktuella bilder för att skapa och säkerhetssäkra svar.\n• Neon lagrar konto-, rutin-, påminnelse- och konversationsdata. Mastra tillhandahåller agentinfrastruktur och rensad operativ observerbarhet. Vår konfigurerade Redis-leverantör behandlar begränsade identifierare och samordningsdata.\n• Leverantörer som hjälper till med säkerhet, support, professionell rådgivning eller affärsdrift får endast uppgifter som skäligen behövs för tjänsterna.\n\nVi kan också lämna ut uppgifter när lagen kräver det, för att skydda användare, Lily eller andra, i samband med fusion, finansiering, förvärv, omorganisation eller försäljning av tillgångar med lämpliga skyddsåtgärder, eller när du instruerar eller samtycker till utlämnandet. Tjänsteleverantörer måste enligt avtal eller tillämpliga villkor behandla uppgifter för angivna syften."
+    },
+    "sales": {
+      "title": "Ingen försäljning eller riktad annonsering",
+      "body": "Vi säljer inte personuppgifter eller konsumenthälsodata för pengar. Vi använder inte dina meddelanden, hudvårdsuppgifter eller bilder för riktad eller kontextöverskridande beteendeannonsering och tillåter inte medvetet tredje parter att göra det. Vi tillåter inte tjänsteleverantörer att använda dina känsliga uppgifter för egen annonsering. Om detta ändras uppdaterar vi policyn och inhämtar det samtycke som lagen kräver innan ändringen börjar gälla."
     },
     "retention": {
-      "title": "Datalagring",
-      "body": "Vi behåller agentminne, rutinloggar, påminnelser, kontodata och rensad konversationshistorik medan ditt konto är aktivt. Bilder som sparas med separat samtycke upphör efter 30 dagar. Att stänga av bildlagring påverkar framtida bilder; sparade bilder kan raderas separat. Radering av bilder tar inte bort text från tidigare bilddiskussioner; radering av kontot tar bort båda."
+      "title": "Lagringstider",
+      "body": "Vi använder följande lagringstider eller kriterier:\n\n• Ofullständiga installationsuppgifter upphör i regel cirka 24 timmar efter det senaste installationsmeddelandet. En minimal krypterad kontopost för dirigering kan finnas kvar tills kontot raderas.\n• Kontodata, samtyckesloggar, rutinloggar, påminnelser, inställningar, agentminne och rensad konversationshistorik finns kvar medan kontot är aktivt, om du inte raderar dem eller en kortare tid krävs.\n• Sparade bilder blir otillgängliga efter 30 dagar och schemaläggs för radering. En post för nytt raderingsförsök kan finnas kvar kortvarigt om raderingen först misslyckas.\n• Kortlivade poster för meddelandedubbletter och behandlingslås löper ut inom några minuter.\n• Säkerhets-, diagnostik-, leverantörs-, säkerhetskopierings- och regelefterlevnadsposter kan finnas kvar en begränsad tid efter radering när det är skäligt, tillåtet eller krävs enligt lag. Vi kan behålla avidentifierad information som inte rimligen kan kopplas till dig.\n\nRadering av sparade bilder tar inte bort text eller AI-genererade observationer från tidigare bilddiskussioner. Kontoradering tar bort båda från Lilys aktiva system, med de begränsade undantagen ovan."
+    },
+    "security": {
+      "title": "Säkerhet",
+      "body": "Vi använder administrativa, tekniska och organisatoriska skyddsåtgärder anpassade efter uppgifternas art, inklusive TLS vid överföring, kryptering eller envägsskyddade identifierare för telefon och visst lagrat innehåll, privat bildlagring, åtkomstkontroller, avgränsade interna ID:n och begränsning av råa bilder i konversationsminnet. Ingen tjänst, AI, meddelandetjänst eller lagringsmetod är helt säker och vi kan inte garantera absolut säkerhet. Du ansvarar för att skydda din enhet, ditt Apple-konto, iMessage och din kod samt för att undvika känsliga detaljer som Lily inte behöver."
+    },
+    "international": {
+      "title": "Internationell behandling",
+      "body": "Lily och våra leverantörer kan behandla uppgifter i USA, Europa, Israel och andra länder där de är verksamma. Dessa länder kan ha andra dataskyddslagar. När det krävs använder vi avtalsmässiga eller andra erkända skyddsåtgärder för internationella överföringar och lämnar information om tillämpliga skyddsåtgärder på begäran."
     },
     "rights": {
-      "title": "Dina rättigheter",
-      "body": "Du har rätt att:\n\n• Fråga vad Lily minns och begära en kopia av din data\n• Rätta eller glömma profil-, produkt- och experimentuppgifter i agentminnet\n• Aktivera eller stänga av framtida bildlagring och radera sparade bilder\n• Begära radering av kontot, inklusive agentminne och integritetsinställningar\n• Återkalla samtycke när som helst"
+      "title": "Dina val och förfrågningar",
+      "body": "Du kan fråga Lily vad hon minns, rätta eller ta bort profil-, produkt- och experimentuppgifter, ändra eller avbryta påminnelser, aktivera eller stänga av framtida bildlagring, radera sparade bilder, återkalla samtycke, begära en kopia av dina uppgifter eller radera kontot permanent. Vid permanent bild- eller kontoradering ber Lily om bekräftelse.\n\nDu kan också kontakta privacy@skintext.ai. Vi kan behöva verifiera att begäran kommer från det berörda telefonnumret eller personen. Ett behörigt ombud kan lämna en begäran där lokal lag tillåter det, efter verifiering. Vi diskriminerar dig inte för att du utövar en integritetsrättighet. Vissa begäranden kan begränsas när lagring eller behandling krävs enligt lag, behövs för att skydda rättigheter eller säkerhet eller annars är undantagen."
+    },
+    "regionalRights": {
+      "title": "Ytterligare rättigheter beroende på plats",
+      "body": "Om tillämplig lag ger dig ytterligare rättigheter gäller de fortfarande. Beroende på var du bor kan de omfatta tillgång, rättelse, radering, dataportabilitet, begränsning, invändning, återkallelse av samtycke, begränsning av användning av känsliga uppgifter, avanmälan från försäljning eller riktad annonsering samt överklagande av ett avslag. Du kan klaga till din lokala dataskydds- eller integritetsmyndighet.\n\nFör lagar om konsumenthälsodata beskrivs kategorierna, källorna, syftena och utlämnandena ovan. Vi säljer inte konsumenthälsodata. För att överklaga ett beslut om en integritetsbegäran, mejla privacy@skintext.ai med \"Privacy Appeal\" i ämnesraden och förklara begäran och beslutet."
+    },
+    "children": {
+      "title": "Ålderskrav",
+      "body": "Lily är inte avsedd för personer under 16 år. Vi ber användare bekräfta att de är minst 16 och skapar inte avsiktligt ett aktivt konto för någon som vi vet är under 16. Om du tror att någon under 16 har lämnat personuppgifter, kontakta privacy@skintext.ai så att vi kan undersöka och radera dem när det är lämpligt."
+    },
+    "changes": {
+      "title": "Ändringar av policyn",
+      "body": "Vi kan uppdatera policyn när Lily, våra leverantörer eller tillämplig lag ändras. Vi ändrar datumet ovan och lämnar ytterligare information eller begär förnyat samtycke när en ändring är väsentlig eller lagen kräver det. Vi använder inte tidigare insamlade känsliga uppgifter för ett väsentligt annat syfte utan den information och det samtycke som lagen kräver."
     },
     "contact": {
-      "title": "Kontakt",
-      "body": "Om du har frågor om denna integritetspolicy, kontakta oss på privacy@skintext.ai."
+      "title": "Kontakta oss",
+      "body": "För integritetsfrågor, förfrågningar, klagomål eller information om Lilys operatör och tillämpliga överföringsskydd, kontakta privacy@skintext.ai. För allmän support, kontakta support@skintext.ai."
     }
   },
   "Terms": {
     "heading": "Användarvillkor",
-    "lastUpdated": "Senast uppdaterad: juli 2026",
-    "intro": "Genom att använda Lily (\"Lily\", \"Tjänsten\") godkänner du dessa villkor. Läs dem noggrant.",
+    "lastUpdated": "Senast uppdaterad: 29 juli 2026",
+    "intro": "Dessa villkor är ett bindande avtal mellan dig och operatören av Lily (\"Lily\", \"vi\", \"oss\") för webbplatsen, iMessage-assistenten, påminnelser, bilder, minne och relaterade funktioner (\"Tjänsten\"). Läs dem innan du använder Lily. Om du inte godkänner dem ska du inte använda Tjänsten.",
+    "agreement": {
+      "title": "Godkännande av villkoren",
+      "body": "Du godkänner villkoren när du uttryckligen samtycker under installationen eller efter att ha fått information om en uppdatering. Du bekräftar också att du tagit del av integritetspolicyn, som beskriver hur personuppgifter och känsliga uppgifter hanteras. Om du använder Lily för en annan person eller organisation bekräftar du att du får binda dem och har tillstånd att lämna deras uppgifter.\n\nVillkoren upphäver inte rättigheter eller rättsmedel som tillämplig lag inte tillåter att du avstår från. Om en översättning strider mot den engelska versionen gäller den engelska versionen i den utsträckning lagen tillåter."
+    },
     "eligibility": {
       "title": "Behörighet",
-      "body": "Du måste vara minst 16 år gammal och ha tillgång till en iPhone med iMessage för att använda Lily. Vi frågar bara om du är 16 år eller äldre, inte efter din exakta ålder eller ditt födelsedatum."
+      "body": "Du måste vara minst 16 år, ha rättslig förmåga att ingå avtalet och ha rätt att använda telefonnumret, enheten och iMessage-kontot som är kopplat till Lily. Om lagen där du bor kräver vårdnadshavares samtycke för en person i din ålder får du använda Lily först efter att samtycket har lämnats. Lily kan neka eller avsluta åtkomst om behörigheten inte kan bekräftas."
     },
     "service": {
       "title": "Tjänsten",
-      "body": "Lily är en AI-driven hudvårdsassistent som fungerar via iMessage. Tjänsten inkluderar rutinloggning, produktanteckningar, kommunikationsinställningar, hudvårdsexperiment med en ändring, sammanfattningar, veckokoll, påminnelser, tillfällig bildbehandling och minneskontroller i chatten. Bildlagring för vuxna är frivillig och kräver separat samtycke."
+      "body": "Lily är en automatiserad AI-assistent för hudvårdsrutiner, information och uppföljning. Funktioner kan omfatta allmän produkt- och rutininformation, rutinloggar, påminnelser, sammanfattningar, experiment, konversationsminne, läsning av produktetiketter samt valfri bildbehandling eller lagring.\n\nLilys svar skapas av AI och granskas inte nödvändigtvis av en människa före leverans. AI kan missförstå dig, sakna kontext, hallucinera, ge inaktuell eller ofullständig information eller ge ett svar som inte passar dig. Tjänsten kan vara försenad, otillgänglig, ändras eller upphöra och påminnelser kan utebli. Förlita dig inte på Lily som enda register, varning eller källa till viktig information."
     },
-    "accuracy": {
-      "title": "Hudvårdsråd",
-      "body": "Lily ger rutinhjälp och försiktig produktvägledning baserat på det du delar. Hon diagnostiserar inte, skriver inte ut behandling och ersätter inte professionell vård. Kontakta vårdpersonal vid oroande, allvarliga, ihållande eller snabbt föränderliga symtom."
+    "medical": {
+      "title": "Inte vård eller akuttjänst",
+      "body": "LILY ÄR INTE LÄKARE, HUDLÄKARE, APOTEKARE, MEDICINTEKNISK PRODUKT, DIGITAL VÅRDGIVARE ELLER AKUTTJÄNST. TJÄNSTEN GER INTE MEDICINSK DIAGNOS, BEHANDLING ELLER RECEPT, SKAPAR INGEN VÅRDRELATION OCH ERSÄTTER INTE KVALIFICERAD VÅRD.\n\nAnvänd inte Lily för att diagnostisera eller utesluta ett tillstånd, avgöra om akut vård behövs, hantera ett recept eller ersätta medicinsk rådgivning. Vänta aldrig med eller bortse från vård på grund av ett Lily-svar. Vid allvarliga, snabbt förvärrade, ihållande, infekterade, smärtsamma, blåsbildande, blödande, ögon- eller andningsrelaterade eller annars oroande symtom ska du sluta med den relevanta produkten och söka lämplig vård eller akut hjälp. Lily övervakar inte meddelanden kontinuerligt och kan inte kontakta räddningstjänst åt dig."
+    },
+    "responsibility": {
+      "title": "Dina beslut, ditt ansvar och riskövertagande",
+      "body": "DU AVGÖR OM DU FÖLJER ETT SVAR FRÅN LILY OCH, I DEN UTSTRÄCKNING LAGEN TILLÅTER, ANSVARAR DU SJÄLV FÖR DINA HUDVÅRDSVAL, PRODUKTANVÄNDNING, RUTINER OCH RESULTAT. Du måste använda eget omdöme, läsa och följa etiketter och tillverkarinstruktioner, kontrollera ingredienser, hållbarhet, äkthet, kompatibilitet och återkallelser, göra lapptest när det är lämpligt, introducera produkter försiktigt, ta hänsyn till allergier, känslighet, recept, graviditet eller amning och kända tillstånd, sluta vid en negativ reaktion och kontakta kvalificerad personal när det är lämpligt.\n\nGenom att agera på Lilys svar accepterar du medvetet riskerna med hudvårds- och kosmetikprodukter, inklusive irritation, allergi, brännskador, missfärgning, förvärrade symtom, interaktioner, ärr, ögonskada, försenad vård och uteblivna resultat. Du ansvarar för att uppgifterna du ger Lily är riktiga och fullständiga. Lily ansvarar inte för skada som orsakas av en produkt, tillverkare, säljare, din underlåtenhet att följa instruktioner eller söka vård, uppgifter du utelämnat eller lämnat fel eller ett beslut du fattat utifrån AI-svar, utom där ansvar enligt lag inte kan uteslutas."
+    },
+    "photos": {
+      "title": "Bilder och bildbegränsningar",
+      "body": "Ett mobilfoto kan inte fastställa en diagnos eller tillförlitligt visa struktur, färg, djup, smärta, temperatur, tidsförlopp eller utveckling. Ljus, vinkel, filter, komprimering, smink, bildkvalitet och AI-fel kan väsentligt ändra det som syns. Lily kan missa eller beskriva något fel och huddrag som ser likadana ut kan ha olika orsaker. Använd inte ett bildsvar för att utesluta sjukdom eller avstå från att söka vård.\n\nDu får endast ladda upp innehåll som du har rätt och tillstånd att dela. Skicka inte intima bilder, olagligt innehåll, någon annans bild eller privata uppgifter utan tillstånd eller något som inte behövs för hudvårdsstöd. Valfri bildlagring kräver separat samtycke och regleras av integritetspolicyn."
     },
     "account": {
-      "title": "Ditt konto",
-      "body": "Ditt konto identifieras av ditt telefonnummer. Du ansvarar för all aktivitet kopplad till ditt telefonnummer. Dela inte åtkomst till ditt iMessage-konto med andra i syfte att använda Lily."
+      "title": "Ditt konto, meddelanden och påminnelser",
+      "body": "Ditt konto är knutet till ditt telefonnummer. Du ansvarar för aktivitet från numret och för att skydda din enhet, ditt Apple-konto, iMessage och din kod. Meddela oss omgående om åtkomsten förloras eller är obehörig. Behandla inte iMessage som en privat vårdkanal; Apple, operatörer, Sendblue och personer med åtkomst till dina enheter eller notiser kan se meddelanden.\n\nDu tillåter Lily att skicka begärda installations-, tjänste-, påminnelse- och kontomeddelanden. Leveranstider garanteras inte. Du ansvarar för operatörs-, data-, roaming- och enhetsavgifter. Du kan be Lily ändra eller stoppa påminnelser, men nödvändiga transaktions-, integritets-, säkerhets- eller kontomeddelanden kan fortfarande skickas."
+    },
+    "products": {
+      "title": "Produkter, länkar och kommersiellt oberoende",
+      "body": "Lily tillverkar, testar, kontrollerar eller garanterar inte och ansvarar inte för tredjepartsprodukter, ingredienser, etiketter, säljare, webbplatser, tillgänglighet, kvalitet, säkerhet, laglighet eller resultat. Tillverkarens etikett, en återkallelse, apotekare, förskrivare eller kvalificerad vårdpersonal har företräde framför Lily. Produktomnämnanden är information, inte garantier eller rekommendationer. Sponsring eller affiliaterelation ska uppges; om inget uppges får Lily inte ersättning för en viss rekommendation."
+    },
+    "payments": {
+      "title": "Provperioder, abonnemang och betalningar",
+      "body": "Vissa funktioner kan vara kostnadsfria, provbaserade eller betalda. Före ett köp visar vi pris, valuta, skatter, faktureringsperiod, förnyelsevillkor, uppsägningsmetod och eventuella ytterligare köpvillkor. Du godkänner de avgifter som visas och måste lämna korrekta betalningsuppgifter. Om inte lag eller köpvillkor kräver annat återbetalas inte redan debiterade avgifter. Tvingande rättigheter om uppsägning, ångerrätt, förnyelse och återbetalning där du bor påverkas inte."
+    },
+    "acceptableUse": {
+      "title": "Tillåten användning",
+      "body": "Du får inte använda Lily för att bryta mot lag eller annans rättigheter, ge vård till andra, utge dig för att vara någon annan, lämna innehåll utan tillstånd, utnyttja, skrapa, bakåtkompilera, störa, överbelasta, testa eller kringgå Tjänsten eller dess skydd, sprida skadlig kod, automatisera missbrukande meddelanden, extrahera modeller, prompter eller systemdata eller använda svar för att träna en konkurrerande modell där lagen förbjuder det. Du får inte använda Lily för diagnoser, nödlägen, receptbeslut eller andra högriskändamål. Vi kan utreda missbruk och samarbeta vid lagliga förfrågningar."
     },
     "ip": {
-      "title": "Immaterialrätt",
-      "body": "Allt innehåll, alla funktioner och all funktionalitet i Lily ägs av Lily och skyddas av upphovsrätt och andra immaterialrättsliga lagar."
+      "title": "Ditt innehåll och immaterialrätt",
+      "body": "Du behåller äganderätten till innehåll som du skickar. Du ger Lily en global, icke-exklusiv, royaltyfri licens att lagra, kopiera, överföra, omvandla och behandla innehållet endast i den mån som behövs för att driva, skydda, stödja och förbättra Tjänsten enligt integritetspolicyn. Du bekräftar att du har nödvändiga rättigheter och tillstånd för licensen.\n\nLily, varumärken, programvara, design, prompter, gränssnitt och tjänsteinnehåll ägs av Lily eller dess licensgivare och skyddas av lag. Under villkoren får du en begränsad, personlig, återkallelig, icke-överlåtbar och icke-exklusiv rätt att använda Tjänsten. AI-svar kanske inte är unika, kan likna svar till andra och kanske inte skyddas av immaterialrätt. Du ansvarar för att kontrollera att din användning av svar inte kränker någon annans rättigheter."
+    },
+    "thirdParties": {
+      "title": "Tredjepartstjänster",
+      "body": "Lily är beroende av Apple, Sendblue, Vercel, AI-leverantörer, hosting- och lagringsleverantörer och andra tredje parter. Deras system och villkor kan gälla och vi styr inte deras tillgänglighet eller självständiga agerande. I den utsträckning lagen tillåter ansvarar Lily inte för en tredje parts tjänst, produkt, innehåll, säkerhetsincident, försening eller fel."
+    },
+    "suspension": {
+      "title": "Ändringar, avstängning och upphörande",
+      "body": "Vi kan lägga till, ta bort, begränsa, stänga av eller upphöra med funktioner eller åtkomst för att skydda användare eller Tjänsten, följa lag, hantera risk eller missbruk eller driva verksamheten. Du kan sluta använda Lily när som helst och begära kontoradering. Bestämmelser som till sin natur ska fortsätta gälla, exempelvis ansvar, immaterialrätt, garantifriskrivningar, ansvarsbegränsningar, skadeslöshet och tvister, gäller även efter upphörandet."
+    },
+    "warranties": {
+      "title": "Garantifriskrivning",
+      "body": "I DEN UTSTRÄCKNING LAGEN TILLÅTER TILLHANDAHÅLLS LILY OCH ALLA SVAR \"I BEFINTLIGT SKICK\" OCH \"I MÅN AV TILLGÅNG\". LILY OCH DESS OPERATÖR, NÄRSTÅENDE, LICENSGIVARE OCH LEVERANTÖRER FRISKRIVER SIG FRÅN ALLA UTTRYCKLIGA, UNDERFÖRSTÅDDA, LAGSTADGADE OCH ANDRA GARANTIER, INKLUSIVE RIKTIGHET, FULLSTÄNDIGHET, SÄKERHET, ICKE-INTRÅNG, SÄLJBARHET, LÄMPLIGHET FÖR ETT VISST ÄNDAMÅL, ÄGANDERÄTT, OSTÖRD ANVÄNDNING, TILLGÄNGLIGHET OCH ATT TJÄNSTEN ÄR FELFRI ELLER GER ETT VISST HUDVÅRDSRESULTAT. Inget uttalande eller svar skapar en garanti om det inte uttryckligen anges i en undertecknad handling."
     },
     "liability": {
       "title": "Ansvarsbegränsning",
-      "body": "Lily tillhandahålls \"i befintligt skick\" utan garantier av något slag. Vi ansvarar inte för skador som uppstår genom din användning av tjänsten, inklusive resultat baserade på rutinhjälp från tjänsten."
+      "body": "I DEN UTSTRÄCKNING LAGEN TILLÅTER ANSVARAR INTE LILYS OPERATÖR, NÄRSTÅENDE, BEFATTNINGSHAVARE, MEDARBETARE, LICENSGIVARE ELLER TJÄNSTELEVERANTÖRER FÖR INDIREKTA, OFÖRUTSEDDA, SÄRSKILDA, EXEMPLARISKA, STRAFFLIKNANDE ELLER FÖLJDSKADOR, FÖRLUST AV DATA, VINST, INTÄKT, GOODWILL ELLER ANVÄNDNING, ERSÄTTNINGSTJÄNSTER, PRODUKTREAKTIONER, PERSONSKADA, FÖRDRÖJD VÅRD ELLER FÖRLUST SOM HAR SAMBAND MED TJÄNSTEN, AI-SVAR, BILDER, PRODUKTER, PÅMINNELSER ELLER DIN TILLIT TILL DEM, ÄVEN OM RISKEN VAR KÄND.\n\nI DEN UTSTRÄCKNING LAGEN TILLÅTER SKA DERAS SAMMANLAGDA ANSVAR FÖR ALLA KRAV SOM RÖR TJÄNSTEN INTE ÖVERSTIGA DET HÖGRE AV 100 USD ELLER DET BELOPP DU BETALADE LILY FÖR TJÄNSTEN UNDER DE 12 MÅNADERNA FÖRE HÄNDELSEN SOM LEDDE TILL KRAVET.\n\nUndantagen och begränsningarna gäller oavsett rättslig grund och även om ett rättsmedel inte fyller sitt syfte. De utesluter inte ansvar som enligt lag inte får uteslutas eller begränsas, exempelvis bedrägeri, uppsåtligt agerande eller dödsfall eller personskada orsakad av vårdslöshet där lagen förbjuder ett sådant undantag. Lokal lag kan ge dig ytterligare rättigheter."
+    },
+    "indemnity": {
+      "title": "Skadeslöshet",
+      "body": "I den utsträckning lagen tillåter ska du försvara, ersätta och hålla Lilys operatör, närstående, personal, licensgivare och leverantörer skadeslösa från tredje mans krav, förluster, ansvar, kostnader och skäliga juridiska kostnader som uppstår genom ditt olagliga eller obehöriga innehåll eller agerande, missbruk av Tjänsten, brott mot villkoren eller intrång i annans rättigheter. Skyldigheten gäller inte i den mån ett krav orsakats av Lilys eget olagliga agerande och begränsar inte tvingande konsumenträttigheter."
+    },
+    "disputes": {
+      "title": "Tvister och individuella krav",
+      "body": "Innan ett krav lämnas in ska du och Lily i god tro försöka lösa det informellt. Skicka en skriftlig beskrivning och önskad lösning till support@skintext.ai och ge 30 dagar för svar. Detta hindrar inte någon part från att begära brådskande säkerhetsåtgärd, använda ett tillämpligt småmålsförfarande, kontakta en tillsynsmyndighet eller utöva en rättighet som inte får begränsas.\n\nI den utsträckning lagen tillåter går du och Lily med på att endast framställa krav individuellt och inte som kärande eller medlem i en grupptalan, kollektiv, samordnad, mass- eller representativ process. Om tillämplig lag inte tillåter avståendet gäller det inte. Tillämplig lag och forum omfattas av tvingande konsumentskydd och den jurisdiktion som rättsligt gäller för Lilys operatör och dig."
     },
     "changes": {
       "title": "Ändringar av villkor",
-      "body": "Vi kan uppdatera dessa villkor från tid till annan. Fortsatt användning av Lily efter ändringar innebär att du godkänner de nya villkoren."
+      "body": "Vi kan uppdatera villkoren när Tjänsten eller lagen ändras. Vi publicerar de uppdaterade villkoren och datumet. Vid väsentliga ändringar lämnar vi skälig information och begär förnyat godkännande när det krävs. Ändringar gäller framåt från angivet ikraftträdandedatum. Om du inte godkänner en uppdatering ska du sluta använda Lily och radera kontot."
+    },
+    "general": {
+      "title": "Allmänna villkor",
+      "body": "Dessa villkor och eventuella köpspecifika villkor utgör hela avtalet om Tjänsten och ersätter tidigare uttalanden i frågan. Om en bestämmelse inte kan verkställas ska den gälla i största lagliga utsträckning och resten fortsätter gälla. Underlåtenhet att verkställa en bestämmelse är inte ett avstående. Du får inte överlåta villkoren utan vårt samtycke; vi får överlåta dem vid omorganisation, finansiering, fusion, förvärv eller tillgångsöverlåtelse. Rubriker är endast till för läsbarhet. Inget skapar agentur-, anställnings-, bolags-, förtroende- eller joint venture-förhållande."
     },
     "contact": {
       "title": "Kontakt",
-      "body": "Om du har frågor om dessa villkor, kontakta oss på support@skintext.ai."
+      "body": "Frågor, juridiska meddelanden och informella tvistmeddelanden kan skickas till support@skintext.ai. Integritetsbegäranden ska skickas till privacy@skintext.ai."
     }
   },
   "Footer": {

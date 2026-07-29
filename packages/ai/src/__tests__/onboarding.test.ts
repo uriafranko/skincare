@@ -61,7 +61,7 @@ describe("processOnboardingMessage", () => {
     );
 
     expect(result.reply).toBe(
-      "OK if I save this so reminders/logs work? You can delete it anytime.",
+      "Reply AGREE if I can save your skincare data for reminders/logs and you accept the Terms of Use: https://skintext.ai/terms. Privacy: https://skintext.ai/privacy. You can delete your data anytime.",
     );
   });
 
@@ -150,7 +150,7 @@ describe("processOnboardingMessage", () => {
 
     expect(result.extracted.ageEligible).toBe(true);
     expect(result.reply).toBe(
-      "OK if I save this so reminders/logs work? You can delete it anytime.",
+      "Reply AGREE if I can save your skincare data for reminders/logs and you accept the Terms of Use: https://skintext.ai/terms. Privacy: https://skintext.ai/privacy. You can delete your data anytime.",
     );
   });
 

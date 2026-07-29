@@ -11,9 +11,10 @@ import {
 } from "./onboarding-state";
 
 const GREETING_SETUP_REPLY =
-  "Hey, I'm Lily. I can help you build a simple routine that fits. Send your name, skin goal, skin type/sensitivity if known, avoids, products, and if you want reminders, best times. Unsure is fine. OK if I save this so reminders/logs work? You can delete anytime.";
+  "Hey, I'm Lily. I can help you build a simple routine that fits. Send your name, skin goal, skin type/sensitivity if known, avoids, products, and if you want reminders, best times. Unsure is fine. Reply AGREE if I can save your skincare data and you accept the Terms: https://skintext.ai/terms. Privacy: https://skintext.ai/privacy.";
 
-const CONSENT_ONLY_REPLY = "OK if I save this so reminders/logs work? You can delete it anytime.";
+const CONSENT_ONLY_REPLY =
+  "Reply AGREE if I can save your skincare data for reminders/logs and you accept the Terms of Use: https://skintext.ai/terms. Privacy: https://skintext.ai/privacy. You can delete your data anytime.";
 const AGE_GATE_REPLY = "Hey, I'm Lily. Before we get started, are you 16 or older?";
 const UNDER_16_REPLY = "I can only help people who are 16 or older, so I can't continue setup.";
 
@@ -221,16 +222,17 @@ function extractReminderTimes(
 }
 
 function extractConsent(lower: string, previousBotReply?: string): boolean | undefined {
-  const mentionsStorage =
-    /\b(save|store|consent|data|spara|lagra|samtycke)\b|לשמור|שמירה|מידע|נתונים/.test(lower);
-  const saysSure = /\bsure\b/.test(lower) && !/\bnot\s+sure\b/.test(lower);
-  const affirmative =
-    /\b(yes|yep|yeah|ok|okay|agree|fine|consent)\b/.test(lower) ||
-    /כן|אפשר|בסדר|מאשר|מאשרת/.test(lower) ||
-    /\b(ja|okej)\b/.test(lower) ||
-    saysSure;
-  const previousAskedConsent = /\b(save|store|consent|data)\b/i.test(previousBotReply ?? "");
-  if ((mentionsStorage && affirmative) || (previousAskedConsent && affirmative)) return true;
+  const explicitlyAgrees = /\b(?:agree|godkänner)\b|מסכים|מסכימה/.test(lower);
+  const mentionsStorage = /\b(save|store|data|spara|lagra|samtycke)\b|לשמור|שמירה|מידע|נתונים/.test(
+    lower,
+  );
+  const mentionsTerms = /\bterms\b|villkor|תנאי/.test(lower);
+  const previousAskedCombinedConsent =
+    /\bterms\b/i.test(previousBotReply ?? "") &&
+    /\b(save|store|data)\b/i.test(previousBotReply ?? "");
+
+  if (previousAskedCombinedConsent && /^\s*agree[\s.!]*$/i.test(lower)) return true;
+  if (explicitlyAgrees && mentionsStorage && mentionsTerms) return true;
   return undefined;
 }
 

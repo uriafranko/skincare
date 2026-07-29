@@ -12,12 +12,20 @@ export default function PrivacyPage({ params }: Props) {
   const t = useTranslations("Privacy");
 
   const sections = [
+    { title: t("scope.title"), body: t("scope.body") },
     { title: t("dataCollection.title"), body: t("dataCollection.body") },
+    { title: t("sensitiveData.title"), body: t("sensitiveData.body") },
     { title: t("dataUsage.title"), body: t("dataUsage.body") },
-    { title: t("dataStorage.title"), body: t("dataStorage.body") },
+    { title: t("aiAndPhotos.title"), body: t("aiAndPhotos.body") },
     { title: t("thirdParty.title"), body: t("thirdParty.body") },
+    { title: t("sales.title"), body: t("sales.body") },
     { title: t("retention.title"), body: t("retention.body") },
+    { title: t("security.title"), body: t("security.body") },
+    { title: t("international.title"), body: t("international.body") },
     { title: t("rights.title"), body: t("rights.body") },
+    { title: t("regionalRights.title"), body: t("regionalRights.body") },
+    { title: t("children.title"), body: t("children.body") },
+    { title: t("changes.title"), body: t("changes.body") },
     { title: t("contact.title"), body: t("contact.body") },
   ];
 

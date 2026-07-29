@@ -1,11 +1,26 @@
-import { createPendingUserForPhone, getUser, resolveUserId } from "@skintext/db";
-import { detectRegion, generateId } from "@skintext/shared";
+import { createPendingUserForPhone, getUser, resolveUserId, updateUser } from "@skintext/db";
+import { CONSENT_VERSION, detectRegion, generateId, type UserAccount } from "@skintext/shared";
 import type { RequestLogger } from "evlog";
 import { handleMessage } from "@/handlers/message";
 import { handleOnboarding } from "@/handlers/onboarding";
 import { normalizeInboundImage } from "@/image";
 import { errorForLogging } from "@/logging";
+import { isExplicitTermsAcceptance, termsAcceptedReply, updatedTermsPrompt } from "@/terms-consent";
 import { pruneExpiredUserImageBlobs } from "@/user-images";
+
+async function requireCurrentTerms(user: UserAccount, text: string): Promise<string[] | null> {
+  if (user.consentVersion === CONSENT_VERSION) return null;
+  if (!isExplicitTermsAcceptance(text)) return [updatedTermsPrompt(user.locale)];
+
+  const consentedAt = new Date().toISOString();
+  await updateUser(user.id, {
+    consentedAt,
+    consentVersion: CONSENT_VERSION,
+  });
+  user.consentedAt = consentedAt;
+  user.consentVersion = CONSENT_VERSION;
+  return [termsAcceptedReply(user.locale)];
+}
 
 /**
  * Routes a plain-text message around the per-phone lock when an existing user
@@ -26,7 +41,7 @@ export async function routeConcurrentMessage(
   if (!userId) return;
 
   const user = await getUser(userId);
-  if (!user?.onboardingComplete || !user.consentedAt) {
+  if (!user?.onboardingComplete || !user.consentedAt || user.consentVersion !== CONSENT_VERSION) {
     return;
   }
 
@@ -78,6 +93,12 @@ export async function routeMessage(
     return [
       "Your data processing consent has been withdrawn. Message me again if you'd like to start over!",
     ];
+  }
+
+  const termsReply = await requireCurrentTerms(user, text);
+  if (termsReply) {
+    log.set({ route: "terms_consent", consentVersion: CONSENT_VERSION });
+    return termsReply;
   }
 
   let imageUrl: string | undefined;

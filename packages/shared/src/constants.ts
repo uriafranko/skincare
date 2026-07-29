@@ -8,7 +8,7 @@ export const ROUTINE_TIMES = [
 export const DAILY_SUMMARY_HOUR = 22;
 export const WEEKLY_RECAP_HOUR = 20;
 export const WEEKLY_RECAP_DAY = "Sunday";
-export const CONSENT_VERSION = "2026-07-26";
+export const CONSENT_VERSION = "2026-07-29";
 export const PHOTO_RETENTION_CONSENT_VERSION = "2026-07-26";
 export const PERSONALITY_POLICY_VERSION = "personality-v1";
 

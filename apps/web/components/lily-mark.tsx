@@ -21,7 +21,7 @@ export function LilyMark({ size = "md", priority = false, className = "" }: Lily
       className={`relative block shrink-0 overflow-hidden rounded-full border border-white/80 bg-[#c99b77] shadow-[0_5px_16px_rgba(105,65,42,0.2)] ${mark.className} ${className}`}
     >
       <Image
-        src="/character/lily-logo-v2.png"
+        src="/character/lily-persona-face.png"
         alt=""
         width={mark.pixels}
         height={mark.pixels}

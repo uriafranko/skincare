@@ -13,7 +13,7 @@
   },
   "Hero": {
     "eyebrow": "Little steps with Lily",
-    "headline": "Better skin every day, guided by research.",
+    "headline": "Better skin from day 1.",
     "subtitle": "A simpler routine for smoother, calmer, more consistent skin days.",
     "resultLines": [
       "Smoother skin every morning.",
@@ -136,16 +136,16 @@
   },
   "Faq": {
     "heading": "A few useful answers",
-    "q1": "Can Lily diagnose my skin?",
-    "a1": "No. Lily is an AI skincare coach. She can describe visible features cautiously, explain product labels, and suggest practical routine steps, but she does not diagnose or replace a clinician.",
+    "q1": "How can Lily help with my skin?",
+    "a1": "Lily can look at skin photos and describe visible features, explain product labels, and suggest practical routine steps tailored to your goals. If something needs medical attention, she’ll help you recognize when to check with a clinician.",
     "q2": "What do I need to get started?",
     "a2": "Just an iPhone with iMessage. No app to download, no account to create. Text Lily and set up your routine in a short chat.",
     "q3": "What does Lily remember?",
     "a3": "Only context that makes future help more useful, such as your routine, goals, products, and reactions. Lily asks before saving sensitive details, and you can ask what she remembers or delete it.",
     "q4": "How does the free trial work?",
-    "a4": "You get full access during the trial period. Track routines, remember products, set reminders, and review summaries. No credit card required to start.",
+    "a4": "Your free trial is tailored to you, with enough time to experience Lily before a subscription is required.",
     "q5": "What languages are supported?",
-    "a5": "Lily detects your language from your message and responds accordingly. English and Swedish are supported, with more languages coming soon."
+    "a5": "Lily supports all languages. Just text her in the language you prefer, and she’ll reply in the same language."
   },
   "BottomCta": {
     "heading": "Start your routine today",
@@ -172,72 +172,152 @@
   },
   "Privacy": {
     "heading": "Privacy Policy",
-    "lastUpdated": "Last updated: July 2026",
-    "intro": "Lily (\"Lily\", \"we\", \"us\") is committed to protecting your privacy. This policy explains what data we collect, how we use it, and your rights.",
+    "lastUpdated": "Last updated: July 29, 2026",
+    "intro": "This Privacy Policy explains how the operator of Lily (\"Lily\", \"we\", \"us\") collects, uses, discloses, retains, and protects personal information when you visit our website or use Lily through iMessage. Because skincare information and photos can reveal health information, we treat them as sensitive data.",
+    "scope": {
+      "title": "Who We Are & Scope",
+      "body": "Lily is a consumer AI skincare routine and tracking service. Lily's operator is responsible for the personal information described in this Policy and acts as the data controller or business where those terms apply.\n\nThis Policy covers Lily's website, iMessage conversations, routine tools, reminders, memory, photo features, support, and related services. Apple, Sendblue, and other third-party services have their own privacy terms for information they process independently."
+    },
     "dataCollection": {
-      "title": "Data We Collect",
-      "body": "When you use Lily, we collect:\n\n• Your phone number (to identify your account and deliver messages via iMessage)\n• Your confirmation that you are at least 16 during setup, never your exact age or birthdate\n• Your name, communication style, skin goals, skin type if shared, sensitivities, allergies, current products, and one-variable skincare experiments in agent memory\n• Routine updates and logs, reminders, timezone, and country for localization\n• Sanitized conversation history, which stores text and a generic marker for photo turns but not image bytes or private image URLs"
+      "title": "Information We Collect & Sources",
+      "body": "We collect information from you, from the messaging and hosting services that deliver your requests, and from Lily's responses and inferences:\n\n• Account and contact data: your phone number, internal account ID, language, country, timezone, consent records, and confirmation that you are at least 16. We ask only for 16+ confirmation, but information you voluntarily include in a message may remain in message history.\n• Messages and content: the text you send, Lily's replies, product names and labels, support requests, and a sanitized photo-turn marker instead of raw image bytes in conversation history.\n• Skincare and wellness data: goals, skin type, sensitivity, allergies or ingredients to avoid, visible skin concerns you describe or ask about, reactions, routines, product use, experiments, logs, and progress notes.\n• Photos: skin, face, product, or label images you choose to send, plus limited metadata needed to process or, with separate consent, retain them.\n• Reminder and activity data: reminder times, routine completion, adherence summaries, and scheduled follow-ups.\n• Service data: message IDs and delivery status, timestamps, feature actions, security events, error and usage data, and IP address, browser/device, and request data that our website host, content providers, or messaging providers receive automatically."
+    },
+    "sensitiveData": {
+      "title": "Sensitive & Consumer Health Data",
+      "body": "Skincare concerns, allergies, reactions, routines, product use, messages, and photos may be health data or sensitive personal information under some laws. We collect them from you and use them only for the purposes described here. Where consent is the required legal basis, we ask for it before storing setup data and ask separately before enabling 30-day photo retention. You may withdraw consent, but Lily may be unable to provide features that require that data.\n\nUnless we expressly agree otherwise in writing, Lily is not provided by or on behalf of a health care provider or health plan and is not intended to be a HIPAA-covered service. Information you send may therefore not receive the protections that apply to medical records held by a HIPAA-covered provider."
     },
     "dataUsage": {
-      "title": "How We Use Your Data",
-      "body": "We use your data to:\n\n• Provide skincare routine tracking and product guidance\n• Remember your chosen communication style and relevant routine context\n• Track one-variable skincare experiments and optional review reminders\n• Generate routine summaries, adherence recaps, and reminders\n• Process product labels and skin photos for the current reply\n• Communicate with you via iMessage"
+      "title": "How We Use Information & Legal Bases",
+      "body": "We use personal information to provide and personalize Lily; understand your messages; generate AI responses; analyze product labels and photos; maintain conversation memory; create logs, reminders, summaries, and exports; deliver and troubleshoot messages; prevent abuse and secure the service; respond to privacy and support requests; comply with law; and establish, exercise, or defend legal claims.\n\nDepending on where you live, we rely on: your consent for sensitive skincare data and optional photo retention; performance of our agreement with you for requested service features; our legitimate interests in operating, securing, and improving Lily where those interests do not override your rights; and legal obligations. Lily does not make decisions that produce legal or similarly significant effects about you."
     },
-    "dataStorage": {
-      "title": "Data Storage & Security",
-      "body": "Connections to our website and services use TLS (HTTPS). Your phone number is encrypted at rest using AES. Routine log content and onboarding data during setup are stored as encrypted application-layer payloads. Agent memory, message history, and operational account fields are stored with strict access controls. Photos are processed for the current reply by default and are not added to conversation history. Users may separately opt into encrypted private photo retention for 30 days."
+    "aiAndPhotos": {
+      "title": "AI Processing, Memory & Photos",
+      "body": "Lily uses automated AI systems. Your relevant messages, profile context, and current photo may be sent through our AI infrastructure providers to produce a reply. AI providers may keep request data for security or abuse monitoring under their business/API settings and legal obligations. Do not send information you do not want processed this way.\n\nBy default, a photo is processed for the current reply and is not intentionally added to Lily's conversation history or photo store. The text sent with it, Lily's reply, a generic photo marker, and—if saved—an internal photo reference may remain in history. If you separately opt in, Lily may keep a private copy for up to 30 days so you can refer to it later. Turning retention off affects future photos; ask Lily to delete already-saved photos separately. Messaging and AI providers may still temporarily process transmitted photos under their own retention rules."
     },
     "thirdParty": {
-      "title": "Third-Party Services",
-      "body": "We use the following third-party services to operate Lily:\n\n• OpenAI — for image analysis and natural language processing\n• Sendblue — for iMessage delivery\n\nThese services process data as necessary to provide our features. We do not sell your data to third parties."
+      "title": "How We Disclose Information",
+      "body": "We disclose only the categories of information needed for the relevant purpose:\n\n• Sendblue and Apple process phone numbers, message content, images, delivery data, and device/account information to deliver iMessage communications.\n• Vercel provides hosting, workflows, private file storage, logs, and AI routing and may process service data, messages, outputs, and photos.\n• OpenAI and any other AI provider we deliberately enable process prompts, relevant context, outputs, and current photos to generate and safeguard responses.\n• Neon hosts account, routine, reminder, and conversation data. Mastra provides agent infrastructure and redacted operational observability. Our configured Redis provider processes limited identifiers and coordination data.\n• Vendors that help with security, support, professional advice, or business operations receive information only as reasonably necessary for those services.\n\nWe may also disclose information when required by law; to protect users, Lily, or others; in connection with a merger, financing, acquisition, reorganization, or sale of assets, subject to appropriate safeguards; or when you direct or consent to the disclosure. Service providers are required by contract or applicable terms to process data for specified purposes."
+    },
+    "sales": {
+      "title": "No Sale or Targeted Advertising",
+      "body": "We do not sell personal information or consumer health data for money. We do not use your messages, skincare data, or photos for targeted or cross-context behavioral advertising, and we do not knowingly allow third parties to do so. We do not authorize our service providers to use your sensitive data for their own advertising. If these practices change, we will update this Policy and obtain any consent required by law before the change applies."
     },
     "retention": {
       "title": "Data Retention",
-      "body": "We retain agent memory, routine logs, reminders, account data, and sanitized conversation history while your account is active. Photos retained with separate consent expire after 30 days. Turning off photo retention affects future photos; saved photos can be deleted separately. Deleting saved photos does not remove text derived from earlier photo discussions; deleting the account removes both."
+      "body": "We use the following retention periods or criteria:\n\n• Incomplete setup details generally expire about 24 hours after the latest setup message. A minimal encrypted account-routing record may remain until the account is deleted.\n• Account data, consent records, routine logs, reminders, preferences, agent memory, and sanitized conversation history remain while your account is active, unless you delete them or a shorter period is required.\n• Saved photos become unavailable after 30 days and are scheduled for deletion. A deletion retry record may remain briefly if storage deletion initially fails.\n• Short-lived message deduplication and processing locks expire within minutes.\n• Security, diagnostic, provider, backup, and legal-compliance records may remain for a limited period after deletion when reasonably necessary, permitted, or required by law. We may retain de-identified information that cannot reasonably be linked to you.\n\nDeleting saved photos does not delete text or AI-generated observations from earlier photo discussions. Deleting your account removes both from Lily's active systems, subject to the limited exceptions above."
+    },
+    "security": {
+      "title": "Security",
+      "body": "We use administrative, technical, and organizational safeguards designed for the nature of the data, including TLS in transit, encryption or one-way protected identifiers for phone and selected stored content, private photo storage, access controls, scoped internal IDs, and limiting raw photos in conversation memory. No service, AI system, messaging network, or storage method is completely secure, and we cannot guarantee absolute security. You are responsible for securing your device, Apple account, iMessage access, and passcode and for avoiding sensitive details you do not need Lily to know."
+    },
+    "international": {
+      "title": "International Processing",
+      "body": "Lily and its providers may process information in the United States, Europe, Israel, and other countries where they operate. Those countries may have different data-protection laws. Where required, we use contractual or other recognized safeguards for international transfers and provide information about applicable safeguards on request."
     },
     "rights": {
-      "title": "Your Rights",
-      "body": "You have the right to:\n\n• Ask what Lily remembers and request a copy of your data\n• Correct or forget profile, product, and experiment details in agent memory\n• Enable or disable future photo retention, and delete saved photos\n• Request deletion of your account, including agent memory and privacy preferences\n• Withdraw consent at any time"
+      "title": "Your Choices & Requests",
+      "body": "You may ask Lily what she remembers; correct or remove profile, product, and experiment details; change or cancel reminders; enable or disable future photo retention; delete saved photos; withdraw consent; request a copy of your data; or permanently delete your account. For permanent photo or account deletion, Lily asks for confirmation.\n\nYou may also contact privacy@skintext.ai. We may need to verify that the request comes from the phone number or person concerned. An authorized agent may submit a request where local law permits, subject to verification. We will not discriminate against you for exercising a privacy right. Some requests may be limited where retention or processing is required by law, needed to protect rights or security, or otherwise exempt."
+    },
+    "regionalRights": {
+      "title": "Additional Rights by Location",
+      "body": "If applicable law gives you additional rights, those rights remain available. Depending on your location, these can include access, correction, deletion, portability, restriction, objection, withdrawal of consent, limiting use of sensitive information, opting out of sale or targeted advertising, and appealing a refused request. You may complain to your local data protection or privacy authority.\n\nFor consumer health data laws, the categories collected, sources, purposes, and disclosures are described above. We do not sell consumer health data. To appeal a decision on a privacy request, email privacy@skintext.ai with \"Privacy Appeal\" in the subject line and explain the request and decision."
+    },
+    "children": {
+      "title": "Age Requirement",
+      "body": "Lily is not intended for anyone under 16. We ask users to confirm they are at least 16 and do not intentionally create an active account for a person we know is under 16. If you believe a person under 16 has provided personal information, contact privacy@skintext.ai so we can investigate and delete it as appropriate."
+    },
+    "changes": {
+      "title": "Changes to This Policy",
+      "body": "We may update this Policy as Lily, our providers, or applicable law changes. We will change the date above and provide additional notice or request renewed consent when a change is material or the law requires it. We will not use previously collected sensitive data for a materially different purpose without the notice and consent required by law."
     },
     "contact": {
-      "title": "Contact",
-      "body": "If you have questions about this privacy policy, contact us at privacy@skintext.ai."
+      "title": "Contact Us",
+      "body": "For privacy questions, requests, complaints, or information about Lily's operator and applicable transfer safeguards, contact privacy@skintext.ai. For general support, contact support@skintext.ai."
     }
   },
   "Terms": {
-    "heading": "Terms of Service",
-    "lastUpdated": "Last updated: July 2026",
-    "intro": "By using Lily (\"Lily\", \"the Service\"), you agree to these terms. Please read them carefully.",
+    "heading": "Terms of Use",
+    "lastUpdated": "Last updated: July 29, 2026",
+    "intro": "These Terms are a binding agreement between you and the operator of Lily (\"Lily\", \"we\", \"us\") governing the website, iMessage assistant, reminders, photos, memory, and related features (the \"Service\"). Read them before using Lily. If you do not agree, do not use the Service.",
+    "agreement": {
+      "title": "Agreement to These Terms",
+      "body": "You accept these Terms when you expressly agree during setup or after receiving an update notice. You also acknowledge the Privacy Policy, which explains how personal and sensitive information is handled. If you use Lily for another person or organization, you confirm that you have authority to bind them and permission to provide their information.\n\nThese Terms do not waive rights or remedies that applicable law does not allow you to waive. If a translated version conflicts with the English version, the English version controls to the extent permitted by law."
+    },
     "eligibility": {
       "title": "Eligibility",
-      "body": "You must be at least 16 years old and have access to an iPhone with iMessage to use Lily. We ask only whether you are 16 or older, not for your exact age or birthdate."
+      "body": "You must be at least 16, legally able to enter this agreement, and authorized to use the phone number, device, and iMessage account connected to Lily. If the law where you live requires parental or guardian consent for a person your age, you may use Lily only after that consent is obtained. Lily may refuse or end access if eligibility cannot be confirmed."
     },
     "service": {
       "title": "The Service",
-      "body": "Lily is an AI-powered skincare routine assistant that operates through iMessage. The service includes routine logging, product notes, communication preferences, one-variable skincare experiments, summaries, adherence recaps, reminders, transient photo processing, and chat-based memory controls. Photo retention is optional and requires separate consent."
+      "body": "Lily is an automated AI skincare routine, education, and tracking assistant. Features may include general product and routine information, routine logs, reminders, summaries, experiments, conversation memory, product-label reading, and optional photo processing or retention.\n\nLily's replies are generated by AI and are not necessarily reviewed by a human before delivery. AI can misunderstand you, omit context, hallucinate, produce outdated or incomplete information, or give a response that is unsuitable for you. The Service may be delayed, unavailable, changed, or discontinued and reminders may fail. Do not rely on Lily as your only record, alert, or source of important information."
     },
-    "accuracy": {
-      "title": "Skincare Guidance",
-      "body": "Lily provides routine support and conservative product guidance based on what you share. She does not diagnose, prescribe, or replace professional medical care. Consult a qualified clinician for concerning, severe, persistent, or rapidly changing symptoms."
+    "medical": {
+      "title": "Not Medical Care or an Emergency Service",
+      "body": "LILY IS NOT A DOCTOR, DERMATOLOGIST, PHARMACIST, MEDICAL DEVICE, TELEHEALTH PROVIDER, OR EMERGENCY SERVICE. THE SERVICE DOES NOT PROVIDE MEDICAL DIAGNOSIS, TREATMENT, PRESCRIPTIONS, OR A CLINICIAN-PATIENT RELATIONSHIP, AND IT IS NOT A SUBSTITUTE FOR QUALIFIED PROFESSIONAL CARE.\n\nDo not use Lily to diagnose or rule out a condition, decide whether urgent care is needed, manage a prescription, or replace medical advice. Never delay or disregard professional care because of a Lily response. For severe, rapidly worsening, persistent, infected, painful, blistering, bleeding, eye-related, breathing-related, or otherwise concerning symptoms, stop the relevant product and seek appropriate professional or emergency help. Lily does not continuously monitor messages and cannot contact emergency services for you."
+    },
+    "responsibility": {
+      "title": "Your Decisions, Responsibility & Assumption of Risk",
+      "body": "YOU DECIDE WHETHER TO FOLLOW ANY LILY OUTPUT AND, TO THE MAXIMUM EXTENT PERMITTED BY LAW, YOU ARE SOLELY RESPONSIBLE FOR YOUR SKINCARE CHOICES, PRODUCT USE, ROUTINE, AND RESULTS. You must use independent judgment; read and follow labels and manufacturer instructions; verify ingredients, expiration, authenticity, compatibility, and recalls; patch test when appropriate; introduce products cautiously; account for allergies, sensitivities, prescriptions, pregnancy or nursing, and known conditions; stop after an adverse reaction; and consult a qualified professional when appropriate.\n\nBy acting on Lily's output, you knowingly accept the risks of skincare and cosmetic products, including irritation, allergy, burns, discoloration, worsening symptoms, interactions, scarring, eye injury, delayed treatment, and lack of results. You are responsible for the accuracy and completeness of what you tell Lily. Lily is not responsible for harm caused by a product, manufacturer, seller, your failure to follow instructions or seek care, information you omitted or misstated, or a decision you made based on AI output, except to the extent liability cannot legally be excluded."
+    },
+    "photos": {
+      "title": "Photos & Image Limitations",
+      "body": "A phone photo cannot establish a diagnosis or reliably show texture, color, depth, pain, temperature, timing, or progression. Lighting, angle, filters, compression, makeup, image quality, and AI error can materially change what appears. Lily may miss or misdescribe something, and similar-looking skin features can have different causes. Do not use a photo response to rule out disease or decide not to seek care.\n\nYou may upload only content you have the right and permission to share. Do not send intimate images, illegal content, another person's image or private information without permission, or anything not needed for skincare support. Optional photo retention requires separate consent and is governed by the Privacy Policy."
     },
     "account": {
-      "title": "Your Account",
-      "body": "Your account is identified by your phone number. You are responsible for all activity associated with your phone number. Do not share access to your iMessage account with others for the purpose of using Lily."
+      "title": "Your Account, Messages & Reminders",
+      "body": "Your account is tied to your phone number. You are responsible for activity from that number and for securing your device, Apple account, iMessage, and passcode. Tell us promptly if access is lost or unauthorized. Do not treat iMessage as a private clinical channel; Apple, carriers, Sendblue, and people with access to your devices or notifications may see messages.\n\nYou authorize Lily to send requested onboarding, service, reminder, and account messages. Delivery timing is not guaranteed. You are responsible for carrier, data, roaming, and device charges. You can ask Lily to change or stop reminders, but transactional privacy, safety, or account messages may still be sent where necessary."
+    },
+    "products": {
+      "title": "Products, Links & Commercial Independence",
+      "body": "Lily does not manufacture, test, control, warrant, or assume responsibility for third-party products, ingredients, labels, sellers, websites, availability, quality, safety, legality, or results. A manufacturer label, recall, pharmacist, prescriber, or qualified clinician takes priority over Lily. Product mentions are informational, not endorsements or guarantees. Any sponsorship or affiliate relationship must be disclosed; unless disclosed, Lily does not receive compensation for a specific recommendation."
+    },
+    "payments": {
+      "title": "Trials, Subscriptions & Payments",
+      "body": "Some features may be free, trial-based, or paid. Before a paid purchase, we will present the price, currency, taxes, billing period, renewal terms, cancellation method, and any additional purchase terms. You authorize disclosed charges and must provide accurate billing information. Except where law or the purchase terms require otherwise, fees already charged are non-refundable. Mandatory cancellation, cooling-off, renewal, and refund rights where you live remain unaffected."
+    },
+    "acceptableUse": {
+      "title": "Acceptable Use",
+      "body": "You may not use Lily to violate law or another person's rights; provide medical care to others; impersonate someone; submit content without permission; exploit, scrape, reverse engineer, disrupt, overload, probe, or bypass the Service or its safeguards; distribute malware; automate abusive messaging; extract models, prompts, or system data; or use outputs to train a competing model where prohibited by law. You may not use Lily for diagnosis, emergencies, prescription decisions, or any high-risk purpose. We may investigate misuse and cooperate with lawful requests."
     },
     "ip": {
-      "title": "Intellectual Property",
-      "body": "All content, features, and functionality of Lily are owned by Lily and are protected by copyright and other intellectual property laws."
+      "title": "Your Content & Intellectual Property",
+      "body": "You keep ownership of content you submit. You give Lily a worldwide, non-exclusive, royalty-free license to host, reproduce, transmit, transform, and process that content only as needed to operate, secure, support, and improve the Service as described in the Privacy Policy. You confirm you have the rights and permissions needed for that license.\n\nLily, its branding, software, design, prompts, interfaces, and service content are owned by Lily or its licensors and protected by law. Subject to these Terms, we give you a limited, personal, revocable, non-transferable, non-exclusive right to use the Service. AI output may not be unique, may resemble output given to others, and may not qualify for intellectual-property protection. You are responsible for checking whether your use of output violates anyone's rights."
+    },
+    "thirdParties": {
+      "title": "Third-Party Services",
+      "body": "Lily relies on Apple, Sendblue, Vercel, AI providers, hosting and storage providers, and other third parties. Their systems and terms may apply, and we do not control their availability or independent conduct. To the maximum extent permitted by law, Lily is not responsible for a third party's service, product, content, security incident, delay, or failure."
+    },
+    "suspension": {
+      "title": "Changes, Suspension & Termination",
+      "body": "We may add, remove, limit, suspend, or discontinue features or access to protect users or the Service, comply with law, address risk or misuse, or operate the business. You may stop using Lily at any time and may request account deletion. Provisions that by their nature should survive—such as responsibility, intellectual property, warranty disclaimers, liability limits, indemnity, and disputes—survive termination."
+    },
+    "warranties": {
+      "title": "Disclaimer of Warranties",
+      "body": "TO THE MAXIMUM EXTENT PERMITTED BY LAW, LILY AND ALL OUTPUT ARE PROVIDED \"AS IS\" AND \"AS AVAILABLE.\" LILY AND ITS OPERATORS, AFFILIATES, LICENSORS, AND PROVIDERS DISCLAIM ALL EXPRESS, IMPLIED, STATUTORY, AND OTHER WARRANTIES, INCLUDING ACCURACY, COMPLETENESS, SAFETY, NON-INFRINGEMENT, MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, QUIET ENJOYMENT, AVAILABILITY, SECURITY, AND THAT THE SERVICE WILL BE ERROR-FREE OR ACHIEVE ANY SKINCARE OR OTHER RESULT. No statement or output creates a warranty unless expressly stated in a signed writing."
     },
     "liability": {
       "title": "Limitation of Liability",
-      "body": "Lily is provided \"as is\" without warranties of any kind. We are not liable for any damages arising from your use of the service, including outcomes based on routine guidance provided by the service."
+      "body": "TO THE MAXIMUM EXTENT PERMITTED BY LAW, LILY'S OPERATOR, AFFILIATES, OFFICERS, WORKERS, LICENSORS, AND SERVICE PROVIDERS WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, PUNITIVE, OR CONSEQUENTIAL DAMAGES; LOSS OF DATA, PROFITS, REVENUE, GOODWILL, OR USE; SUBSTITUTE SERVICES; PRODUCT REACTIONS; PERSONAL INJURY; DELAYED CARE; OR ANY LOSS ARISING FROM OR RELATED TO THE SERVICE, AI OUTPUT, PHOTOS, PRODUCTS, REMINDERS, OR YOUR RELIANCE ON THEM, EVEN IF ADVISED THAT SUCH LOSS WAS POSSIBLE.\n\nTO THE MAXIMUM EXTENT PERMITTED BY LAW, THEIR TOTAL AGGREGATE LIABILITY FOR ALL CLAIMS RELATING TO THE SERVICE WILL NOT EXCEED THE GREATER OF US$100 OR THE AMOUNT YOU PAID LILY FOR THE SERVICE IN THE 12 MONTHS BEFORE THE EVENT GIVING RISE TO THE CLAIM.\n\nThese exclusions and limits apply regardless of the legal theory and even if a remedy fails its essential purpose. They do not exclude liability that cannot lawfully be excluded or limited, such as liability for fraud, willful misconduct, or death or personal injury caused by negligence where applicable law forbids that exclusion. Your local law may give you additional rights."
+    },
+    "indemnity": {
+      "title": "Indemnity",
+      "body": "To the extent permitted by law, you will defend, indemnify, and hold harmless Lily's operator, affiliates, personnel, licensors, and providers from third-party claims, losses, liabilities, costs, and reasonable legal fees arising from your unlawful or unauthorized content or conduct, misuse of the Service, violation of these Terms, or infringement of another person's rights. This obligation does not apply to the extent a claim was caused by Lily's own unlawful conduct and does not limit non-waivable consumer rights."
+    },
+    "disputes": {
+      "title": "Disputes & Individual Claims",
+      "body": "Before filing a claim, you and Lily agree to try in good faith to resolve it informally. Send a written description and requested resolution to support@skintext.ai and allow 30 days for a response. This does not stop either party from seeking urgent injunctive relief, using an eligible small-claims procedure, contacting a regulator, or exercising a right that cannot be limited.\n\nTo the maximum extent permitted by law, you and Lily agree to bring claims only in an individual capacity and not as a plaintiff or class member in a class, collective, consolidated, coordinated, mass, or representative action. If applicable law does not permit this waiver, it will not apply. The governing law and forum are subject to mandatory consumer protections and the jurisdiction legally applicable to Lily's operator and you."
     },
     "changes": {
-      "title": "Changes to Terms",
-      "body": "We may update these terms from time to time. Continued use of Lily after changes constitutes acceptance of the new terms."
+      "title": "Changes to These Terms",
+      "body": "We may update these Terms as the Service or law changes. We will post the updated Terms and date. For material changes, we will provide reasonable notice and request renewed assent when required. Changes apply prospectively from their stated effective date. If you do not accept an update, stop using Lily and delete your account."
+    },
+    "general": {
+      "title": "General Terms",
+      "body": "These Terms and any purchase-specific terms are the entire agreement about the Service and replace prior statements on that subject. If a provision is unenforceable, it will be enforced to the maximum lawful extent and the rest remains effective. Failure to enforce a provision is not a waiver. You may not assign these Terms without our consent; we may assign them in connection with a reorganization, financing, merger, acquisition, or asset transfer. Headings are for convenience only. Nothing creates an agency, employment, partnership, fiduciary, or joint-venture relationship."
     },
     "contact": {
       "title": "Contact",
-      "body": "If you have questions about these terms, contact us at support@skintext.ai."
+      "body": "Questions, legal notices, and informal dispute notices may be sent to support@skintext.ai. Privacy requests should be sent to privacy@skintext.ai."
     }
   },
   "Footer": {

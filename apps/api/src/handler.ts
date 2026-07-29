@@ -83,7 +83,7 @@ export async function handleIncoming(
       releaseLock = await waitForMessageLock(encryptedPhone);
     }
 
-    log.set({ input: { text: text.slice(0, 80), hasImage: !!rawImageUrl } });
+    log.set({ input: { textLength: text.length, hasImage: !!rawImageUrl } });
     void sendTyping(phone).catch(() => undefined);
 
     const replies = await routeMessage(log, encryptedPhone, phone, text, rawImageUrl, messageId);

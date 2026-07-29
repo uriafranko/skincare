@@ -1,7 +1,7 @@
 export function createSharedMock(overrides: Record<string, unknown> = {}) {
   return {
     ADHERENCE_MILESTONES: {},
-    CONSENT_VERSION: "2026-06-04",
+    CONSENT_VERSION: "2026-07-29",
     DAILY_SUMMARY_HOUR: 22,
     PERSONALITY_POLICY_VERSION: "personality-v1",
     PHOTO_RETENTION_CONSENT_VERSION: "2026-07-26",

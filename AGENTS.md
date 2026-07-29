@@ -108,7 +108,7 @@ Useful scenarios:
 
 - Keep setup short and one-bubble when possible.
 - Do not ask for fields already provided.
-- If only consent is missing, ask only: `OK if I save this so reminders/logs work? You can delete it anytime.`
+- If only consent is missing, ask only for an explicit `AGREE` to skincare-data storage and the linked Terms; include both the Terms and Privacy URLs.
 - Treat `unsure` as valid for skin type or sensitivity.
 - Avoid form language such as `please provide`, `required fields`, or `the following`.
 - Completion copy should stay compact: `All set. Text done after your routine, or send a skin/product photo anytime you want help placing something.`

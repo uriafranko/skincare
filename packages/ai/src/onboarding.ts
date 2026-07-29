@@ -52,7 +52,7 @@ const extractionSchema = z.object({
     .boolean()
     .nullable()
     .describe(
-      "True if user agreed to store skincare data, false if refused, null if not addressed.",
+      "True only if the user explicitly agreed both to storing skincare data and to the Terms of Use, including by replying AGREE to Lily's combined request. False if refused; null if either part was not addressed.",
     ),
   detectedLocale: z
     .string()
@@ -95,10 +95,11 @@ export function createOnboardingGenerator(modelName?: string): OnboardingGenerat
 
 const generateDefaultOnboarding = createOnboardingGenerator();
 
-const CONSENT_ONLY_REPLY = "OK if I save this so reminders/logs work? You can delete it anytime.";
+const CONSENT_ONLY_REPLY =
+  "Reply AGREE if I can save your skincare data for reminders/logs and you accept the Terms of Use: https://skintext.ai/terms. Privacy: https://skintext.ai/privacy. You can delete your data anytime.";
 const CONSENT_ASK_DESCRIPTION =
-  "Ask whether it is OK to save setup details so reminders/logs work, and say they can delete it anytime.";
-const CONSENT_ONLY_REPLY_INSTRUCTION = `${CONSENT_ASK_DESCRIPTION} Ask this in the user's language, with no other setup asks.`;
+  'Ask the user to reply "AGREE" if Lily may save their skincare setup data for reminders/logs and they accept the Terms of Use. Include the exact URLs https://skintext.ai/terms and https://skintext.ai/privacy, identify the second as the Privacy Policy, and say they can delete their data anytime.';
+const CONSENT_ONLY_REPLY_INSTRUCTION = `${CONSENT_ASK_DESCRIPTION} Translate the surrounding text into the user's language but keep the word AGREE and both URLs unchanged. Make no other setup asks.`;
 
 const ENGLISH_AGE_GATE_REPLY = "Hey, I'm Lily. Before we get started, are you 16 or older?";
 const ENGLISH_UNDER_16_REPLY =
@@ -153,7 +154,7 @@ function describeState(state: OnboardingState): string {
   if (state.timezoneConfirmed && state.timezone) {
     parts.push(`confirmed timezone: ${state.timezone}`);
   }
-  if (state.consented) parts.push("consent: given");
+  if (state.consented) parts.push("data-storage and Terms consent: given");
   return parts.length > 0 ? parts.join(", ") : "nothing yet";
 }
 
@@ -168,7 +169,8 @@ function describeMissing(state: OnboardingState): string {
   if ((state.morningReminder || state.eveningReminder) && !state.timezoneConfirmed) {
     missing.push("city or timezone for reminders");
   }
-  if (!state.consented) missing.push("consent to store skincare data");
+  if (!state.consented)
+    missing.push("explicit agreement to the Terms and storage of skincare data");
   return missing.join(", ");
 }
 
@@ -263,7 +265,7 @@ EXTRACTION INSTRUCTIONS:
 - ageEligible: set true when the user explicitly confirms they are 16 or older, including an affirmative response to a previous 16+ question or a volunteered age of 16 or older. Set false when they explicitly say they are under 16, including a negative response to a previous 16+ question. Otherwise use null.
 - Never infer eligibility from appearance, language, phone number, products, or concerns.
 - Never request or extract an exact age or birthdate.
-- If your previous message asked the user to confirm something and the user replies affirmatively (yes, yeah, yep, ja, japp, oui, si, ok, sure, כן, etc.), mark consented as true only when the confirmation is about data storage.
+- Mark consented true only when the user explicitly agrees both to saving their skincare data and to the Terms of Use. A reply of AGREE to Lily's prior combined Terms-and-storage request qualifies. Agreement only to storage, or a generic affirmative without the prior combined request, does not qualify.
 - skinType: use "unsure" if they say they do not know.
 - sensitivity: use "unsure" if they say they do not know.
 - routinePreference: infer "simple" if they ask for minimal/basic, "detailed" if they want many steps, otherwise null unless stated.

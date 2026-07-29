@@ -258,7 +258,9 @@ describe("onboarding prompt source", () => {
 
   test("setup guidance localizes consent and CTA copy", async () => {
     const source = await Bun.file(new URL("../onboarding.ts", import.meta.url)).text();
-    expect(source).toContain("Ask whether it is OK to save setup details");
+    expect(source).toContain('Ask the user to reply "AGREE"');
+    expect(source).toContain("https://skintext.ai/terms");
+    expect(source).toContain("https://skintext.ai/privacy");
     expect(source).toContain("End with a localized low-friction CTA");
   });
 

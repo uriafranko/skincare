@@ -13,7 +13,7 @@ export const onboardingScenarios: SimulationScenario[] = [
       profile:
         "Maya wants a simple routine, dislikes long setup flows, and is comfortable with data storage when asked plainly.",
       messages: [
-        "Hi, I'm Maya and I'm 24. My goals are less redness and dryness. I have combination skin, medium sensitivity, and I avoid fragrance. I use a CeraVe cleanser and moisturizer. Remind me at 8am and 9pm. Yes, you can save this so reminders work.",
+        "Hi, I'm Maya and I'm 24. My goals are less redness and dryness. I have combination skin, medium sensitivity, and I avoid fragrance. I use a CeraVe cleanser and moisturizer. Remind me at 8am and 9pm. I agree to the Terms and you can save my skincare data so reminders work.",
       ],
     },
     expectations: {
@@ -38,7 +38,7 @@ export const onboardingScenarios: SimulationScenario[] = [
         "Noor answers the skincare questions but does not proactively agree to data storage until Lily asks.",
       messages: [
         "I'm 19 and my name is Noor. Oily skin, high sensitivity, acne is my main concern. I use a gentle cleanser and SPF. Mornings 7:30, evenings 10.",
-        "Yes, that's fine. You can save it.",
+        "AGREE",
       ],
     },
     expectations: {
@@ -65,7 +65,7 @@ export const onboardingScenarios: SimulationScenario[] = [
         "hey",
         "I'm 17. My name is Leo. Not sure on skin type. I get dry cheeks and breakouts. No fragrance please.",
         "Keep it simple. Remind me 07:30 and 22:00.",
-        "yes, save it",
+        "AGREE",
       ],
     },
     expectations: {
@@ -89,7 +89,7 @@ export const onboardingScenarios: SimulationScenario[] = [
       profile:
         "Dana writes in Hebrew, wants a simple routine, avoids fragrance, and gives consent in the first message.",
       messages: [
-        "שלום, אני דנה ואני בת 22. המטרה שלי היא פחות אדמומיות ויובש. העור שלי מעורב עם רגישות בינונית, ואני נמנעת מבישום. אני משתמשת בתכשיר ניקוי וקרם לחות. תזכיר לי ב-8:00 וב-21:00. כן, אפשר לשמור את זה.",
+        "שלום, אני דנה ואני בת 22. המטרה שלי היא פחות אדמומיות ויובש. העור שלי מעורב עם רגישות בינונית, ואני נמנעת מבישום. אני משתמשת בתכשיר ניקוי וקרם לחות. תזכיר לי ב-8:00 וב-21:00. אני מסכימה לתנאים ואפשר לשמור את הנתונים.",
       ],
     },
     expectations: {
@@ -112,7 +112,7 @@ export const onboardingScenarios: SimulationScenario[] = [
       kind: "scripted",
       profile: "Elin is 16 or older, writes in Swedish, and wants a simple fragrance-free routine.",
       messages: [
-        "Jag är 22 och heter Elin. Jag vill ha en enkel rutin för mindre rodnad. Min hud är kombinerad och medelkänslig. Jag använder rengöring och fuktkräm. Ja, ni kan spara data.",
+        "Jag är 22 och heter Elin. Jag vill ha en enkel rutin för mindre rodnad. Min hud är kombinerad och medelkänslig. Jag använder rengöring och fuktkräm. Jag godkänner villkoren och ni kan spara data.",
       ],
     },
     expectations: {

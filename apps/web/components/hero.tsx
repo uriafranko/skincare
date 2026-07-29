@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { ChromaCharacter } from "./chroma-character";
 import { IMessageButton } from "./imessage-button";
 import { LilyMark } from "./lily-mark";
+import { TrustedByPill } from "./trusted-by-pill";
 import { Highlighter } from "./ui/highlighter";
 import { TypingAnimation } from "./ui/typing-animation";
 
@@ -326,10 +327,10 @@ function MobileGuideStage({ activeScenario }: { activeScenario: DemoScenario }) 
             <HandDrawnArrow />
           </div>
 
-          <div className="relative min-h-[164px] overflow-hidden rounded-[19px] bg-[#f8f3ea] p-2.5">
+          <div className="relative min-h-[190px] overflow-hidden rounded-[19px] bg-[#f8f3ea] p-2.5 min-[480px]:min-h-[204px]">
             <div className="mb-1.5 flex items-center gap-2">
               <LilyMark size="sm" />
-              <p className="max-w-[72%] text-[10px] font-semibold leading-[1.35] text-[#34352f]">
+              <p className="max-w-[62%] text-[10px] font-semibold leading-[1.35] text-[#34352f]">
                 {t(`demo.${activeScenario}.answer`)}
               </p>
             </div>
@@ -337,7 +338,7 @@ function MobileGuideStage({ activeScenario }: { activeScenario: DemoScenario }) 
               <PlanVisual scenario={activeScenario} compact />
             </div>
             <motion.div
-              className="pointer-events-none absolute bottom-[-102px] right-[-57px] w-[64%] min-[480px]:bottom-[-114px] min-[480px]:right-[-38px] min-[480px]:w-[53%]"
+              className="pointer-events-none absolute bottom-1.5 right-1.5 h-[172px] w-[115px] min-[480px]:h-[186px] min-[480px]:w-[124px]"
               animate={activeScenario}
               variants={{
                 simplify: { y: [0, -5, 0], rotate: [0, -1, 0] },
@@ -587,6 +588,9 @@ export function Hero() {
               short
               className="w-full max-w-[460px] justify-center px-6 lg:w-auto lg:min-w-[250px]"
             />
+            <div className="w-fit">
+              <TrustedByPill />
+            </div>
             <HandDrawnHeart className="absolute right-[-5px] top-[-8px] h-14 w-[70px] min-[480px]:right-[8px] lg:left-[272px] lg:right-auto lg:top-[-12px]" />
             <p className="hidden text-[11px] leading-relaxed text-muted sm:text-[12px] lg:block">
               {t("trustLine")}

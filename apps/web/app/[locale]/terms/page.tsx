@@ -12,13 +12,25 @@ export default function TermsPage({ params }: Props) {
   const t = useTranslations("Terms");
 
   const sections = [
+    { title: t("agreement.title"), body: t("agreement.body") },
     { title: t("eligibility.title"), body: t("eligibility.body") },
     { title: t("service.title"), body: t("service.body") },
-    { title: t("accuracy.title"), body: t("accuracy.body") },
+    { title: t("medical.title"), body: t("medical.body") },
+    { title: t("responsibility.title"), body: t("responsibility.body") },
+    { title: t("photos.title"), body: t("photos.body") },
     { title: t("account.title"), body: t("account.body") },
+    { title: t("products.title"), body: t("products.body") },
+    { title: t("payments.title"), body: t("payments.body") },
+    { title: t("acceptableUse.title"), body: t("acceptableUse.body") },
     { title: t("ip.title"), body: t("ip.body") },
+    { title: t("thirdParties.title"), body: t("thirdParties.body") },
+    { title: t("suspension.title"), body: t("suspension.body") },
+    { title: t("warranties.title"), body: t("warranties.body") },
     { title: t("liability.title"), body: t("liability.body") },
+    { title: t("indemnity.title"), body: t("indemnity.body") },
+    { title: t("disputes.title"), body: t("disputes.body") },
     { title: t("changes.title"), body: t("changes.body") },
+    { title: t("general.title"), body: t("general.body") },
     { title: t("contact.title"), body: t("contact.body") },
   ];
 
