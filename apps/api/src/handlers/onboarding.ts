@@ -20,6 +20,7 @@ import {
 import type { RequestLogger } from "evlog";
 import { errorForLogging } from "@/logging";
 import { rejectUnder16PendingOnboarding } from "@/onboarding-eligibility";
+import { posthog } from "@/posthog";
 import { reminderRunManager } from "@/reminder-runs";
 
 function parseReminderTime(label: string, time?: string) {
@@ -59,6 +60,9 @@ export async function handleOnboarding(
   }
 
   log.set({ onboarding: { isFirstMessage, stateFields: Object.keys(state).length } });
+  if (isFirstMessage) {
+    posthog?.capture({ event: "onboarding_started" });
+  }
 
   const { extracted: modelExtracted, reply } = await processOnboardingMessage(text, state, {
     isFirstMessage,
@@ -76,6 +80,7 @@ export async function handleOnboarding(
 
   if (modelExtracted.ageEligible === false) {
     log.set({ onboarding: { ageEligible: false, accountDeleted: true } });
+    posthog?.capture({ event: "underage_onboarding_rejected" });
     const rejected = await rejectUnder16PendingOnboarding({
       extracted: modelExtracted,
       userId,
@@ -125,6 +130,11 @@ export async function handleOnboarding(
       onboardingComplete: true,
       consentedAt: new Date().toISOString(),
       consentVersion: CONSENT_VERSION,
+    });
+
+    posthog?.capture({
+      event: "onboarding_completed",
+      properties: { has_reminder_times: reminderTimes.length > 0 },
     });
 
     await initializeUserWorkingMemory(

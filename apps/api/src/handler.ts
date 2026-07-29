@@ -1,7 +1,8 @@
-import { reserveInboundMessage, tryAcquireMessageLock } from "@skintext/db";
+import { reserveInboundMessage, resolveUserId, tryAcquireMessageLock } from "@skintext/db";
 import { encrypt } from "@skintext/shared";
 import { createLogger, type RequestLogger } from "evlog";
 import { errorForLogging } from "@/logging";
+import { capturePostHogException } from "@/posthog";
 import { sendReplyBubbles } from "@/replies";
 import { routeConcurrentMessage, routeMessage } from "@/router";
 import { sendMessage, sendTyping } from "@/sendblue";
@@ -89,6 +90,8 @@ export async function handleIncoming(
     const replies = await routeMessage(log, encryptedPhone, phone, text, rawImageUrl, messageId);
     await deliverReplies(log, phone, replies);
   } catch (error) {
+    const userId = await resolveUserId(encryptedPhone).catch(() => undefined);
+    capturePostHogException(error, userId ?? undefined);
     log.error(errorForLogging(error));
     try {
       await sendMessage(phone, "Oops, something went wrong. Try again in a sec! 🙏");

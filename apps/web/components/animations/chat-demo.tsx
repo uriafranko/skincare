@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import type { CSSProperties, ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -86,8 +86,8 @@ function formatShortTime(date: Date): string {
   });
 }
 
-function formatDemoClock(locale: string, date: Date): string {
-  return new Intl.DateTimeFormat(locale, {
+function formatDemoClock(date: Date): string {
+  return new Intl.DateTimeFormat("en-US", {
     hour: "numeric",
     minute: "2-digit",
   })
@@ -95,8 +95,8 @@ function formatDemoClock(locale: string, date: Date): string {
     .replace(/\s?[APap][Mm]/, "");
 }
 
-function formatDemoDate(locale: string, date: Date): string {
-  return new Intl.DateTimeFormat(locale, {
+function formatDemoDate(date: Date): string {
+  return new Intl.DateTimeFormat("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -780,16 +780,12 @@ function IOSCameraView({ flash }: { flash: boolean }) {
 function NotificationBanner({
   title,
   body,
-  locale,
   tapped,
 }: {
   title: string;
   body: string;
-  locale: string;
   tapped: boolean;
 }) {
-  const nowLabel = locale === "sv" ? "nu" : "now";
-
   return (
     <motion.div
       initial={{ y: 300, opacity: 0, scale: 0.94, filter: "blur(10px)" }}
@@ -877,7 +873,7 @@ function NotificationBanner({
                 fontFamily: SF_FONT,
               }}
             >
-              {nowLabel}
+              now
             </span>
           </div>
           <p
@@ -901,9 +897,9 @@ function NotificationBanner({
   );
 }
 
-function LockScreen({ locale, currentDate }: { locale: string; currentDate: Date }) {
-  const dateStr = useMemo(() => formatDemoDate(locale, currentDate), [currentDate, locale]);
-  const timeStr = useMemo(() => formatDemoClock(locale, currentDate), [currentDate, locale]);
+function LockScreen({ currentDate }: { currentDate: Date }) {
+  const dateStr = useMemo(() => formatDemoDate(currentDate), [currentDate]);
+  const timeStr = useMemo(() => formatDemoClock(currentDate), [currentDate]);
   return (
     <motion.div
       className="absolute inset-0 flex flex-col items-center"
@@ -1140,14 +1136,12 @@ function IOSKeyboard() {
 }
 
 function ChatView({
-  locale,
   title,
   messages,
   composerText,
   isTyping,
   showKeyboard,
 }: {
-  locale: string;
   title: string;
   messages: ChatMessage[];
   composerText: string;
@@ -1200,8 +1194,6 @@ function ChatView({
 
   const visibleComposerText = composerText ? composerText.slice(0, typedLength) : "";
   const showSendButton = composerText.length > 0 && typedLength > 0;
-  const encryptedLabel = locale === "sv" ? "Krypterad" : "Encrypted";
-
   return (
     <div
       className="absolute inset-0 flex flex-col"
@@ -1329,7 +1321,7 @@ function ChatView({
                 strokeLinecap="round"
               />
             </svg>
-            <span>{encryptedLabel}</span>
+            <span>Encrypted</span>
           </div>
         </div>
       </div>
@@ -1522,12 +1514,11 @@ function ChatView({
 
 function buildScenarioData(
   scenario: ChatDemoScenario,
-  locale: string,
   featuresT: ReturnType<typeof useTranslations<"Features">>,
   phoneT: ReturnType<typeof useTranslations<"PhoneMockup">>,
   currentDate: Date,
 ): ScenarioData {
-  const readLabel = locale === "sv" ? "Läst 9:41" : "Read 9:41";
+  const readLabel = "Read 9:41";
   const routineMoment = getRoutineMoment(currentDate);
 
   switch (scenario) {
@@ -1546,10 +1537,7 @@ function buildScenarioData(
             sender: "user",
             text: "",
             imageSrc: CAMERA_IMAGE_SRC,
-            imageAlt:
-              locale === "sv"
-                ? "Abstrakt bild som används som produkt- och hudvårdsfoto i demot"
-                : "Abstract image used as a skincare and product photo in the demo",
+            imageAlt: "Abstract image used as a skincare and product photo in the demo",
             statusLabel: readLabel,
           },
           {
@@ -1633,7 +1621,6 @@ export function ChatIMessageAnimation({
   onComplete?: () => void;
   onBackTap?: () => void;
 }) {
-  const locale = useLocale();
   const featuresT = useTranslations("Features");
   const phoneT = useTranslations("PhoneMockup");
   const clientNow = useClientNow();
@@ -1657,8 +1644,8 @@ export function ChatIMessageAnimation({
   const activeDate = referenceDate ?? DEMO_DATE;
 
   const data = useMemo(
-    () => buildScenarioData(scenario, locale, featuresT, phoneT, activeDate),
-    [activeDate, scenario, locale, featuresT, phoneT],
+    () => buildScenarioData(scenario, featuresT, phoneT, activeDate),
+    [activeDate, scenario, featuresT, phoneT],
   );
 
   useEffect(() => {
@@ -1822,12 +1809,11 @@ export function ChatIMessageAnimation({
             transition={{ duration: 0.35, ease: "easeOut" }}
             className="absolute inset-0"
           >
-            <LockScreen locale={locale} currentDate={activeDate} />
+            <LockScreen currentDate={activeDate} />
             {notificationVisible ? (
               <NotificationBanner
                 title={phoneT("lockTitle")}
                 body={data.notificationText}
-                locale={locale}
                 tapped={notificationTapped}
               />
             ) : null}
@@ -1853,7 +1839,6 @@ export function ChatIMessageAnimation({
             className="absolute inset-0"
           >
             <ChatView
-              locale={locale}
               title={phoneT("header")}
               messages={data.messages.slice(0, visibleMessages)}
               composerText={composerDraft}

@@ -1,14 +1,6 @@
 import { useTranslations } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
-import { use } from "react";
 
-type Props = {
-  params: Promise<{ locale: string }>;
-};
-
-export default function TermsPage({ params }: Props) {
-  const { locale } = use(params);
-  setRequestLocale(locale);
+export default function TermsPage() {
   const t = useTranslations("Terms");
 
   const sections = [

@@ -6,6 +6,7 @@ import { getRun, start } from "workflow/api";
 import { runAgentMessage } from "@/agent-runner";
 import type { NormalizedImage } from "@/image";
 import { errorForLogging } from "@/logging";
+import { posthog } from "@/posthog";
 import { reminderRunManager } from "@/reminder-runs";
 import { sendUiMessageAttachment } from "@/ui-messages";
 import {
@@ -53,6 +54,7 @@ export async function handleMessage(
         log.set({ imageDeleteError: true });
       });
       await deleteAllUserData(deleteUserId);
+      posthog?.capture({ event: "account_deleted" });
     },
     scheduleOneOffReminderWorkflow: async ({ userId, reminderId }) => {
       const run = await start(oneOffReminderWorkflow, [userId, reminderId]);

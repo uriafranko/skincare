@@ -15,11 +15,13 @@
     "@skintext/db": "*",
     "@skintext/shared": "*",
     "@vercel/blob": "^2.4.0",
+    "@vercel/functions": "^3.6.2",
     "evlog": "^2.11.1",
     "files-sdk": "^1.8.0",
     "heic-convert": "^2.1.0",
     "hono": "^4.12.12",
     "nitro": "^3.0.260311-beta",
+    "posthog-node": "^5.46.1",
     "sharp": "^0.34.5",
     "workflow": "^4.2.0"
   },

@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import { Geist, Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import messages from "@/messages/en.json";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -16,10 +19,27 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   display: "swap",
 });
 
+export const metadata: Metadata = {
+  title: messages.Metadata.title,
+  description: messages.Metadata.description,
+  openGraph: {
+    title: messages.Metadata.ogTitle,
+    description: messages.Metadata.ogDescription,
+    type: "website",
+  },
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html className={cn(inter.variable, plusJakartaSans.variable, "font-sans", geist.variable)}>
-      <body>{children}</body>
+    <html
+      lang="en"
+      className={cn(inter.variable, plusJakartaSans.variable, "font-sans", geist.variable)}
+    >
+      <body>
+        <NextIntlClientProvider locale="en" messages={messages}>
+          {children}
+        </NextIntlClientProvider>
+      </body>
     </html>
   );
 }

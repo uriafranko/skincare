@@ -4,6 +4,7 @@ import { type EvlogVariables, evlog } from "evlog/hono";
 import { Hono } from "hono";
 import { handleIncoming } from "@/handler";
 import { errorForLogging } from "@/logging";
+import { capturePostHogException } from "@/posthog";
 import { reminderRunManager } from "@/reminder-runs";
 import { markRead, parseInbound } from "@/sendblue";
 import { pruneExpiredUserImageBlobs } from "@/user-images";
@@ -12,6 +13,12 @@ initLogger({ env: { service: "skintext" } });
 
 const app = new Hono<EvlogVariables>();
 app.use(evlog());
+
+app.onError((error, c) => {
+  capturePostHogException(error);
+  c.get("log").error(errorForLogging(error));
+  return c.json({ error: "internal server error" }, 500);
+});
 
 app.get("/health", (c) => c.json({ status: "ok", service: "skintext" }));
 
@@ -47,12 +54,14 @@ app.post("/webhooks/sendblue", async (c) => {
     if (!msg) return c.json({ ok: true });
 
     const readReceipt = markRead(msg.phone).catch((error) => {
+      capturePostHogException(error);
       log.error(errorForLogging(error));
     });
     await handleIncoming(msg.phone, msg.text, msg.imageUrl, msg.messageId);
     await readReceipt;
     return c.json({ ok: true });
   } catch (error) {
+    capturePostHogException(error);
     log.error(errorForLogging(error));
     return c.json({ error: "webhook failed" }, 500);
   }

@@ -14,6 +14,7 @@ import { Files } from "files-sdk";
 import { vercelBlob } from "files-sdk/vercel-blob";
 import type { NormalizedImage } from "@/image";
 import { errorForLogging } from "@/logging";
+import { posthog } from "@/posthog";
 import { sendImageFile } from "@/sendblue";
 
 const USER_IMAGE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
@@ -128,6 +129,10 @@ export async function saveInboundUserImage({
   }
 
   log?.set({ imageStorage: { retained: true, ttlDays: 30 } });
+  posthog?.capture({
+    event: "photo_retained",
+    properties: { content_type: image.contentType, size_bytes: image.size, ttl_days: 30 },
+  });
   return record;
 }
 

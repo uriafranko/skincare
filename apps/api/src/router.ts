@@ -5,6 +5,7 @@ import { handleMessage } from "@/handlers/message";
 import { handleOnboarding } from "@/handlers/onboarding";
 import { normalizeInboundImage } from "@/image";
 import { errorForLogging } from "@/logging";
+import { posthog } from "@/posthog";
 import { isExplicitTermsAcceptance, termsAcceptedReply, updatedTermsPrompt } from "@/terms-consent";
 import { pruneExpiredUserImageBlobs } from "@/user-images";
 
@@ -19,6 +20,10 @@ async function requireCurrentTerms(user: UserAccount, text: string): Promise<str
   });
   user.consentedAt = consentedAt;
   user.consentVersion = CONSENT_VERSION;
+  posthog?.capture({
+    event: "terms_accepted",
+    properties: { consent_version: CONSENT_VERSION },
+  });
   return [termsAcceptedReply(user.locale)];
 }
 
@@ -46,8 +51,18 @@ export async function routeConcurrentMessage(
   }
 
   log.set({ userId, route: "message", concurrent: true });
-  const reply = await handleMessage(log, user, rawPhone, text, undefined, undefined, messageId);
+  const reply = await withUserContext(userId, () => {
+    posthog?.capture({
+      event: "user_message_received",
+      properties: { has_image: false, concurrent: true },
+    });
+    return handleMessage(log, user, rawPhone, text, undefined, undefined, messageId);
+  });
   return reply ? [reply] : [];
+}
+
+function withUserContext<T>(userId: string, callback: () => T): T {
+  return posthog ? posthog.withContext({ distinctId: userId }, callback) : callback();
 }
 
 export async function routeMessage(
@@ -72,7 +87,34 @@ export async function routeMessage(
   }
 
   log.set({ userId });
+  return withUserContext(userId, () =>
+    routeMessageForUser(
+      log,
+      userId,
+      encryptedPhone,
+      rawPhone,
+      text,
+      region?.locale,
+      region?.timezone,
+      region?.country,
+      rawImageUrl,
+      messageId,
+    ),
+  );
+}
 
+async function routeMessageForUser(
+  log: RequestLogger,
+  userId: string,
+  encryptedPhone: string,
+  rawPhone: string,
+  text: string,
+  detectedLocale?: string,
+  detectedTimezone?: string,
+  detectedCountry?: string,
+  rawImageUrl?: string,
+  messageId?: string,
+): Promise<string[]> {
   const user = await getUser(userId);
 
   if (!user?.onboardingComplete) {
@@ -82,9 +124,9 @@ export async function routeMessage(
       userId,
       text,
       encryptedPhone,
-      region?.locale ?? user?.locale ?? "en",
-      region?.timezone ?? user?.timezone ?? "UTC",
-      region?.country ?? user?.country ?? "US",
+      detectedLocale ?? user?.locale ?? "en",
+      detectedTimezone ?? user?.timezone ?? "UTC",
+      detectedCountry ?? user?.country ?? "US",
     );
   }
 
@@ -115,6 +157,10 @@ export async function routeMessage(
   }
 
   log.set({ route: "message" });
+  posthog?.capture({
+    event: "user_message_received",
+    properties: { has_image: !!normalizedImage, concurrent: false },
+  });
   const reply = await handleMessage(
     log,
     user,
