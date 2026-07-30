@@ -36,9 +36,6 @@ const SHELF_BOTTLES = [
 
 type DemoScenario = (typeof DEMO_SCENARIOS)[number]["id"];
 
-const EDITORIAL_FONT =
-  "[font-family:'Iowan_Old_Style','Palatino_Linotype','Book_Antiqua',Georgia,serif]";
-
 function HandDrawnHeart({ className = "" }: { className?: string }) {
   return (
     <motion.svg
@@ -559,9 +556,7 @@ export function Hero() {
               {t("eyebrow")}
             </Highlighter>
           </p>
-          <h1
-            className={`max-w-[680px] text-[3.25rem] font-normal leading-[0.91] tracking-[-0.05em] text-primary min-[480px]:text-[4rem] sm:text-[5rem] lg:max-w-[610px] lg:text-[4.35rem] xl:text-[5.7rem] ${EDITORIAL_FONT}`}
-          >
+          <h1 className="max-w-[680px] text-[3.25rem] font-normal leading-[0.91] tracking-[-0.05em] text-primary min-[480px]:text-[4rem] sm:text-[5rem] lg:max-w-[610px] lg:text-[4.35rem] xl:text-[5.7rem]">
             {t("headline")}
           </h1>
           <p className="mt-6 min-h-[54px] max-w-[540px] text-[18px] font-medium leading-[1.5] text-[#5f6c63] min-[480px]:min-h-[36px] min-[480px]:text-[20px] sm:text-[22px] lg:mt-7">

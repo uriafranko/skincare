@@ -42,7 +42,7 @@ export function IMessageButton({
         </span>
       ) : null}
       <span
-        className={`flex min-w-0 items-center justify-center font-heading font-semibold tracking-[-0.02em] text-white ${showIcon ? (compact ? "pr-0.5 text-[0.84rem]" : "pr-0.5 text-[0.94rem]") : compact ? "px-2.5 text-[0.84rem]" : "px-4 text-[0.94rem]"} ${edgeIcon ? "w-full px-10" : ""}`}
+        className={`flex min-w-0 items-center justify-center font-body font-semibold tracking-[-0.02em] text-white ${showIcon ? (compact ? "pr-0.5 text-[0.84rem]" : "pr-0.5 text-[0.94rem]") : compact ? "px-2.5 text-[0.84rem]" : "px-4 text-[0.94rem]"} ${edgeIcon ? "w-full px-10" : ""}`}
       >
         {short ? t("shortLabel") : t("label")}
       </span>

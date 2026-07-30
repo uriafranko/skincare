@@ -13,7 +13,7 @@ export function ChatShowcase() {
             <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-accent">
               {t("story.eyebrow")}
             </p>
-            <h2 className="mt-4 text-4xl font-normal leading-[1.02] tracking-[-0.045em] text-primary [font-family:'Iowan_Old_Style','Palatino_Linotype','Book_Antiqua',Georgia,serif] sm:text-[3.35rem]">
+            <h2 className="mt-4 text-4xl font-normal leading-[1.02] tracking-[-0.045em] text-primary sm:text-[3.35rem]">
               {t("story.heading")}
             </h2>
             <p className="mt-4 text-[16px] leading-[1.65] text-secondary">{t("story.subtitle")}</p>
