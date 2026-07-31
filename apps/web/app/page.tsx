@@ -5,6 +5,7 @@ import { Footer } from "@/components/footer";
 import { Hero } from "@/components/hero";
 import { Nav } from "@/components/nav";
 import { QuickValueSection } from "@/components/quick-value-section";
+import { TestimonialsSection } from "@/components/testimonials-section";
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
         <CleanHero />
         <Hero />
         <QuickValueSection />
+        <TestimonialsSection />
         <FinalCtaSection />
         <Faq />
       </main>
