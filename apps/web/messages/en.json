@@ -1,8 +1,8 @@
 {
   "Metadata": {
-    "title": "Lily — A simpler skincare routine in iMessage",
-    "description": "Text Lily a skin photo, product label, or routine question. Get practical guidance and a clear next step—without another app or products to sell.",
-    "ogTitle": "Lily — A simpler skincare routine in iMessage",
+    "title": "Lily - A simpler skincare routine in iMessage",
+    "description": "Text Lily a skin photo, product label, or routine question. Get practical guidance and a clear next step-without another app or products to sell.",
+    "ogTitle": "Lily - A simpler skincare routine in iMessage",
     "ogDescription": "Turn a skin photo, product label, or routine question into one clear next step, right in iMessage."
   },
   "Nav": {
@@ -26,12 +26,12 @@
         "1": {
           "eyebrow": "What’s visible",
           "heading": "See what stands out.",
-          "body": "Lily points out visible texture, redness, and dry-looking areas—without pretending to diagnose."
+          "body": "Lily points out visible texture, redness, and dry-looking areas-without pretending to diagnose."
         },
         "2": {
           "eyebrow": "What changes the answer",
           "heading": "Your routine changes the answer.",
-          "body": "Your products, sensitivity, and recent changes shape the next step—not a generic skin score."
+          "body": "Your products, sensitivity, and recent changes shape the next step-not a generic skin score."
         },
         "3": {
           "eyebrow": "Your plan for tonight",
@@ -219,22 +219,22 @@
     "quick": {
       "eyebrow": "More ways Lily helps",
       "heading": "Make tonight’s routine easier.",
-      "body": "Send the question in front of you—check a product, simplify your shelf, or get help staying consistent.",
+      "body": "Send the question in front of you-check a product, simplify your shelf, or get help staying consistent.",
       "check": {
         "heading": "Check a product",
         "body": "See where it fits, how to start, and what to watch for."
       },
       "simplify": {
         "heading": "Simplify your routine",
-        "body": "Find the few steps worth keeping—and what you can leave out."
+        "body": "Find the few steps worth keeping-and what you can leave out."
       },
       "consistent": {
         "heading": "Stay consistent",
-        "body": "Get gentle check-ins and pick up where you left off—no streaks or guilt."
+        "body": "Get gentle check-ins and pick up where you left off-no streaks or guilt."
       },
       "independence": {
         "heading": "Your shelf, not our store.",
-        "body": "Lily helps you decide what to use—not what to buy. Sometimes the right next step is to wait, use less, or change nothing.",
+        "body": "Lily helps you decide what to use-not what to buy. Sometimes the right next step is to wait, use less, or change nothing.",
         "badge": "No product sales"
       }
     },
@@ -420,8 +420,8 @@
     "q3": "What happens to photos I send?",
     "a3": "By default, Lily processes a photo for the current reply and does not add it to Lily’s conversation history or photo store. If you separately opt in, Lily can keep a private copy for up to 30 days. Messaging and AI providers may still process it temporarily under their own terms. You can ask Lily to delete saved photos.",
     "q4": "Is Lily a dermatologist?",
-    "a4": "No. Lily is an AI skincare routine and education assistant—not a doctor, dermatologist, medical device, or emergency service. She does not diagnose conditions or replace qualified professional care.",
-    "q5": "What does Lily remember—and can I delete it?",
+    "a4": "No. Lily is an AI skincare routine and education assistant-not a doctor, dermatologist, medical device, or emergency service. She does not diagnose conditions or replace qualified professional care.",
+    "q5": "What does Lily remember-and can I delete it?",
     "a5": "After you consent, Lily can remember your routine, goals, products, and reactions so future replies fit you better. Ask what Lily remembers, correct or forget current routine details, delete saved photos, or delete your account."
   },
   "BottomCta": {
