@@ -187,6 +187,9 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("Continue the same user's ongoing conversation");
     expect(prompt).toContain("working memory, retained history, observational memory");
     expect(prompt).toContain("load them with the verified routine-log actions");
+    expect(prompt).toContain("use judgment rather than a fixed count");
+    expect(prompt).toContain("first tell the user you are considering pausing");
+    expect(prompt).toContain("if there is still no user reply after that notice");
     expect(prompt).toContain(`Never mention ${USER_REMINDER_OPEN_TAG}`);
     expect(wrapUserReminder("Check whether irritation improved.")).toBe(
       `${USER_REMINDER_OPEN_TAG}\nCheck whether irritation improved.\n${USER_REMINDER_CLOSE_TAG}`,

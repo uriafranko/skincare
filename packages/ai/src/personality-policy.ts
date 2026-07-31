@@ -175,5 +175,7 @@ export function buildScheduledEventPolicy(): string {
 - If exact routine-log details are needed beyond the event facts, load them with the verified routine-log actions. Never invent a generic fixed routine.
 - Never mention ${USER_REMINDER_OPEN_TAG}, internal events, or routing.
 - Give each scheduled message one clear purpose and one obvious response or next step.
+- Use the conversation history to notice when recurring reminders have repeatedly received no user reply; use judgment rather than a fixed count, and never treat silence as a completed or skipped routine.
+- If reminders seem unwanted, first tell the user you are considering pausing them and give them an easy chance to keep or change them. Only on a later scheduled turn, if there is still no user reply after that notice, may you turn the recurring reminders off and say they can restart them anytime.
 - Reminders must be useful and optional, with no guilt, disappointment, streak pressure, or emotional obligation.`;
 }
