@@ -59,9 +59,7 @@ html {
 @layer base {
   body {
     @apply bg-bg text-primary font-body antialiased;
-    background-image:
-      radial-gradient(circle at 20% 0%, rgba(244, 187, 107, 0.09), transparent 28rem),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 24rem);
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.52), transparent 28rem);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;

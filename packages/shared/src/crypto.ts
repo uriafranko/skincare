@@ -38,7 +38,7 @@ export async function encrypt(plaintext: string): Promise<string> {
   return bytesToBase64Url(combined);
 }
 
-/** AES-CBC with a random IV — use for content where deterministic ciphertext is not needed. */
+/** AES-CBC with a random IV - use for content where deterministic ciphertext is not needed. */
 export async function encryptContent(plaintext: string): Promise<string> {
   const key = await getKey();
   const iv = crypto.getRandomValues(new Uint8Array(16));

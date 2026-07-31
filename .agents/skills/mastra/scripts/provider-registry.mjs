@@ -57,7 +57,7 @@ function extractVersion(name) {
   const processed = [];
   for (const c of candidates) {
     let parts = c.numStr.split(/[.\-]/).map(Number);
-    // If followed by a size suffix (b/B/k/K/m/M/t/T) — e.g. "8b", "70B", "1t" —
+    // If followed by a size suffix (b/B/k/K/m/M/t/T) - e.g. "8b", "70B", "1t" -
     // strip the last numeric part (param count) but keep earlier parts as the version
     if (/^[bBkKmMtT]$/.test(c.suffix)) {
       parts = parts.slice(0, -1);
@@ -101,7 +101,7 @@ function compareVersionsDesc(a, b) {
     const bi = vb[i] ?? 0;
     if (bi !== ai) return bi - ai;
   }
-  // Same version — secondary sort by full name descending
+  // Same version - secondary sort by full name descending
   return b.localeCompare(a);
 }
 
@@ -146,7 +146,7 @@ function listModels(registry, providerName) {
 
   const models = [...provider.models].sort(compareVersionsDesc);
 
-  console.log(`${provider.name || providerName} — ${models.length} models\n`);
+  console.log(`${provider.name || providerName} - ${models.length} models\n`);
   for (const model of models) {
     console.log(`  ${model}`);
   }

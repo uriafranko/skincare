@@ -17,7 +17,7 @@ export function Nav() {
           </a>
 
           <div className="hidden items-center gap-8 text-[13px] font-medium text-primary/78 lg:flex">
-            <a href="#features" className="transition-colors hover:text-primary">
+            <a href="#how-it-works" className="transition-colors hover:text-primary">
               {t("features")}
             </a>
             <a href="#faqs" className="transition-colors hover:text-primary">

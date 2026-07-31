@@ -22,7 +22,7 @@ export function TrustedByPill() {
       <span aria-hidden="true">🎉</span>
       <hr className="mx-2 h-4 w-px shrink-0 bg-neutral-500" />
       <AnimatedGradientText className="text-sm font-medium">
-        Trusted by +20,000 women
+        Built for practical iMessage help
       </AnimatedGradientText>
       <ChevronRight
         className="ml-1 size-4 stroke-neutral-500 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5"

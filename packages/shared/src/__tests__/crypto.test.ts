@@ -16,7 +16,7 @@ describe("encrypt / decrypt", () => {
     expect(decrypted).toBe(phone);
   });
 
-  test("deterministic — same input produces same ciphertext", async () => {
+  test("deterministic - same input produces same ciphertext", async () => {
     const phone = "+14155551234";
     const a = await encrypt(phone);
     const b = await encrypt(phone);
