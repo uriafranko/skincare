@@ -8,8 +8,8 @@ export function Footer() {
   return (
     <footer id="site-footer" className="w-full border-t border-border/80 py-8">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-5 px-5 text-center sm:flex-row sm:px-6 sm:text-left">
-        <div>
-          <div className="flex items-center gap-2">
+        <div className="text-center">
+          <div className="flex items-center justify-center gap-2">
             <LilyMark />
             <p className="text-[1.25rem] leading-none font-normal tracking-[-0.035em] text-primary [font-family:'Iowan_Old_Style','Palatino_Linotype','Book_Antiqua',Georgia,serif]">
               {t("logo")}

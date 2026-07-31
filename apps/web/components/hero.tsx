@@ -57,7 +57,7 @@ function StageCopy({ stage }: { stage: number }) {
         transition={{ duration: 0.24, ease: "easeOut" }}
         className="mx-auto max-w-[720px] text-center md:mx-0 md:max-w-[520px] md:text-left"
       >
-        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#236d38]">
+        <p className="text-[14px] font-bold uppercase tracking-[0.14em] text-[#236d38]">
           {t(`stages.${stage}.eyebrow`)}
         </p>
         <h2 className="mt-2 text-[2.65rem] font-normal leading-[0.93] tracking-[-0.055em] text-primary [font-family:'Iowan_Old_Style','Palatino_Linotype','Book_Antiqua',Georgia,serif] sm:text-[3.75rem] md:text-[clamp(3.2rem,5.1vw,4.75rem)]">

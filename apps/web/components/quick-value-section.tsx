@@ -45,17 +45,17 @@ export function QuickValueSection() {
           ))}
         </div>
 
-        <div className="mt-4 rounded-[24px] bg-[#20211f] px-5 py-6 text-white sm:flex sm:items-center sm:justify-between sm:gap-8 sm:px-7">
+        <div className="mt-4 rounded-[24px] border border-[#dce8dc] bg-[#f8fbf7] px-5 py-6 sm:flex sm:items-center sm:justify-between sm:gap-8 sm:px-7">
           <div>
-            <p className="text-[18px] font-semibold tracking-[-0.035em]">
+            <p className="text-[18px] font-semibold tracking-[-0.035em] text-primary">
               {t("independence.heading")}
             </p>
-            <p className="mt-1.5 max-w-[650px] text-[12px] leading-[1.5] text-white/58">
+            <p className="mt-1.5 max-w-[650px] text-[12px] leading-[1.5] text-secondary">
               {t("independence.body")}
             </p>
           </div>
-          <span className="mt-4 inline-flex shrink-0 items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-[10px] font-semibold text-white/76 sm:mt-0">
-            <ShieldCheck className="size-3.5 text-[#8bd29d]" />
+          <span className="mt-4 inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#e4f0e3] px-3 py-1.5 text-[10px] font-semibold text-[#236d38] sm:mt-0">
+            <ShieldCheck className="size-3.5" />
             {t("independence.badge")}
           </span>
         </div>

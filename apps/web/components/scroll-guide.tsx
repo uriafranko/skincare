@@ -99,7 +99,7 @@ export function ScrollGuide() {
           role="status"
           aria-live="polite"
         >
-          <span className="mb-1.5 block text-[12px] font-bold uppercase tracking-[0.14em] text-accent">
+          <span className="mb-1.5 block text-[14px] font-bold uppercase tracking-[0.14em] text-accent">
             Lily
           </span>
           {t(`tips.${currentTip}`)}
