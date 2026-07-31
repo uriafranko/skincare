@@ -55,15 +55,15 @@ function StageCopy({ stage }: { stage: number }) {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
         transition={{ duration: 0.24, ease: "easeOut" }}
-        className="mx-auto max-w-[720px] text-center"
+        className="mx-auto max-w-[720px] text-center md:mx-0 md:max-w-[520px] md:text-left"
       >
         <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#236d38]">
           {t(`stages.${stage}.eyebrow`)}
         </p>
-        <h2 className="mt-2 text-[2.65rem] font-normal leading-[0.93] tracking-[-0.055em] text-primary [font-family:'Iowan_Old_Style','Palatino_Linotype','Book_Antiqua',Georgia,serif] sm:text-[4.8rem]">
+        <h2 className="mt-2 text-[2.65rem] font-normal leading-[0.93] tracking-[-0.055em] text-primary [font-family:'Iowan_Old_Style','Palatino_Linotype','Book_Antiqua',Georgia,serif] sm:text-[3.75rem] md:text-[clamp(3.2rem,5.1vw,4.75rem)]">
           {t(`stages.${stage}.heading`)}
         </h2>
-        <p className="mx-auto mt-3 max-w-[560px] text-[13px] leading-[1.5] text-secondary sm:text-[16px]">
+        <p className="mx-auto mt-3 max-w-[560px] text-[13px] leading-[1.5] text-secondary sm:text-[16px] md:mx-0 md:max-w-[460px] md:text-[15px]">
           {t(`stages.${stage}.body`)}
         </p>
       </motion.div>
@@ -180,84 +180,86 @@ export function Hero() {
     <section
       id="how-it-works"
       ref={sectionRef}
-      className="relative h-[320svh] bg-[#fbfaf7] sm:h-[300svh]"
+      className="relative h-[320svh] bg-[#fbfaf7] sm:h-[300svh] md:h-[280svh]"
     >
       <div className="sticky top-0 h-[100svh] overflow-hidden">
-        <div className="relative z-40 px-5 pt-22 sm:px-7 sm:pt-24">
-          <StageCopy stage={stage} />
-        </div>
+        <div className="relative h-full md:mx-auto md:grid md:max-w-[1180px] md:grid-cols-[minmax(0,1fr)_minmax(340px,0.92fr)] md:items-center md:gap-8 md:px-8 md:pt-20 lg:grid-cols-[minmax(0,1fr)_minmax(420px,520px)] lg:gap-16 xl:gap-24">
+          <div className="relative z-40 px-5 pt-22 sm:px-7 sm:pt-24 md:px-0 md:pt-0">
+            <StageCopy stage={stage} />
+          </div>
 
-        <div className="absolute inset-x-4 bottom-[-3svh] top-[255px] mx-auto max-w-[430px] sm:top-[290px] sm:max-w-[500px]">
-          <div className="relative h-full overflow-hidden rounded-t-[42px] border-x border-t border-white bg-white shadow-[0_28px_90px_rgba(42,38,34,0.14)] ring-1 ring-black/[0.04]">
-            <motion.div
-              style={{ scale: reduceMotion ? 1 : imageScale }}
-              className="absolute inset-0 origin-center"
-            >
-              <Image
-                src="/editorial/face-scan-portrait-v1.png"
-                alt={t("portraitAlt")}
-                fill
-                priority
-                sizes="(max-width: 640px) calc(100vw - 32px), 500px"
-                className="object-cover object-[50%_23%]"
+          <div className="absolute inset-x-4 bottom-[-3svh] top-[255px] mx-auto max-w-[430px] sm:top-[290px] sm:max-w-[500px] md:relative md:inset-auto md:mx-0 md:h-[min(76svh,720px)] md:w-full md:max-w-none">
+            <div className="relative h-full overflow-hidden rounded-t-[42px] border-x border-t border-white bg-white shadow-[0_28px_90px_rgba(42,38,34,0.14)] ring-1 ring-black/[0.04] md:rounded-[42px] md:border">
+              <motion.div
+                style={{ scale: reduceMotion ? 1 : imageScale }}
+                className="absolute inset-0 origin-center"
+              >
+                <Image
+                  src="/editorial/face-scan-portrait-v1.png"
+                  alt={t("portraitAlt")}
+                  fill
+                  priority
+                  sizes="(max-width: 767px) calc(100vw - 32px), (max-width: 1279px) 44vw, 520px"
+                  className="object-cover object-[50%_23%]"
+                />
+              </motion.div>
+
+              <motion.div
+                style={{ opacity: faceShade }}
+                className="absolute inset-0 z-10 bg-[#20211f]"
+                aria-hidden="true"
               />
-            </motion.div>
 
-            <motion.div
-              style={{ opacity: faceShade }}
-              className="absolute inset-0 z-10 bg-[#20211f]"
-              aria-hidden="true"
-            />
-
-            <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between bg-gradient-to-b from-black/26 to-transparent px-4 pb-10 pt-4 text-white">
-              <span className="flex items-center gap-1.5 rounded-full bg-black/22 px-2.5 py-1 text-[9px] font-semibold backdrop-blur-md">
-                <ShieldCheck className="size-3" />
-                {t("privacy")}
-              </span>
-              <span className="rounded-full bg-black/22 px-2.5 py-1 text-[9px] font-semibold backdrop-blur-md">
-                {t("stageCount", { current: stage + 1 })}
-              </span>
-            </div>
-
-            <motion.div
-              style={{ top: scanTop, opacity: scanOpacity }}
-              className="absolute inset-x-0 z-30 h-px bg-white shadow-[0_0_14px_3px_rgba(255,255,255,0.78)]"
-              aria-hidden="true"
-            >
-              <span className="absolute inset-x-0 -top-12 h-12 bg-gradient-to-b from-transparent to-[#8bd29d]/12" />
-            </motion.div>
-
-            <motion.div
-              initial={false}
-              animate={{ opacity: stage === 1 ? 1 : 0 }}
-              transition={{ duration: 0.28 }}
-              className="absolute inset-0 z-30"
-              aria-hidden={stage !== 1}
-            >
-              <AnalysisPoint label={t("points.texture")} className="left-[16%] top-[28%]" />
-              <AnalysisPoint
-                label={t("points.redness")}
-                className="right-[9%] top-[48%]"
-                align="right"
-              />
-              <AnalysisPoint label={t("points.dryness")} className="left-[19%] top-[68%]" />
-              <div className="absolute inset-x-3 bottom-4 rounded-[18px] bg-white/88 px-3 py-2.5 text-center text-[9px] leading-[1.4] text-secondary shadow-[0_12px_34px_rgba(39,36,33,0.12)] backdrop-blur-xl">
-                {t("visibleNote")}
+              <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between bg-gradient-to-b from-black/26 to-transparent px-4 pb-10 pt-4 text-white">
+                <span className="flex items-center gap-1.5 rounded-full bg-black/22 px-2.5 py-1 text-[9px] font-semibold backdrop-blur-md">
+                  <ShieldCheck className="size-3" />
+                  {t("privacy")}
+                </span>
+                <span className="rounded-full bg-black/22 px-2.5 py-1 text-[9px] font-semibold backdrop-blur-md">
+                  {t("stageCount", { current: stage + 1 })}
+                </span>
               </div>
-            </motion.div>
 
-            <RoutineContext visible={stage === 2} />
-            <TonightResult visible={stage === 3} />
+              <motion.div
+                style={{ top: scanTop, opacity: scanOpacity }}
+                className="absolute inset-x-0 z-30 h-px bg-white shadow-[0_0_14px_3px_rgba(255,255,255,0.78)]"
+                aria-hidden="true"
+              >
+                <span className="absolute inset-x-0 -top-12 h-12 bg-gradient-to-b from-transparent to-[#8bd29d]/12" />
+              </motion.div>
+
+              <motion.div
+                initial={false}
+                animate={{ opacity: stage === 1 ? 1 : 0 }}
+                transition={{ duration: 0.28 }}
+                className="absolute inset-0 z-30"
+                aria-hidden={stage !== 1}
+              >
+                <AnalysisPoint label={t("points.texture")} className="left-[16%] top-[28%]" />
+                <AnalysisPoint
+                  label={t("points.redness")}
+                  className="right-[9%] top-[48%]"
+                  align="right"
+                />
+                <AnalysisPoint label={t("points.dryness")} className="left-[19%] top-[68%]" />
+                <div className="absolute inset-x-3 bottom-4 rounded-[18px] bg-white/88 px-3 py-2.5 text-center text-[9px] leading-[1.4] text-secondary shadow-[0_12px_34px_rgba(39,36,33,0.12)] backdrop-blur-xl">
+                  {t("visibleNote")}
+                </div>
+              </motion.div>
+
+              <RoutineContext visible={stage === 2} />
+              <TonightResult visible={stage === 3} />
+
+              <motion.div
+                initial={false}
+                animate={{ opacity: stage === 0 ? 1 : 0 }}
+                className="absolute inset-x-0 bottom-3 z-50 text-center text-[9px] font-semibold uppercase tracking-[0.12em] text-white/72"
+              >
+                {t("scrollHint")}
+              </motion.div>
+            </div>
           </div>
         </div>
-
-        <motion.div
-          initial={false}
-          animate={{ opacity: stage === 0 ? 1 : 0 }}
-          className="absolute inset-x-0 bottom-3 z-50 text-center text-[9px] font-semibold uppercase tracking-[0.12em] text-white/72"
-        >
-          {t("scrollHint")}
-        </motion.div>
       </div>
     </section>
   );

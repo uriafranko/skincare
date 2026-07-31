@@ -7,7 +7,7 @@ import { Highlighter } from "./ui/highlighter"
 export function CleanHero() {
   const t = useTranslations("Hero");
   const nav = useTranslations("Nav");
-  const trustPoints = ["trustNoApp", "trustNoSales", "trustMemory"] as const;
+  const trustPoints = ["trustNoApp", "trustNoSales", "trustMemory", "trustUsers"] as const;
 
   return (
     <section className="relative flex min-h-[100svh] items-center overflow-hidden border-b border-border/70 bg-[#fbfaf7] px-5 pb-20 pt-28 sm:px-7 sm:pb-24 sm:pt-32">
