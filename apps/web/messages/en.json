@@ -1,9 +1,9 @@
 {
   "Metadata": {
-    "title": "Lily - Skincare clarity from one photo",
-    "description": "Send Lily a skin photo in iMessage. Get cautious visible-detail guidance, routine context, and one clear next step-without product sales.",
-    "ogTitle": "Lily - Skincare clarity from one photo",
-    "ogDescription": "Turn a skin photo and your routine context into one useful next step, right in iMessage."
+    "title": "Lily — A simpler skincare routine in iMessage",
+    "description": "Text Lily a skin photo, product label, or routine question. Get practical guidance and a clear next step—without another app or products to sell.",
+    "ogTitle": "Lily — A simpler skincare routine in iMessage",
+    "ogDescription": "Turn a skin photo, product label, or routine question into one clear next step, right in iMessage."
   },
   "Nav": {
     "logo": "Lily",
@@ -15,32 +15,32 @@
   "Hero": {
     "eyebrow": "Little steps with Lily",
     "headline": "Better skin from day 1.",
-    "subtitle": "A simpler routine for smoother, calmer, more consistent skin days.",
+    "subtitle": "Send a skin or product photo and get one clear next step for your routine, right in iMessage.",
     "scroll": {
       "stages": {
         "0": {
-          "eyebrow": "Skincare clarity in one photo",
+          "eyebrow": "One photo to a plan",
           "heading": "Send a skin photo.",
-          "body": "Scroll to see how Lily turns visible details and your routine into one useful next step."
+          "body": "Lily looks at what’s visible, checks it against your routine, and helps you decide what to do tonight."
         },
         "1": {
-          "eyebrow": "Visible details",
+          "eyebrow": "What’s visible",
           "heading": "See what stands out.",
-          "body": "Lily describes what is visible carefully-without pretending to diagnose."
+          "body": "Lily points out visible texture, redness, and dry-looking areas—without pretending to diagnose."
         },
         "2": {
-          "eyebrow": "Your context",
+          "eyebrow": "What changes the answer",
           "heading": "Your routine changes the answer.",
-          "body": "Products, sensitivity, and recent changes matter more than a generic score."
+          "body": "Your products, sensitivity, and recent changes shape the next step—not a generic skin score."
         },
         "3": {
-          "eyebrow": "Tonight’s next step",
+          "eyebrow": "Your plan for tonight",
           "heading": "Know what to do tonight.",
-          "body": "Get a simple plan you can act on right in iMessage."
+          "body": "See what to keep, pause, and watch so you can act without second-guessing."
         }
       },
       "portraitAlt": "Adult woman with natural skin shown during Lily’s photo-analysis demonstration",
-      "privacy": "Processed for this reply",
+      "privacy": "Photo saving is opt-in",
       "stageCount": "{current} of 4",
       "scrollHint": "Scroll to see how",
       "points": {
@@ -48,10 +48,10 @@
         "redness": "Surface redness",
         "dryness": "Dry-looking area"
       },
-      "visibleNote": "Visible details only. Lily does not diagnose skin conditions.",
+      "visibleNote": "Visible details only. Lighting and cameras can mislead; Lily does not diagnose.",
       "context": {
         "heading": "Routine context",
-        "subtitle": "What changes the recommendation",
+        "subtitle": "What shapes the next step",
         "sensitive": "Sensitive skin",
         "newProduct": "New exfoliant",
         "dryness": "Dryness this week"
@@ -65,16 +65,16 @@
         "watch": "Watch: whether redness and stinging settle."
       }
     },
-    "trustNoApp": "No app",
-    "trustNoSales": "No product sales",
+    "trustNoApp": "No app to download",
+    "trustNoSales": "No products to sell",
     "trustMemory": "Memory you control",
     "trustUsers": "Trusted by +20,000 women",
     "resultLines": [
-      "Smoother skin every morning.",
-      "A routine you’ll actually keep.",
-      "Less guessing. More good skin days.",
       "Know what to use tonight.",
-      "Clear next steps for calmer skin."
+      "A simpler routine you can stick with.",
+      "See where each product fits.",
+      "Try new products with a clear plan.",
+      "Stay consistent without streaks or guilt."
     ],
     "trustLine": "No app · No products to sell · You choose what Lily remembers",
     "socialProof": "Built for short, practical iMessage help",
@@ -151,7 +151,7 @@
   "IMessageButton": {
     "label": "Text Lily in Messages",
     "shortLabel": "Text Lily",
-    "smsBody": "Hi - help me build a simple skincare routine."
+    "smsBody": "Hi Lily - help me decide what to use tonight."
   },
   "Features": {
     "story": {
@@ -217,33 +217,33 @@
   },
   "Landing": {
     "quick": {
-      "eyebrow": "The useful part",
-      "heading": "One text can clear up tonight.",
-      "body": "No dashboard to learn. Send what you have, get the next useful step, and keep moving.",
+      "eyebrow": "More ways Lily helps",
+      "heading": "Make tonight’s routine easier.",
+      "body": "Send the question in front of you—check a product, simplify your shelf, or get help staying consistent.",
       "check": {
         "heading": "Check a product",
-        "body": "See where skincare or cosmetics fit and what to watch for."
+        "body": "See where it fits, how to start, and what to watch for."
       },
       "simplify": {
         "heading": "Simplify your routine",
-        "body": "Focus on the few steps your skin actually needs."
+        "body": "Find the few steps worth keeping—and what you can leave out."
       },
       "consistent": {
         "heading": "Stay consistent",
-        "body": "Reply done or skip and continue without streak pressure."
+        "body": "Get gentle check-ins and pick up where you left off—no streaks or guilt."
       },
       "independence": {
         "heading": "Your shelf, not our store.",
-        "body": "Lily doesn’t sell products. Sometimes the best answer is to wait, use less, or change nothing.",
-        "badge": "No affiliate checkout"
+        "body": "Lily helps you decide what to use—not what to buy. Sometimes the right next step is to wait, use less, or change nothing.",
+        "badge": "No product sales"
       }
     },
     "final": {
       "eyebrow": "Start in one text",
-      "heading": "Start with the product in your hand.",
-      "body": "Open iMessage, send the label or question, and Lily will take it from there.",
-      "footnote": "Opens iMessage on your iPhone or Mac. No download.",
-      "questions": "A few useful answers"
+      "heading": "Text Lily what you’re stuck on.",
+      "body": "Send a product label, skin photo, or routine question. Lily will help you decide what to do next.",
+      "footnote": "Opens iMessage on your iPhone or Mac. No download. Available to people 16+; brief setup first.",
+      "questions": "Questions before you text?"
     },
     "story": {
       "eyebrow": "One clear next step",
@@ -410,19 +410,19 @@
     }
   },
   "Faq": {
-    "eyebrow": "Trust, in plain language",
-    "heading": "Useful answers before you text.",
-    "subtitle": "Lily is practical skincare and cosmetics guidance-not a store, diagnosis, or replacement for professional care.",
-    "q1": "How can Lily help with skincare and cosmetics?",
-    "a1": "Lily can describe visible details in photos, explain labels, show where a product may fit, help simplify a routine, and track the check-ins you confirm. She keeps the answer practical and tells you when a question is better handled by a qualified professional.",
+    "eyebrow": "Good to know",
+    "heading": "What Lily can and can’t do.",
+    "subtitle": "Clear answers about products, photos, privacy, memory, and when to ask a professional.",
+    "q1": "What can I ask Lily?",
+    "a1": "Ask about a product label, where something fits, how to simplify your routine, or what stands out in a skin photo. Lily gives practical guidance and tells you when a question needs a qualified professional.",
     "q2": "Does Lily get paid to recommend products?",
-    "a2": "Lily does not sell skincare or cosmetics and does not have a product catalog to push. Guidance focuses on what you already own, your goals, and the information you send.",
+    "a2": "No. Lily does not sell skincare or cosmetics and does not have a product catalog to push. Guidance focuses on what you already own, your goals, and the information you send.",
     "q3": "What happens to photos I send?",
-    "a3": "A photo is processed for the current reply and is not intentionally saved by default. If you separately opt in, Lily can retain a private copy temporarily so you can refer to it later. You can ask Lily to delete saved photos.",
+    "a3": "By default, Lily processes a photo for the current reply and does not add it to Lily’s conversation history or photo store. If you separately opt in, Lily can keep a private copy for up to 30 days. Messaging and AI providers may still process it temporarily under their own terms. You can ask Lily to delete saved photos.",
     "q4": "Is Lily a dermatologist?",
-    "a4": "No. Lily is an AI skincare routine and education assistant, not a doctor, dermatologist, medical device, or emergency service. She does not diagnose conditions or replace qualified professional care.",
-    "q5": "What does Lily remember-and can I delete it?",
-    "a5": "Lily remembers only context that makes future help more useful, such as your routine, goals, products, and reactions, after the appropriate consent. You can ask what she remembers, correct it, remove individual details, or delete your account."
+    "a4": "No. Lily is an AI skincare routine and education assistant—not a doctor, dermatologist, medical device, or emergency service. She does not diagnose conditions or replace qualified professional care.",
+    "q5": "What does Lily remember—and can I delete it?",
+    "a5": "After you consent, Lily can remember your routine, goals, products, and reactions so future replies fit you better. Ask what Lily remembers, correct or forget current routine details, delete saved photos, or delete your account."
   },
   "BottomCta": {
     "heading": "Start your routine today",

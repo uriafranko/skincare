@@ -110,13 +110,13 @@ function TonightResult({ visible }: { visible: boolean }) {
       initial={false}
       animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 18, scale: visible ? 1 : 0.97 }}
       transition={{ duration: 0.32, ease: "easeOut" }}
-      className={`absolute inset-x-3 bottom-4 z-40 rounded-[26px] bg-[#20211f] p-4 text-white shadow-[0_24px_70px_rgba(31,31,29,0.28)] sm:inset-x-5 sm:bottom-6 sm:p-5 ${
+      className={`absolute inset-x-3 bottom-4 z-40 rounded-[26px] bg-[linear-gradient(145deg,#7f4d3c_0%,#684034_100%)] p-4 text-white shadow-[0_24px_70px_rgba(105,56,39,0.3)] ring-1 ring-[#f5c7b2]/18 sm:inset-x-5 sm:bottom-6 sm:p-5 ${
         visible ? "pointer-events-auto" : "pointer-events-none"
       }`}
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-[13px] bg-[#dcebdc] text-[#247d3e]">
+          <span className="flex h-9 w-9 items-center justify-center rounded-[13px] bg-[#f7ded1] text-[#984a34]">
             <Sparkles className="size-4" />
           </span>
           <div>
@@ -126,7 +126,7 @@ function TonightResult({ visible }: { visible: boolean }) {
             <p className="mt-0.5 text-[15px] font-semibold tracking-[-0.03em]">{t("heading")}</p>
           </div>
         </div>
-        <span className="rounded-full bg-white/10 px-2.5 py-1 text-[9px] font-semibold text-white/64">
+        <span className="rounded-full bg-[#f9e1d5]/12 px-2.5 py-1 text-[9px] font-semibold text-[#fdebe3]/72">
           {t("confidence")}
         </span>
       </div>
@@ -134,19 +134,15 @@ function TonightResult({ visible }: { visible: boolean }) {
         {(["keep", "pause", "watch"] as const).map((item) => (
           <div
             key={item}
-            className="flex items-start gap-2 rounded-[14px] bg-white/[0.065] px-3 py-2"
+            className="flex items-start gap-2 rounded-[14px] bg-[#fff8f2]/[0.085] px-3 py-2"
           >
-            <Check className="mt-0.5 size-3.5 shrink-0 text-[#8bd29d]" />
-            <p className="text-[10px] leading-[1.4] text-white/82">{t(item)}</p>
+            <Check className="mt-0.5 size-3.5 shrink-0 text-[#f2b89f]" />
+            <p className="text-[10px] leading-[1.4] text-[#fff8f3]/90">{t(item)}</p>
           </div>
         ))}
       </div>
       <div className="mt-3">
-        <IMessageButton
-          short
-          compact
-          className="w-full justify-center border-white/18 bg-white text-[#20211f] shadow-none"
-        />
+        <IMessageButton short compact tone="light" className="w-full justify-center" />
       </div>
     </motion.div>
   );
@@ -242,7 +238,7 @@ export function Hero() {
                   align="right"
                 />
                 <AnalysisPoint label={t("points.dryness")} className="left-[19%] top-[68%]" />
-                <div className="absolute inset-x-3 bottom-4 rounded-[18px] bg-white/88 px-3 py-2.5 text-center text-[9px] leading-[1.4] text-secondary shadow-[0_12px_34px_rgba(39,36,33,0.12)] backdrop-blur-xl">
+                <div className="absolute inset-x-3 bottom-[calc(0.75rem+3svh)] rounded-[18px] bg-white/88 px-3 py-2.5 text-center text-[9px] leading-[1.4] text-secondary shadow-[0_12px_34px_rgba(39,36,33,0.12)] backdrop-blur-xl md:bottom-4">
                   {t("visibleNote")}
                 </div>
               </motion.div>

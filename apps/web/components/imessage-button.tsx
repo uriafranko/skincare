@@ -8,20 +8,27 @@ export function IMessageButton({
   compact = false,
   showIcon = true,
   edgeIcon = false,
+  tone = "warm",
 }: {
   className?: string;
   short?: boolean;
   compact?: boolean;
   showIcon?: boolean;
   edgeIcon?: boolean;
+  tone?: "warm" | "light";
 }) {
   const t = useTranslations("IMessageButton");
   const smsHref = `sms:${PHONE_NUMBER}&body=${encodeURIComponent(t("smsBody"))}`;
+  const surfaceClass =
+    tone === "light"
+      ? "border-[#efd5c7] bg-[linear-gradient(180deg,#fffaf7_0%,#f8e5da_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_8px_22px_rgba(88,45,31,0.16)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_12px_26px_rgba(88,45,31,0.2)] focus-visible:outline-[#9c4b34]"
+      : "border-[#873f2f] bg-[linear-gradient(180deg,#b25e45_0%,#984734_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_8px_22px_rgba(137,66,45,0.25)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_12px_26px_rgba(137,66,45,0.32)] focus-visible:outline-[#9c4b34]";
+  const labelClass = tone === "light" ? "text-[#68392c]" : "text-white";
 
   return (
     <a
       href={smsHref}
-      className={`relative inline-flex items-center gap-3 border border-primary/75 bg-[linear-gradient(180deg,#373431_0%,#292725_100%)] text-center text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_8px_22px_rgba(32,35,33,0.16)] transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_12px_26px_rgba(32,35,33,0.2)] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-primary ${compact ? "min-h-10 rounded-[14px] px-3.5 py-1.5" : "min-h-14 rounded-[18px] py-2 pr-4.5 pl-3"} ${className}`}
+      className={`relative inline-flex items-center gap-3 border text-center transition-all duration-150 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-3 ${surfaceClass} ${compact ? "min-h-10 rounded-[14px] px-3.5 py-1.5" : "min-h-14 rounded-[18px] py-2 pr-4.5 pl-3"} ${className}`}
     >
       {showIcon ? (
         <span
@@ -42,7 +49,7 @@ export function IMessageButton({
         </span>
       ) : null}
       <span
-        className={`flex min-w-0 items-center justify-center font-body font-semibold tracking-[-0.02em] text-white ${showIcon ? (compact ? "pr-0.5 text-[0.84rem]" : "pr-0.5 text-[0.94rem]") : compact ? "px-2.5 text-[0.84rem]" : "px-4 text-[0.94rem]"} ${edgeIcon ? "w-full px-10" : ""}`}
+        className={`flex min-w-0 items-center justify-center font-body font-semibold tracking-[-0.02em] ${labelClass} ${showIcon ? (compact ? "pr-0.5 text-[0.84rem]" : "pr-0.5 text-[0.94rem]") : compact ? "px-2.5 text-[0.84rem]" : "px-4 text-[0.94rem]"} ${edgeIcon ? "w-full px-10" : ""}`}
       >
         {short ? t("shortLabel") : t("label")}
       </span>

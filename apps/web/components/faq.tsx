@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
-const FAQ_KEYS = ["1", "2", "3", "4"] as const;
+const FAQ_KEYS = ["1", "2", "3", "4", "5"] as const;
 
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);

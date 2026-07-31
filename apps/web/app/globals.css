@@ -143,6 +143,22 @@ html {
   to {
     background-position: var(--bg-size, 300%) 0;
     }
+  }
+  @keyframes canopy-x {
+  from {
+    transform: translateX(0);
+    }
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+  @keyframes canopy-y {
+  from {
+    transform: translateY(0);
+    }
+  to {
+    transform: translateY(calc(-100% - var(--gap)));
+    }
   }}
 
 :root {
@@ -212,4 +228,22 @@ html {
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer utilities {
+  .animate-canopy-horizontal {
+    animation: canopy-x var(--duration) infinite linear;
+  }
+  .animate-canopy-vertical {
+    animation: canopy-y var(--duration) linear infinite;
+  }
+  .direction-reverse.animate-canopy-horizontal {
+    animation-direction: reverse;
+  }
+  .direction-reverse.animate-canopy-vertical {
+    animation-direction: reverse;
+  }
+  .group:hover .group-hover\:paused {
+    animation-play-state: paused;
+  }
 }
