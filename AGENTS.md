@@ -30,7 +30,7 @@ Mastra stores agent threads, messages, and observations in the `mastra` schema o
 
 ```bash
 PATH="$HOME/.bun/bin:$PATH" "$HOME/.bun/bin/bun" run lint
-PATH="$HOME/.bun/bin:$PATH" "$HOME/.bun/bin/bun" test
+PATH="$HOME/.bun/bin:$PATH" "$HOME/.bun/bin/bun" run test
 PATH="$HOME/.bun/bin:$PATH" "$HOME/.bun/bin/bun" run sim --system stub --scenario all
 ```
 
