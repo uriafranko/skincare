@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { QRCodeSVG } from "qrcode.react";
 import { IMessageButton } from "./imessage-button";
 
-const PHONE_NUMBER = process.env.NEXT_PUBLIC_PHONE_NUMBER ?? "+1XXXXXXXXXX";
+const PHONE_NUMBER = process.env.NEXT_PUBLIC_PHONE_NUMBER ?? "+18722964991";
 
 export function BottomCta() {
   const t = useTranslations("BottomCta");
