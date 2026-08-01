@@ -8,6 +8,7 @@ import type { NormalizedImage } from "@/image";
 import { errorForLogging } from "@/logging";
 import { posthog } from "@/posthog";
 import { reminderRunManager } from "@/reminder-runs";
+import { inspectRetainedImageWithRetry } from "@/retained-image-inspection";
 import { sendUiMessageAttachment } from "@/ui-messages";
 import {
   deleteAllUserImageBlobs,
@@ -44,9 +45,12 @@ export async function handleMessage(
       await sendStoredUserImage({ phone: rawPhone, image, caption });
     },
     inspectUserImage: async ({ image, question }) =>
-      analyzeRetainedImage({
-        dataUrl: await loadStoredUserImageDataUrl(image),
+      inspectRetainedImageWithRetry({
+        image,
         question,
+        log,
+        loadImageDataUrl: loadStoredUserImageDataUrl,
+        analyzeImage: analyzeRetainedImage,
       }),
     deleteAccountData: async (deleteUserId) => {
       await deleteAllUserImageBlobs(deleteUserId, log).catch((error) => {

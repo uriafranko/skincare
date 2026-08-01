@@ -1,5 +1,4 @@
 import type { DailyRoutineLog, RoutineLogEntry, RoutineSlot } from "@skintext/shared";
-import { decrypt, encryptContent } from "@skintext/shared";
 import { format, parseISO, subDays } from "date-fns";
 import { and, asc, eq, sql } from "drizzle-orm";
 import { getDb } from "./client";
@@ -17,10 +16,10 @@ async function parseRoutineEntry(
   fallbackUserId?: string,
   fallbackDate?: string,
 ): Promise<RoutineLogEntry> {
-  const stepsRaw = data.steps ? await decrypt(String(data.steps)) : "[]";
-  const reactionRaw = data.reaction ? await decrypt(String(data.reaction)) : "";
-  const notesRaw = data.notes ? await decrypt(String(data.notes)) : "";
-  const sourceRaw = data.source ? await decrypt(String(data.source)) : "text";
+  const stepsRaw = data.steps ? String(data.steps) : "[]";
+  const reactionRaw = data.reaction ? String(data.reaction) : "";
+  const notesRaw = data.notes ? String(data.notes) : "";
+  const sourceRaw = data.source ? String(data.source) : "text";
 
   return {
     id,
@@ -37,12 +36,10 @@ async function parseRoutineEntry(
 }
 
 export async function saveRoutineEntry(entry: RoutineLogEntry): Promise<void> {
-  const [steps, reaction, notes, source] = await Promise.all([
-    encryptContent(JSON.stringify(entry.steps)),
-    encryptContent(entry.reaction ?? ""),
-    encryptContent(entry.notes ?? ""),
-    encryptContent(entry.source),
-  ]);
+  const steps = JSON.stringify(entry.steps);
+  const reaction = entry.reaction ?? "";
+  const notes = entry.notes ?? "";
+  const source = entry.source;
 
   await getDb()
     .insert(routineEntries)

@@ -7,7 +7,8 @@ const generateMock = mock(async () => nextOutput);
 
 mock.module("@skintext/shared", () => createSharedMock());
 
-const { processOnboardingMessage } = await import("../onboarding");
+const { buildOnboardingStateProjection, onboardingThreadId, processOnboardingMessage } =
+  await import("../onboarding");
 
 function output(overrides: Record<string, unknown> = {}) {
   return {
@@ -63,6 +64,47 @@ describe("processOnboardingMessage", () => {
     expect(result.reply).toBe(
       "Reply AGREE if I can save your skincare data for reminders/logs and you accept the Terms of Use: https://skintext.ai/terms. Privacy: https://skintext.ai/privacy. You can delete your data anytime.",
     );
+    expect(result.nextAction).toBe("ask_consent");
+  });
+
+  test("uses the main conversation thread and projects only authoritative setup state", () => {
+    const projection = buildOnboardingStateProjection(
+      {
+        ageEligible: true,
+        name: "Dana",
+        concerns: ["redness"],
+        skinType: "combination",
+        timezone: "America/New_York",
+        timezoneConfirmed: false,
+        lastBotReply: "stale prompt text",
+      },
+      {
+        isFirstMessage: false,
+        locale: "en",
+        timezone: "America/New_York",
+      },
+    );
+
+    expect(onboardingThreadId("usr_123")).toBe("skintext:usr_123");
+    expect(projection.currentAction).toBe("ask_consent");
+    expect(projection.collected?.confirmedTimezone).toBeNull();
+    expect(JSON.stringify(projection)).not.toContain("stale prompt text");
+
+    const retired = buildOnboardingStateProjection(
+      { ...setupCompleteExceptConsent, consented: true },
+      {
+        isFirstMessage: false,
+        locale: "en",
+        timezone: "America/New_York",
+      },
+    );
+    expect(retired).toEqual({
+      version: 1,
+      mode: "onboarding",
+      active: false,
+      currentAction: "complete",
+      missingFields: [],
+    });
   });
 
   test("does not force English consent-only copy for Hebrew users", async () => {

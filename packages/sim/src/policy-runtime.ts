@@ -68,7 +68,7 @@ function stubReply(scenarioId: string): string {
 function accountForScenario(scenario: SimulationScenario): UserAccount {
   return {
     id: "sim_user",
-    phone: "encrypted",
+    phone: "+15555550123",
     locale: scenario.locale,
     timezone: scenario.timezone,
     timezoneConfirmed: true,
@@ -133,14 +133,27 @@ export function createPolicyRuntime(
     id: `personality:live:${modelName}:${scenario.communicationStyle ?? "clear_expert"}`,
     async receive(text) {
       const decision = policyDecisionForScenario(scenario, text);
-      const { buildSkintextSystemPrompt } = await import("@skintext/ai/prompts");
+      const { buildMainAccountState, buildSkintextSystemPrompt, serializeMainAccountState } =
+        await import("@skintext/ai/prompts");
+      const context = contextForScenario(scenario, decision.riskState);
       const generate = createTextGenerator({
         id: `skintext-policy-sim-${scenario.id}`,
         model: modelName,
-        instructions: buildSkintextSystemPrompt(contextForScenario(scenario, decision.riskState)),
+        instructions: buildSkintextSystemPrompt(),
       });
+      const accountState = serializeMainAccountState(buildMainAccountState(context));
+      const userAttributes = [
+        `minimumRiskState="${context.riskState}"`,
+        `scheduledEvent="${context.isScheduledEvent}"`,
+        `offerCommunicationStyle="${context.shouldOfferStyle}"`,
+        `offerPhotoRetention="${context.shouldOfferPhotoRetention}"`,
+      ].join(" ");
       return {
-        messages: [await generate(text)],
+        messages: [
+          await generate(
+            `<account-state>${accountState}</account-state>\n<user ${userAttributes}>${text}</user>`,
+          ),
+        ],
         complete: true,
         metadata: decision,
       };

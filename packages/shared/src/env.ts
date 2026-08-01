@@ -21,7 +21,6 @@ export const env = createEnv({
     AI_GATEWAY_REASONING_EFFORT: z
       .enum(AI_GATEWAY_REASONING_EFFORTS)
       .default(DEFAULT_AI_GATEWAY_REASONING_EFFORT),
-    ENCRYPTION_KEY: z.string().length(64),
     CRON_SECRET: z.string().min(1).optional(),
   },
   extends: [vercel()],

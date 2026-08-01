@@ -43,14 +43,15 @@ describe("AI Gateway model config", () => {
     ).toBe(DEFAULT_AI_GATEWAY_MODEL);
   });
 
-  test("defaults reasoning effort to medium", () => {
-    expect(DEFAULT_AI_GATEWAY_REASONING_EFFORT).toBe("medium");
-    expect(resolveReasoningEffort({})).toBe("medium");
+  test("defaults reasoning effort to max", () => {
+    expect(DEFAULT_AI_GATEWAY_REASONING_EFFORT).toBe("max");
+    expect(resolveReasoningEffort({})).toBe("max");
   });
 
   test("uses valid reasoning effort overrides", () => {
     expect(resolveReasoningEffort({ AI_GATEWAY_REASONING_EFFORT: "high" })).toBe("high");
-    expect(resolveReasoningEffort({ AI_GATEWAY_REASONING_EFFORT: " " })).toBe("medium");
-    expect(resolveReasoningEffort({ AI_GATEWAY_REASONING_EFFORT: "invalid" })).toBe("medium");
+    expect(resolveReasoningEffort({ AI_GATEWAY_REASONING_EFFORT: "max" })).toBe("max");
+    expect(resolveReasoningEffort({ AI_GATEWAY_REASONING_EFFORT: " " })).toBe("max");
+    expect(resolveReasoningEffort({ AI_GATEWAY_REASONING_EFFORT: "invalid" })).toBe("max");
   });
 });

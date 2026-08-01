@@ -32,11 +32,10 @@ Fill in the required keys:
 | `SENDBLUE_API_KEY` / `SENDBLUE_API_SECRET` | [sendblue.co](https://sendblue.co) |
 | `SENDBLUE_FROM_NUMBER` | Your Sendblue phone number |
 | `DATABASE_URL` | [neon.tech](https://neon.tech) pooled Postgres connection string |
-| `ENCRYPTION_KEY` | 64-char hex key from `openssl rand -hex 32` |
 | `AI_GATEWAY_API_KEY` | [vercel.com/ai-gateway](https://vercel.com/ai-gateway) |
 | `AI_GATEWAY_DEFAULT_MODEL` | Optional override for the built-in Gateway model |
 | `AI_GATEWAY_MEMORY_MODEL` | Optional Mastra observational-memory model override |
-| `AI_GATEWAY_REASONING_EFFORT` | Optional reasoning effort (`none`, `minimal`, `low`, `medium`, `high`, `xhigh`, or `max`); defaults to `medium` |
+| `AI_GATEWAY_REASONING_EFFORT` | Optional reasoning effort (`none`, `minimal`, `low`, `medium`, `high`, `xhigh`, or `max`); defaults to `max` |
 
 ### 3. Apply database migrations
 
@@ -98,9 +97,9 @@ skintext/
 2. Sendblue forwards the message via webhook.
 3. New users confirm they are 16 or older, then go through conversational onboarding for skin goals, sensitivities, products, reminders, and service consent.
 4. Returning users interact with the AI assistant.
-5. Photos are analyzed transiently by default. Users can separately opt into 30-day encrypted private-blob retention.
+5. Photos are analyzed transiently by default. Users can separately opt into 30-day private-blob retention.
 6. Text updates log routine steps, products, reactions, and skips.
 7. Morning and evening reminders are timezone-aware.
 8. End-of-day summaries report AM/PM completion, products used, and noted reactions.
 9. Weekly recaps summarize adherence and routine patterns.
-10. One active, encrypted skincare experiment can track a single change and an optional follow-up.
+10. One active skincare experiment can track a single change and an optional follow-up.

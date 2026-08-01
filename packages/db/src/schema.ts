@@ -21,17 +21,6 @@ export const users = pgTable(
   (table) => [index("users_phone_idx").on(table.phone)],
 );
 
-export const phoneMappings = pgTable(
-  "phone_mappings",
-  {
-    encryptedPhone: text("encrypted_phone").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-  },
-  (table) => [index("phone_mappings_user_id_idx").on(table.userId)],
-);
-
 export const userImages = pgTable(
   "user_images",
   {
@@ -137,6 +126,25 @@ export const oneOffReminders = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
   },
   (table) => [index("one_off_reminders_user_send_at_idx").on(table.userId, table.sendAt)],
+);
+
+export const userFeedback = pgTable(
+  "user_feedback",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    kind: text("kind").notNull(),
+    message: text("message").notNull(),
+    status: text("status").notNull().default("new"),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("user_feedback_user_created_at_idx").on(table.userId, table.createdAt),
+    index("user_feedback_status_created_at_idx").on(table.status, table.createdAt),
+  ],
 );
 
 export const routineEntries = pgTable(

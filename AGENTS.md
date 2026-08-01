@@ -8,10 +8,11 @@ Lily is a Bun/Turborepo monorepo for an iMessage skincare routine assistant. Int
 - `apps/web`: Next.js public web app.
 - `packages/ai`: Mastra agents, Postgres-backed observational memory, prompts, onboarding, and tools.
 - `packages/db`: Drizzle/Neon data layer for users, onboarding state, products, routine logs, and reminders.
-- `packages/shared`: Shared types, env validation, locale/timezone helpers, constants, crypto.
+- `packages/shared`: Shared types, env validation, locale/timezone helpers, and constants.
 - `packages/sim`: Local onboarding simulator.
 - `docs/local-simulator.md`: Simulator workflow reference.
 - `docs/message-surfaces.md`: Voice and message-format boundaries.
+- `suggestions`: Future product and architecture proposals that are not yet implemented; each file should record the current behavior, proposed change, tradeoffs, and acceptance criteria.
 
 ## Runtime Notes
 
@@ -97,10 +98,10 @@ Useful scenarios:
 
 ## Frequent Hotspots
 
-- Onboarding live prompt and extraction: `packages/ai/src/onboarding.ts`.
+- Onboarding prompt: `packages/ai/src/prompts/onboarding.ts`; extraction/signals: `packages/ai/src/onboarding.ts`.
 - Deterministic onboarding simulator: `packages/sim/src/stub-onboarding.ts`.
 - Local onboarding completion rules: `packages/sim/src/onboarding-state.ts`.
-- Main assistant system prompt: `packages/ai/src/prompts.ts`.
+- Main assistant system prompt: `packages/ai/src/prompts/main.ts`; shared policy: `packages/ai/src/prompts/core.ts`.
 - API onboarding persistence/user creation: `apps/api/src/handlers/onboarding.ts`.
 - Returning-user message path: `apps/api/src/handlers/message.ts`.
 

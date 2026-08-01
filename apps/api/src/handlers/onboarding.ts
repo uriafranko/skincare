@@ -44,7 +44,7 @@ export async function handleOnboarding(
   log: RequestLogger,
   userId: string,
   text: string,
-  encryptedPhone: string,
+  phone: string,
   locale: string,
   timezone: string,
   country: string,
@@ -64,10 +64,15 @@ export async function handleOnboarding(
     posthog?.capture({ event: "onboarding_started" });
   }
 
-  const { extracted: modelExtracted, reply } = await processOnboardingMessage(text, state, {
+  const {
+    extracted: modelExtracted,
+    nextAction,
+    reply,
+  } = await processOnboardingMessage(text, state, {
     isFirstMessage,
     timezone,
     locale,
+    userId,
   });
   const extracted =
     state.ageEligible !== true && modelExtracted.ageEligible == null
@@ -76,7 +81,7 @@ export async function handleOnboarding(
         }
       : modelExtracted;
 
-  log.set({ onboarding: { extractedFields: Object.keys(extracted) } });
+  log.set({ onboarding: { extractedFields: Object.keys(extracted), nextAction } });
 
   if (modelExtracted.ageEligible === false) {
     log.set({ onboarding: { ageEligible: false, accountDeleted: true } });
@@ -110,15 +115,8 @@ export async function handleOnboarding(
   if (isOnboardingComplete(merged)) {
     log.set({ onboarding: { complete: true } });
 
-    const { reply: welcomeReply } = await processOnboardingMessage(text, merged, {
-      isFirstMessage: false,
-      timezone,
-      locale,
-      complete: true,
-    });
-
     const reminderTimes = buildReminderTimes(merged);
-    await createUser(userId, encryptedPhone, {
+    await createUser(userId, phone, {
       locale: merged.detectedLocale ?? locale,
       timezone: merged.timezone!,
       timezoneConfirmed: merged.timezoneConfirmed === true,
@@ -166,7 +164,7 @@ export async function handleOnboarding(
       }
     }
 
-    return [welcomeReply];
+    return [reply];
   }
 
   return [reply];

@@ -5,16 +5,22 @@ import { RedisStreamsPubSub } from "@mastra/redis-streams";
 import { env } from "@skintext/shared";
 import { mastraStorage, skintextMemory } from "./memory";
 import { getDefaultModelName, getDefaultProviderOptions } from "./models";
-import { buildSkintextSystemPrompt } from "./prompts";
+import { skintextOnboardingAgent } from "./onboarding";
+import {
+  buildMainAccountState,
+  mainAccountStateCacheKey,
+  serializeMainAccountState,
+} from "./prompts/context";
+import { buildSkintextSystemPrompt } from "./prompts/main";
 import {
   createSkintextRequestContext,
-  getSkintextRuntime,
   type SkintextRuntime,
   skintextMemoryOptions,
 } from "./runtime";
 import { skintextAgentTools } from "./tools/agent-tools";
 
-const PROMPT_CACHE_KEY = "lily-agent-v1";
+const PROMPT_CACHE_KEY = "lily-agent-v2";
+const MAIN_ACCOUNT_STATE_SIGNAL_ID = "account";
 const CONFIRMATION_TOOL_NAMES = new Set([
   "deleteAccount",
   "deleteSavedPhotos",
@@ -43,8 +49,7 @@ export const skintextAgent = new Agent({
   model: getDefaultModelName(),
   defaultOptions: { providerOptions: getDefaultProviderOptions() },
   memory: skintextMemory,
-  instructions: ({ requestContext }) =>
-    buildSkintextSystemPrompt(getSkintextRuntime(requestContext).agentContext),
+  instructions: buildSkintextSystemPrompt(),
   tools: skintextAgentTools,
 });
 
@@ -52,7 +57,7 @@ const pubsub = createMastraPubSub();
 
 export const mastra = new Mastra({
   storage: mastraStorage,
-  agents: { skintextAgent },
+  agents: { skintextAgent, skintextOnboardingAgent },
   ...(pubsub ? { pubsub } : {}),
   observability: new Observability({
     configs: {
@@ -74,21 +79,67 @@ function imageMediaType(imageUrl: string): string {
   return /^data:([^;,]+)/.exec(imageUrl)?.[1] ?? "image/jpeg";
 }
 
-function buildUserSignal({ text, imageUrl }: RunSkintextAgentInput): AgentMessageInput {
-  if (!imageUrl) return text;
+function buildUserSignal(
+  { text, imageUrl }: RunSkintextAgentInput,
+  runtime: SkintextRuntime,
+): AgentMessageInput {
+  const contents = imageUrl
+    ? [
+        {
+          type: "text" as const,
+          text: text
+            ? `${text}\n\n[User attached a skincare/product photo]`
+            : "[User sent a skincare/product photo]",
+        },
+        {
+          type: "file" as const,
+          data: imageUrl,
+          mediaType: imageMediaType(imageUrl),
+        },
+      ]
+    : text;
 
-  const imageMarker = text
-    ? `${text}\n\n[User attached a skincare/product photo]`
-    : "[User sent a skincare/product photo]";
-
-  return [
-    { type: "text", text: imageMarker },
-    {
-      type: "file",
-      data: imageUrl,
-      mediaType: imageMediaType(imageUrl),
+  return {
+    contents,
+    attributes: {
+      minimumRiskState: runtime.agentContext.riskState,
+      scheduledEvent: runtime.agentContext.isScheduledEvent,
+      offerCommunicationStyle: runtime.agentContext.shouldOfferStyle,
+      offerPhotoRetention: runtime.agentContext.shouldOfferPhotoRetention,
     },
-  ];
+  };
+}
+
+async function syncMainAccountState(
+  agent: typeof skintextAgent,
+  runtime: SkintextRuntime,
+  target: { resourceId: string; threadId: string },
+): Promise<void> {
+  const state = buildMainAccountState(runtime.agentContext);
+  const signal = await agent.sendStateSignal(
+    {
+      id: MAIN_ACCOUNT_STATE_SIGNAL_ID,
+      mode: "snapshot",
+      tagName: "account-state",
+      cacheKey: mainAccountStateCacheKey(state),
+      contents: serializeMainAccountState(state),
+      value: state,
+    },
+    {
+      ...target,
+      ifActive: { behavior: "deliver" },
+      ifIdle: { behavior: "persist" },
+    },
+  );
+
+  if (signal.skipped) return;
+  const accepted = await signal.accepted;
+  if (accepted.action === "deliver") return;
+  if (accepted.action === "persist") {
+    await signal.persisted;
+    return;
+  }
+  throw new Error(`Unexpected main account state-signal action: ${accepted.action}.`);
 }
 
 function withSeparatedStepText<
@@ -166,7 +217,7 @@ async function resumeConfirmation(
 export async function runSkintextAgent(input: RunSkintextAgentInput, runtime: SkintextRuntime) {
   try {
     const agent = mastra.getAgent("skintextAgent");
-    const { hasImage, isScheduledEvent, userId } = runtime.agentContext;
+    const { hasImage, userId } = runtime.agentContext;
     const threadId = skintextMemoryOptions(userId).thread;
     const target = { resourceId: userId, threadId };
     const suspended = await agent.listSuspendedRuns({
@@ -179,15 +230,12 @@ export async function runSkintextAgent(input: RunSkintextAgentInput, runtime: Sk
       return await resumeConfirmation(agent, pendingConfirmation, input, runtime);
     }
 
-    const delivery = agent.sendMessage(buildUserSignal(input), {
+    await syncMainAccountState(agent, runtime, target);
+
+    const delivery = agent.sendMessage(buildUserSignal(input, runtime), {
       ...target,
       ifActive: {
         behavior: "deliver",
-        attributes: {
-          minimumRiskState: runtime.agentContext.riskState,
-          imageAttached: hasImage,
-          scheduledEvent: isScheduledEvent,
-        },
       },
       ifIdle: {
         behavior: "wake",

@@ -16,8 +16,8 @@
       "import": "./dist/text.js"
     },
     "./prompts": {
-      "bun": "./src/prompts.ts",
-      "types": "./src/prompts.ts",
+      "bun": "./src/prompts/index.ts",
+      "types": "./src/prompts/index.ts",
       "import": "./dist/prompts.js"
     },
     "./risk": {

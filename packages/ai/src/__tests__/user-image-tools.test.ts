@@ -75,4 +75,20 @@ describe("retained user image inspection", () => {
     expect(result).toEqual({ inspected: false, message: "Image not found or expired." });
     expect(inspect).not.toHaveBeenCalled();
   });
+
+  test("returns a safe temporary failure after inspection retries are exhausted", async () => {
+    const inspect = mock(async () => {
+      throw new Error("provider response contained private diagnostics");
+    });
+    const result = await execute({ imageId: "img_saved", question: "What is visible?" }, inspect);
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        inspected: false,
+        image: expect.objectContaining({ id: "img_saved" }),
+        message: "The retained photo could not be inspected right now.",
+      }),
+    );
+    expect(JSON.stringify(result)).not.toContain("private diagnostics");
+  });
 });

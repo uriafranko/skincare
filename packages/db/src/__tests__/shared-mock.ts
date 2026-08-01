@@ -11,15 +11,12 @@ export function createSharedMock(overrides: Record<string, unknown> = {}) {
     ],
     WEEKLY_RECAP_DAY: "Sunday",
     WEEKLY_RECAP_HOUR: 20,
-    decrypt: async (s: string) => s.replace(/^enc:/, ""),
     detectRegion: () => ({
       locale: "en",
       timezone: "UTC",
       country: "US",
       countryName: "United States",
     }),
-    encrypt: async (s: string) => `enc:${s}`,
-    encryptContent: async (s: string) => `enc:${s}`,
     env: {},
     generateId: () => "test_id",
     getLocaleName: (locale: string) => {

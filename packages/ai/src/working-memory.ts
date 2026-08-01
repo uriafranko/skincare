@@ -93,7 +93,7 @@ export const skintextWorkingMemorySchema = z
       .describe("Current unresolved skincare follow-ups or review conditions."),
   })
   .describe(
-    "Compact current skincare state. Operational timezone comes from turn context. Do not copy routine-log history, raw photos, diagnoses, or long conversation summaries here.",
+    "Compact current skincare state. Operational timezone comes from account-state. Do not copy routine-log history, raw photos, diagnoses, or long conversation summaries here.",
   );
 
 export type SkintextWorkingMemory = z.infer<typeof skintextWorkingMemorySchema>;

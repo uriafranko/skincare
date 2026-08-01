@@ -1,5 +1,4 @@
 import type { OneOffReminder } from "@skintext/shared";
-import { decrypt, encryptContent } from "@skintext/shared";
 import { and, asc, eq, isNull, lt, ne, or, sql } from "drizzle-orm";
 import { getDb } from "./client";
 import { customReminderTimes, oneOffReminders, reminderRunIds } from "./schema";
@@ -212,13 +211,13 @@ export async function setCustomReminderTimes(
   userId: string,
   times: CustomReminderTime[],
 ): Promise<void> {
-  const enc = await encryptContent(JSON.stringify(times));
+  const value = JSON.stringify(times);
   await getDb()
     .insert(customReminderTimes)
-    .values({ userId, value: enc })
+    .values({ userId, value })
     .onConflictDoUpdate({
       target: customReminderTimes.userId,
-      set: { value: enc, updatedAt: sql`now()` },
+      set: { value, updatedAt: sql`now()` },
     });
 }
 
@@ -227,24 +226,23 @@ export async function getCustomReminderTimes(userId: string): Promise<CustomRemi
     where: eq(customReminderTimes.userId, userId),
   });
   if (!row) return null;
-  const decrypted = await decrypt(row.value);
-  return JSON.parse(decrypted) as CustomReminderTime[];
+  return JSON.parse(row.value) as CustomReminderTime[];
 }
 
 export async function deleteCustomReminderTimes(userId: string): Promise<void> {
   await getDb().delete(customReminderTimes).where(eq(customReminderTimes.userId, userId));
 }
 
-async function encodeOneOffReminder(reminder: OneOffReminder): Promise<string> {
-  return encryptContent(JSON.stringify(reminder));
+function encodeOneOffReminder(reminder: OneOffReminder): string {
+  return JSON.stringify(reminder);
 }
 
-async function decodeOneOffReminder(raw: string): Promise<OneOffReminder> {
-  return JSON.parse(await decrypt(raw)) as OneOffReminder;
+function decodeOneOffReminder(raw: string): OneOffReminder {
+  return JSON.parse(raw) as OneOffReminder;
 }
 
 export async function createOneOffReminder(reminder: OneOffReminder): Promise<void> {
-  const value = await encodeOneOffReminder(reminder);
+  const value = encodeOneOffReminder(reminder);
   await getDb()
     .insert(oneOffReminders)
     .values({

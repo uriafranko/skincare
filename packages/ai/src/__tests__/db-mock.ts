@@ -28,6 +28,7 @@ export const listOneOffReminders = mock(() => Promise.resolve([] as unknown[]));
 export const listUserImages = mock(() => Promise.resolve([] as unknown[]));
 export const markOneOffReminderFailed = mock(() => Promise.resolve());
 export const saveExportBlob = mock(() => Promise.resolve(null as unknown));
+export const saveUserFeedback = mock((_feedback: unknown) => Promise.resolve());
 export const saveRoutineEntry = mock((_entry: unknown) => Promise.resolve());
 export const setCustomReminderTimes = mock(() => Promise.resolve());
 export const setOneOffReminderWorkflowRunId = mock(() => Promise.resolve());
@@ -51,6 +52,7 @@ mock.module("@skintext/db", () => ({
   listUserImages,
   markOneOffReminderFailed,
   saveExportBlob,
+  saveUserFeedback,
   saveRoutineEntry,
   setCustomReminderTimes,
   setOneOffReminderWorkflowRunId,

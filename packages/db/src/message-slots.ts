@@ -28,12 +28,10 @@ export async function reserveInboundMessage(messageId?: string): Promise<boolean
   return messageId ? trySetExpiringKey(`dedup:${messageId}`, "dedup", DEDUP_TTL) : true;
 }
 
-/** @param encryptedPhone deterministic ciphertext from `encrypt(phone)`, never raw E.164 */
-export async function tryAcquireMessageLock(
-  encryptedPhone: string,
-): Promise<(() => Promise<void>) | null> {
+/** @param phone the user's normalized E.164 phone number */
+export async function tryAcquireMessageLock(phone: string): Promise<(() => Promise<void>) | null> {
   await pruneExpiredKeys();
-  const lockKey = `lock:${encryptedPhone}`;
+  const lockKey = `lock:${phone}`;
   const lockOk = await trySetExpiringKey(lockKey, "lock", LOCK_TTL);
   return lockOk ? () => deleteExpiringKey(lockKey) : null;
 }

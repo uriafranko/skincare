@@ -1,58 +1,20 @@
 import { describe, expect, mock, test } from "bun:test";
-import type { AgentContext, CommunicationStyle, UserAccount } from "@skintext/shared";
+import type { CommunicationStyle } from "@skintext/shared";
 import { createSharedMock } from "./shared-mock";
 
 mock.module("@skintext/shared", () => createSharedMock());
 
 const {
   buildBodyImagePolicy,
-  buildCommercePolicy,
   buildConversationPolicy,
-  buildContextPriorityPolicy,
-  buildImagePolicy,
-  buildMemoryPolicy,
   buildResponseShapePolicy,
   buildSafetyPolicy,
-} = await import("../personality-policy");
+} = await import("../prompts/core");
+const { buildCommercePolicy, buildContextPriorityPolicy, buildImagePolicy, buildMemoryPolicy } =
+  await import("../prompts/main");
 const { deriveMinimumRiskState, shouldOfferCommunicationStyle, shouldOfferPhotoRetention } =
   await import("../risk");
-const { buildSkintextSystemPrompt } = await import("../prompts");
-
-function account(): UserAccount {
-  return {
-    id: "usr_test",
-    phone: "encrypted",
-    locale: "en",
-    timezone: "UTC",
-    timezoneConfirmed: true,
-    country: "US",
-    styleOfferState: "shown",
-    photoRetentionConsentedAt: null,
-    photoRetentionConsentVersion: null,
-    photoRetentionOfferShownAt: null,
-    onboardingComplete: true,
-    consentedAt: "2026-07-26T00:00:00.000Z",
-    consentVersion: "2026-07-26",
-    createdAt: "2026-07-26T00:00:00.000Z",
-  };
-}
-
-function context(): AgentContext {
-  return {
-    userId: "usr_test",
-    localeName: "English",
-    locale: "en",
-    timezone: "UTC",
-    localDate: "2026-07-26",
-    userAccount: account(),
-    riskState: "routine",
-    shouldOfferStyle: false,
-    shouldOfferPhotoRetention: false,
-    hasImage: false,
-    isScheduledEvent: false,
-    streak: null,
-  };
-}
+const { buildSkintextSystemPrompt } = await import("../prompts/main");
 
 describe("personality v1 policies", () => {
   test("uses escalation precedence over caution keywords", () => {
@@ -111,8 +73,7 @@ describe("personality v1 policies", () => {
   });
 
   test("composes working-memory priority and prohibited-pattern coverage into the prompt", () => {
-    const ctx = context();
-    const prompt = buildSkintextSystemPrompt(ctx);
+    const prompt = buildSkintextSystemPrompt();
     expect(prompt).toContain("Working memory is the compact current source");
     expect(prompt).toContain("latest explicit addition, correction, stop, removal, or forget");
     expect(prompt).toContain("Do not diagnose");

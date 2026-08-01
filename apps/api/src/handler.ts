@@ -1,5 +1,4 @@
 import { reserveInboundMessage, resolveUserId, tryAcquireMessageLock } from "@skintext/db";
-import { encrypt } from "@skintext/shared";
 import { createLogger, type RequestLogger } from "evlog";
 import { errorForLogging } from "@/logging";
 import { capturePostHogException } from "@/posthog";
@@ -7,25 +6,14 @@ import { sendReplyBubbles } from "@/replies";
 import { routeConcurrentMessage, routeMessage } from "@/router";
 import { sendMessage, sendTyping } from "@/sendblue";
 
-const MAX_CACHE_SIZE = 500;
 const MESSAGE_LOCK_WAIT_MS = 30_000;
 const MESSAGE_LOCK_RETRY_MS = 100;
-const encryptCache = new Map<string, string>();
-async function cachedEncrypt(phone: string): Promise<string> {
-  let enc = encryptCache.get(phone);
-  if (!enc) {
-    enc = await encrypt(phone);
-    if (encryptCache.size >= MAX_CACHE_SIZE) encryptCache.clear();
-    encryptCache.set(phone, enc);
-  }
-  return enc;
-}
 
-async function waitForMessageLock(encryptedPhone: string) {
+async function waitForMessageLock(phone: string) {
   const deadline = Date.now() + MESSAGE_LOCK_WAIT_MS;
   while (Date.now() < deadline) {
     await new Promise((resolve) => setTimeout(resolve, MESSAGE_LOCK_RETRY_MS));
-    const release = await tryAcquireMessageLock(encryptedPhone);
+    const release = await tryAcquireMessageLock(phone);
     if (release) return release;
   }
   throw new Error("Timed out waiting for the user's active message to finish.");
@@ -58,19 +46,17 @@ export async function handleIncoming(
     phone: phone.slice(-4),
   });
 
-  const encryptedPhone = await cachedEncrypt(phone);
   if (!(await reserveInboundMessage(messageId))) {
     log.set({ skipped: "duplicate" });
     log.emit();
     return;
   }
-  let releaseLock = await tryAcquireMessageLock(encryptedPhone);
+  let releaseLock = await tryAcquireMessageLock(phone);
 
   try {
     if (!releaseLock) {
       const concurrentReplies = await routeConcurrentMessage(
         log,
-        encryptedPhone,
         phone,
         text,
         rawImageUrl,
@@ -81,16 +67,16 @@ export async function handleIncoming(
         return;
       }
 
-      releaseLock = await waitForMessageLock(encryptedPhone);
+      releaseLock = await waitForMessageLock(phone);
     }
 
     log.set({ input: { textLength: text.length, hasImage: !!rawImageUrl } });
     void sendTyping(phone).catch(() => undefined);
 
-    const replies = await routeMessage(log, encryptedPhone, phone, text, rawImageUrl, messageId);
+    const replies = await routeMessage(log, phone, text, rawImageUrl, messageId);
     await deliverReplies(log, phone, replies);
   } catch (error) {
-    const userId = await resolveUserId(encryptedPhone).catch(() => undefined);
+    const userId = await resolveUserId(phone).catch(() => undefined);
     capturePostHogException(error, userId ?? undefined);
     log.error(errorForLogging(error));
     try {

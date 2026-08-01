@@ -1,10 +1,10 @@
 # Message surfaces and voice
 
-Lily uses one agent with composable identity, conversation, safety, body-image, commerce, memory, image, and action policies.
+Lily uses separate onboarding and main agent prompts on the same Mastra memory and user thread. Both compose the same identity, conversation, safety, body-image, and response policies.
 
 ## Transactional
 
-**Where:** `buildSkintextSystemPrompt` in `packages/ai/src/prompts.ts`.
+**Where:** the static `buildSkintextSystemPrompt` in `packages/ai/src/prompts/main.ts`.
 
 **Goal:** Fast scanning, consistent parsing, minimal tokens. The user is actively logging, asking for status, sharing a product, or sending an image.
 
@@ -18,14 +18,20 @@ Lily uses one agent with composable identity, conversation, safety, body-image, 
 
 | Surface | Code |
 |--------|------|
-| Onboarding | `packages/ai/src/onboarding.ts` |
+| Onboarding prompt | `packages/ai/src/prompts/onboarding.ts` |
+| Onboarding runtime | `packages/ai/src/onboarding.ts` |
+| Scheduled prompt templates | `packages/ai/src/prompts/scheduled.ts` |
 | Routine reminders | `buildRoutineReminderEvent` -> `sendReminderToAgent` |
 | Daily summary | `buildDailySummaryReminder` -> `sendReminderToAgent` |
 | Weekly recap | `buildWeeklyRecapReminder` -> `sendReminderToAgent` |
 
 **Goal:** Gentle routine nudges and wrap-ups. Reminders are warm, optional, and short; summaries are data-first and never use guilt or streak pressure.
 
-Every proactive surface sends an internal prompt through the same main agent and persistent per-user Mastra thread used for inbound messages. Recent messages and observational memory provide conversational continuity without injecting routine logs into the dynamic system prompt. When exact routine facts matter, the agent uses its verified today/weekly routine-log tools; scheduled prompts already carry the event-specific facts they need.
+Every proactive surface sends an internal prompt through the same main agent and persistent per-user Mastra thread used for inbound messages. Recent messages and observational memory provide conversational continuity without injecting routine logs into the static system prompt. When exact routine facts matter, the agent uses its verified today/weekly routine-log tools; scheduled prompts already carry the event-specific facts they need.
+
+## Runtime context
+
+The main system prompt contains only stable identity, voice, safety, privacy, memory, image, action, commerce, and scheduled-event rules. Slow server-verified facts - locale, local date, timezone, service consent, photo-retention consent, and adherence streak - are sent as one deduplicated `account-state` snapshot on the same Mastra thread. Turn-only routing facts - minimum risk state, scheduled-event status, and one-time offer decisions - are attributes on the current user message. Image presence is represented only by the actual attached file, never by a duplicated `imageAttached` flag.
 
 ## Safety
 
@@ -37,7 +43,7 @@ Onboarding validates only that the user is 16 or older; Lily does not divide eli
 
 - Service consent covers working memory, logs, reminders, and sanitized text conversation history.
 - Every image turn runs with message persistence disabled. After the reply, conversation history receives only the user's text, a generic photo marker, and the assistant reply - never image bytes or a private blob URL.
-- Photo retention is a separate adult opt-in. Retained photos use the encrypted-metadata/private-blob path and the existing 30-day expiry.
+- Photo retention is a separate adult opt-in. Retained photos use the metadata/private-blob path and the existing 30-day expiry.
 - Observational memory cannot inspect attachments and must not infer protected attributes, attractiveness, diagnosis, pregnancy, or emotional vulnerability.
 - Working memory is the current source for profile details, products, communication style, experiments, and follow-ups. Newer conversation claims override stale working memory until observation reconciles it.
 - Chat controls can summarize retained data, correct or forget conversational details, delete photos, change future photo retention, export data, or delete the account.

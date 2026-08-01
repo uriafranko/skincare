@@ -1,30 +1,24 @@
 import type { StyleOfferState, UserAccount } from "@skintext/shared";
 import { eq } from "drizzle-orm";
 import { getDb } from "./client";
-import { phoneMappings, users } from "./schema";
+import { users } from "./schema";
 
-export async function resolveUserId(encryptedPhone: string): Promise<string | null> {
-  const row = await getDb().query.phoneMappings.findFirst({
-    where: eq(phoneMappings.encryptedPhone, encryptedPhone),
+export async function resolveUserId(phone: string): Promise<string | null> {
+  const row = await getDb().query.users.findFirst({
+    columns: { id: true },
+    where: eq(users.phone, phone),
   });
-  return row?.userId ?? null;
-}
-
-export async function createPhoneMapping(encryptedPhone: string, userId: string): Promise<void> {
-  await getDb().insert(phoneMappings).values({ encryptedPhone, userId }).onConflictDoUpdate({
-    target: phoneMappings.encryptedPhone,
-    set: { userId },
-  });
+  return row?.id ?? null;
 }
 
 function pendingUserValues(
   userId: string,
-  encryptedPhone: string,
+  phone: string,
   account: Pick<UserAccount, "locale" | "timezone" | "country">,
 ): typeof users.$inferInsert {
   return {
     id: userId,
-    phone: encryptedPhone,
+    phone,
     locale: account.locale,
     timezone: account.timezone,
     timezoneConfirmed: false,
@@ -42,13 +36,13 @@ function pendingUserValues(
 
 export async function createPendingUserForPhone(
   userId: string,
-  encryptedPhone: string,
+  phone: string,
   account: Pick<UserAccount, "locale" | "timezone" | "country">,
 ): Promise<string> {
   const db = getDb();
   const [inserted] = await db
     .insert(users)
-    .values(pendingUserValues(userId, encryptedPhone, account))
+    .values(pendingUserValues(userId, phone, account))
     .onConflictDoNothing()
     .returning({ id: users.id });
 
@@ -57,21 +51,13 @@ export async function createPendingUserForPhone(
     (
       await db.query.users.findFirst({
         columns: { id: true },
-        where: eq(users.phone, encryptedPhone),
+        where: eq(users.phone, phone),
       })
     )?.id;
 
   if (!resolvedUserId) {
     throw new Error("Unable to create or resolve pending user for phone.");
   }
-
-  await db
-    .insert(phoneMappings)
-    .values({ encryptedPhone, userId: resolvedUserId })
-    .onConflictDoUpdate({
-      target: phoneMappings.encryptedPhone,
-      set: { userId: resolvedUserId },
-    });
 
   return resolvedUserId;
 }
@@ -107,7 +93,7 @@ export async function getUser(userId: string): Promise<UserAccount | null> {
 
 export async function createUser(
   userId: string,
-  encryptedPhone: string,
+  phone: string,
   account: Omit<UserAccount, "id" | "phone" | "createdAt">,
 ): Promise<void> {
   const createdAt = new Date().toISOString();
@@ -115,7 +101,7 @@ export async function createUser(
     .insert(users)
     .values({
       id: userId,
-      phone: encryptedPhone,
+      phone,
       locale: account.locale,
       timezone: account.timezone,
       timezoneConfirmed: account.timezoneConfirmed,
@@ -132,7 +118,7 @@ export async function createUser(
     .onConflictDoUpdate({
       target: users.id,
       set: {
-        phone: encryptedPhone,
+        phone,
         locale: account.locale,
         timezone: account.timezone,
         timezoneConfirmed: account.timezoneConfirmed,
@@ -146,7 +132,6 @@ export async function createUser(
         consentVersion: account.consentVersion,
       },
     });
-  await createPhoneMapping(encryptedPhone, userId);
 }
 
 export async function updateUser(

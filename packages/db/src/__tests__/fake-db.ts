@@ -13,9 +13,9 @@ const tableKeys = new Map<unknown, (row: Row) => string>([
   [schema.expiringKeys, (row) => String(row.key)],
   [schema.oneOffReminders, (row) => String(row.id)],
   [schema.onboardingStates, (row) => String(row.userId)],
-  [schema.phoneMappings, (row) => String(row.encryptedPhone)],
   [schema.reminderRunIds, (row) => String(row.userId)],
   [schema.routineEntries, (row) => String(row.id)],
+  [schema.userFeedback, (row) => String(row.id)],
   [schema.userImages, (row) => String(row.id)],
   [schema.users, (row) => String(row.id)],
 ]);
@@ -99,6 +99,8 @@ export function createFakeDb() {
       rows.sort((a, b) => String(a.sendAt).localeCompare(String(b.sendAt)));
     if (table === schema.routineEntries)
       rows.sort((a, b) => String(a.timestamp).localeCompare(String(b.timestamp)));
+    if (table === schema.userFeedback)
+      rows.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
     return rows.map((row) => ({ ...row }));
   }
 
@@ -182,9 +184,9 @@ export function createFakeDb() {
       expiringKeys: tableQuery(schema.expiringKeys),
       oneOffReminders: tableQuery(schema.oneOffReminders),
       onboardingStates: tableQuery(schema.onboardingStates),
-      phoneMappings: tableQuery(schema.phoneMappings),
       reminderRunIds: tableQuery(schema.reminderRunIds),
       routineEntries: tableQuery(schema.routineEntries),
+      userFeedback: tableQuery(schema.userFeedback),
       userImages: tableQuery(schema.userImages),
       users: tableQuery(schema.users),
     },

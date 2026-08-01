@@ -1,4 +1,5 @@
 import { deleteAccountTool } from "./delete-account";
+import { recordFeedbackTool } from "./feedback";
 import {
   cancelOneOffReminderTool,
   listOneOffRemindersTool,
@@ -25,5 +26,6 @@ export const skintextAgentTools = {
   sendUserImage: sendUserImageTool,
   managePhotoRetention: managePhotoRetentionTool,
   deleteSavedPhotos: deleteSavedPhotosTool,
+  recordFeedback: recordFeedbackTool,
   deleteAccount: deleteAccountTool,
 };

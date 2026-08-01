@@ -12,6 +12,7 @@
     "lint": "biome check .",
     "lint:fix": "biome check --fix .",
     "format": "biome format --write .",
+    "proactive": "bun --cwd apps/api scripts/send-proactive-message.ts",
     "sim": "bun --cwd packages/sim src/cli.ts",
     "test": "turbo test",
     "clean": "turbo clean",

@@ -1,5 +1,14 @@
 export { getDb } from "./client";
 export { deleteExpiredExportBlobs, saveExportBlob } from "./exports";
+export {
+  type FeedbackKind,
+  type FeedbackStatus,
+  getUserFeedback,
+  listUserFeedback,
+  type SaveUserFeedbackInput,
+  saveUserFeedback,
+  type UserFeedbackRecord,
+} from "./feedback";
 export { reserveInboundMessage, tryAcquireMessageLock } from "./message-slots";
 export { deleteOnboardingState, getOnboardingState, setOnboardingState } from "./onboarding";
 export {
@@ -49,7 +58,6 @@ export {
 } from "./user-images";
 export {
   createPendingUserForPhone,
-  createPhoneMapping,
   createUser,
   deleteAllUserData,
   getUser,

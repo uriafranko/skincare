@@ -11,7 +11,7 @@ const { deleteSavedPhotosTool, managePhotoRetentionTool } = await import("../too
 function account(): UserAccount {
   return {
     id: "usr_photo",
-    phone: "encrypted",
+    phone: "+15555550123",
     locale: "en",
     timezone: "UTC",
     timezoneConfirmed: true,

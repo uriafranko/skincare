@@ -7,7 +7,6 @@
       "outputs": ["dist/**", ".output/**", ".next/**", ".vercel/output/**"],
       "env": [
         "DATABASE_URL",
-        "ENCRYPTION_KEY",
         "AI_GATEWAY_API_KEY",
         "AI_GATEWAY_DEFAULT_MODEL",
         "AI_GATEWAY_MEMORY_MODEL",

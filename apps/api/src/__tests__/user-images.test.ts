@@ -63,8 +63,6 @@ mock.module("files-sdk/vercel-blob", () => ({
 mock.module("@skintext/shared", () => ({
   PERSONALITY_POLICY_VERSION: "personality-v1",
   PHOTO_RETENTION_CONSENT_VERSION: "2026-07-26",
-  decrypt: async (s: string) => s.replace(/^enc:/, ""),
-  encryptContent: async (s: string) => `enc:${s}`,
   generateId: () => "img_test",
   isValidTimeZone: () => true,
 }));

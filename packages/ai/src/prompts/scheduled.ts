@@ -1,49 +1,4 @@
-import type { AgentContext } from "@skintext/shared";
 import { getLocaleName } from "@skintext/shared";
-import {
-  buildActionPolicy,
-  buildBodyImagePolicy,
-  buildCommercePolicy,
-  buildContextPriorityPolicy,
-  buildConversationPolicy,
-  buildIdentityPolicy,
-  buildImagePolicy,
-  buildMemoryPolicy,
-  buildResponseShapePolicy,
-  buildSafetyPolicy,
-  buildScheduledEventPolicy,
-} from "./personality-policy";
-
-export function buildSkintextSystemPrompt(ctx: AgentContext): string {
-  const account = ctx.userAccount;
-  const turnContext = `TURN CONTEXT
-- Minimum risk state: ${ctx.riskState}
-- Reply language: ${ctx.localeName} (${ctx.locale})
-- Today's local date: ${ctx.localDate}
-- Operational timezone: ${ctx.timezone}; confirmed: ${account?.timezoneConfirmed ? "yes" : "no"}
-- Image attached: ${ctx.hasImage ? "yes" : "no"}
-- Scheduled event: ${ctx.isScheduledEvent ? "yes" : "no"}
-- Offer communication-style choice: ${ctx.shouldOfferStyle ? "yes" : "no"}
-- Photo retention: ${account?.photoRetentionConsentedAt ? `enabled under consent ${account.photoRetentionConsentVersion ?? "unknown"}` : "disabled"}
-- Offer photo retention: ${ctx.shouldOfferPhotoRetention ? "yes" : "no"}
-- Adherence streak: ${ctx.streak ?? "none"}
-Use working memory and newer retained history for personal profile, products, and experiment state. Reply in the exact language of the latest user message. For a scheduled event, reply in the saved locale above.`;
-
-  return [
-    buildIdentityPolicy(),
-    buildConversationPolicy(),
-    buildResponseShapePolicy(),
-    buildContextPriorityPolicy(),
-    buildSafetyPolicy(),
-    buildBodyImagePolicy(),
-    buildCommercePolicy(),
-    buildMemoryPolicy(),
-    buildImagePolicy(),
-    buildActionPolicy(),
-    buildScheduledEventPolicy(),
-    turnContext,
-  ].join("\n\n");
-}
 
 export function buildDailyRoutineSummaryPrompt(locale: string): string {
   const localeName = getLocaleName(locale);

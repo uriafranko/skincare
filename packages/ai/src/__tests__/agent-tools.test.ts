@@ -18,6 +18,7 @@ describe("Skintext agent tools", () => {
       "sendUserImage",
       "managePhotoRetention",
       "deleteSavedPhotos",
+      "recordFeedback",
       "deleteAccount",
     ]);
   });

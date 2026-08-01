@@ -1,5 +1,5 @@
 export const DEFAULT_AI_GATEWAY_MODEL = "openai/gpt-5.6-luna";
-export const DEFAULT_AI_GATEWAY_REASONING_EFFORT = "medium" as const;
+export const DEFAULT_AI_GATEWAY_REASONING_EFFORT = "max" as const;
 export const AI_GATEWAY_REASONING_EFFORTS = [
   "none",
   "minimal",

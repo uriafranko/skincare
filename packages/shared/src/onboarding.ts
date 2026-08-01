@@ -1,5 +1,13 @@
 import type { OnboardingFieldKey, OnboardingState } from "./types";
 
+export type OnboardingNextAction =
+  | "ask_age"
+  | "collect_profile"
+  | "ask_timezone"
+  | "ask_consent"
+  | "complete"
+  | "stop_underage";
+
 export function getMissingFields(state: OnboardingState): OnboardingFieldKey[] {
   const missing: OnboardingFieldKey[] = [];
   if (state.ageEligible !== true) missing.push("age_eligibility");
@@ -11,6 +19,22 @@ export function getMissingFields(state: OnboardingState): OnboardingFieldKey[] {
   }
   if (missing.length === 0 && !state.consented) missing.push("consent");
   return missing;
+}
+
+/**
+ * The product has two modes (onboarding and main). This is not another state
+ * machine: it is the single server-derived instruction for the next onboarding
+ * reply.
+ */
+export function getOnboardingNextAction(state: OnboardingState): OnboardingNextAction {
+  if (state.ageEligible === false) return "stop_underage";
+
+  const firstMissing = getMissingFields(state)[0];
+  if (!firstMissing) return "complete";
+  if (firstMissing === "age_eligibility") return "ask_age";
+  if (firstMissing === "timezone") return "ask_timezone";
+  if (firstMissing === "consent") return "ask_consent";
+  return "collect_profile";
 }
 
 function mergeList(existing?: readonly string[], incoming?: readonly string[]): string[] {

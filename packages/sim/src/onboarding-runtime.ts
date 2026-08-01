@@ -11,10 +11,18 @@ type ProcessLiveOnboardingMessage = (
     isFirstMessage: boolean;
     timezone: string;
     locale: string;
-    complete?: boolean;
   },
-  generate?: (prompt: string) => Promise<Record<string, unknown>>,
-) => Promise<{ extracted: Partial<OnboardingState>; reply: string }>;
+  generate?: (input: {
+    text: string;
+    state: OnboardingState;
+    context: {
+      isFirstMessage: boolean;
+      timezone: string;
+      locale: string;
+      userId?: string;
+    };
+  }) => Promise<Record<string, unknown>>,
+) => Promise<{ extracted: Partial<OnboardingState>; reply: string; nextAction: string }>;
 
 export interface OnboardingRuntimeOptions {
   mode: RuntimeMode;
@@ -57,7 +65,6 @@ async function processLiveOnboardingMessage(
     isFirstMessage: boolean;
     timezone: string;
     locale: string;
-    complete?: boolean;
   },
   modelName: string,
 ) {
@@ -65,7 +72,11 @@ async function processLiveOnboardingMessage(
   const { createOnboardingGenerator, processOnboardingMessage } = (await import(moduleUrl)) as {
     createOnboardingGenerator: (
       modelName?: string,
-    ) => (prompt: string) => Promise<Record<string, unknown>>;
+    ) => (input: {
+      text: string;
+      state: OnboardingState;
+      context: typeof ctx;
+    }) => Promise<Record<string, unknown>>;
     processOnboardingMessage: ProcessLiveOnboardingMessage;
   };
   return processOnboardingMessage(text, state, ctx, createOnboardingGenerator(modelName));
@@ -103,33 +114,11 @@ function createLiveOnboardingRuntime(options: OnboardingRuntimeOptions): Simulat
 
       const merged = mergeOnboardingState(state, extracted);
       const complete = isLocalOnboardingComplete(merged);
-
-      if (complete) {
-        const completeResult = await processLiveOnboardingMessage(
-          text,
-          merged,
-          {
-            isFirstMessage: false,
-            timezone,
-            locale,
-            complete: true,
-          },
-          modelName,
-        );
-        state = { ...merged, lastBotReply: completeResult.reply };
-        return {
-          messages: [completeResult.reply],
-          state,
-          complete: true,
-          metadata: { extracted },
-        };
-      }
-
       state = { ...merged, lastBotReply: reply };
       return {
         messages: [reply],
         state,
-        complete: false,
+        complete,
         metadata: { extracted },
       };
     },

@@ -21,7 +21,7 @@ const {
 } = await import("../reminders");
 
 describe("one-off reminders", () => {
-  test("creates, retrieves, and lists encrypted one-off reminders", async () => {
+  test("creates, retrieves, and lists one-off reminders", async () => {
     await createOneOffReminder({
       id: "reminder_1",
       userId: "usr_test",

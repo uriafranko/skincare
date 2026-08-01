@@ -1,4 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
+import type { AgentContext } from "@skintext/shared";
 import { createSharedMock } from "./shared-mock";
 
 mock.module("@skintext/shared", () =>
@@ -10,22 +11,27 @@ mock.module("@skintext/shared", () =>
   }),
 );
 
+const { buildSkintextSystemPrompt } = await import("../prompts/main");
 const {
   buildDailyRoutineSummaryPrompt,
   buildRoutineReminderPrompt,
-  buildSkintextSystemPrompt,
   buildWeeklyRoutineRecapPrompt,
-} = await import("../prompts");
+} = await import("../prompts/scheduled");
 const {
   USER_REMINDER_CLOSE_TAG,
   USER_REMINDER_OPEN_TAG,
   USER_REMINDER_TAG_EXAMPLE,
   wrapUserReminder,
 } = await import("../user-reminder");
+const { ONBOARDING_INSTRUCTIONS } = await import("../prompts/onboarding");
+const { buildCorePrompt } = await import("../prompts/core");
+const { buildMainAccountState, mainAccountStateCacheKey, serializeMainAccountState } = await import(
+  "../prompts/context"
+);
 
 const baseAccount = {
   id: "usr_test123",
-  phone: "encrypted",
+  phone: "+15555550123",
   locale: "en",
   timezone: "America/New_York",
   timezoneConfirmed: true,
@@ -45,7 +51,7 @@ const baseContext = {
   localeName: "English",
   locale: "en",
   timezone: "America/New_York",
-  localDate: "2026-07-26",
+  localDate: "2026-07-31",
   userAccount: baseAccount,
   riskState: "routine" as const,
   shouldOfferStyle: false,
@@ -53,21 +59,22 @@ const baseContext = {
   hasImage: false,
   isScheduledEvent: false,
   streak: 4,
-};
+} satisfies AgentContext;
 
-function makeContext(overrides: Record<string, unknown> = {}) {
+function makeContext(overrides: Partial<AgentContext> = {}): AgentContext {
   return { ...baseContext, ...overrides };
 }
 
 describe("buildSkintextSystemPrompt", () => {
   test("composes every trusted-core policy module", () => {
-    const prompt = buildSkintextSystemPrompt(makeContext());
+    const prompt = buildSkintextSystemPrompt();
     expect(prompt).toContain("Your name is Lily");
     expect(prompt).toContain("You are AI, not a human");
     expect(prompt).toContain("ROLE AND IDENTITY");
     expect(prompt).toContain("CONVERSATION POLICY");
     expect(prompt).toContain("RESPONSE SHAPE");
     expect(prompt).toContain("CONTEXT PRIORITY");
+    expect(prompt).toContain("RUNTIME CONTEXT");
     expect(prompt).toContain("SAFETY POLICY");
     expect(prompt).toContain("BODY-IMAGE POLICY");
     expect(prompt).toContain("COMMERCE POLICY");
@@ -77,53 +84,23 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("SCHEDULED EVENTS");
   });
 
-  test("keeps conversational user state in working memory instead of the system prompt", () => {
-    const prompt = buildSkintextSystemPrompt(makeContext());
-    expect(prompt).toContain("TURN CONTEXT");
-    expect(prompt).toContain("Use working memory and newer retained history");
+  test("keeps all user and turn state out of the static system prompt", () => {
+    const prompt = buildSkintextSystemPrompt();
+    expect(prompt).not.toContain("TURN CONTEXT");
+    expect(prompt).toContain("Working memory is the compact current source");
     expect(prompt).not.toContain("Name: Alice");
     expect(prompt).not.toContain("Skin type: combination");
     expect(prompt).not.toContain("Allergies/avoids: fragrance");
     expect(prompt).not.toContain("Gentle Cleanser");
-    expect(prompt).toContain("Adherence streak: 4");
-    expect(prompt).toContain("exact language of the latest user message");
+    expect(prompt).not.toContain("Adherence streak: 4");
+    expect(prompt).not.toContain("America/New_York");
+    expect(prompt).not.toContain("2026-07-31");
+    expect(prompt).not.toContain("Image attached:");
+    expect(prompt).toContain("exact language of the user's latest message");
   });
 
-  test("keeps routine-log payloads out of the dynamic system prompt", () => {
-    const prompt = buildSkintextSystemPrompt(
-      makeContext({
-        recentRoutineLogs: [
-          {
-            date: "2026-07-25",
-            log: {
-              entries: [
-                {
-                  id: "routine_1",
-                  userId: "usr_test123",
-                  slot: "evening",
-                  steps: [
-                    {
-                      name: "moisturize",
-                      category: "moisturizer",
-                      productName: "Barrier Cream",
-                    },
-                  ],
-                  completed: true,
-                  reaction: "less tightness",
-                  source: "text",
-                  timestamp: "2026-07-25T20:00:00Z",
-                  localDate: "2026-07-25",
-                },
-              ],
-              entryCount: 1,
-              completedSlots: ["evening"],
-              productsUsed: ["Barrier Cream"],
-              reactions: ["less tightness"],
-            },
-          },
-        ],
-      }),
-    );
+  test("keeps routine-log payloads out of the static system prompt", () => {
+    const prompt = buildSkintextSystemPrompt();
 
     expect(prompt).not.toContain("routine_1");
     expect(prompt).not.toContain("Barrier Cream");
@@ -134,7 +111,7 @@ describe("buildSkintextSystemPrompt", () => {
   });
 
   test("includes safety, privacy, commercial, and action invariants", () => {
-    const prompt = buildSkintextSystemPrompt(makeContext());
+    const prompt = buildSkintextSystemPrompt();
     expect(prompt).toContain("Do not diagnose");
     expect(prompt).toContain("Never confirm that the user is ugly");
     expect(prompt).toContain('"Buy nothing"');
@@ -144,11 +121,12 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("Every user-visible reply must be plain text");
     expect(prompt).toContain("Never use Markdown syntax");
     expect(prompt).toContain("Promise a future message only after");
+    expect(prompt).toContain("save it with the feedback action");
     expect(prompt).toContain("one clear purpose and one obvious response");
   });
 
   test("defines response shape and type-specific context precedence", () => {
-    const prompt = buildSkintextSystemPrompt(makeContext());
+    const prompt = buildSkintextSystemPrompt();
     expect(prompt).toContain("Do not restate or paraphrase the user's request");
     expect(prompt).toContain('"Let me know if you need anything else"');
     expect(prompt).toContain("Do not repeat the same question or recommendation");
@@ -160,27 +138,14 @@ describe("buildSkintextSystemPrompt", () => {
   });
 
   test("does not inject experiment state outside working memory", () => {
-    const prompt = buildSkintextSystemPrompt(
-      makeContext({
-        activeExperiment: {
-          id: "experiment_1",
-          userId: "usr_test123",
-          change: "Use azelaic acid every other night",
-          baseline: "Redness is unchanged",
-          startedAt: "2026-07-20T00:00:00Z",
-          plannedReviewAt: "2026-08-03T00:00:00Z",
-          status: "active",
-          createdAt: "2026-07-20T00:00:00Z",
-        },
-      }),
-    );
+    const prompt = buildSkintextSystemPrompt();
     expect(prompt).not.toContain("Use azelaic acid every other night");
     expect(prompt).not.toContain("Redness is unchanged");
     expect(prompt).toContain("experiment state as conversational memory");
   });
 
   test("treats scheduled reminder tags as internal input", () => {
-    const prompt = buildSkintextSystemPrompt(makeContext());
+    const prompt = buildSkintextSystemPrompt();
     expect(prompt).toContain(USER_REMINDER_TAG_EXAMPLE);
     expect(prompt).toContain("internal scheduled events");
     expect(prompt).toContain("Reply in the user's saved locale");
@@ -197,19 +162,68 @@ describe("buildSkintextSystemPrompt", () => {
   });
 
   test("does not inject saved image metadata into system context", () => {
-    const prompt = buildSkintextSystemPrompt(
-      makeContext({
-        recentImages: [
-          {
-            id: "img_123",
-            sourceText: "is this irritation improving?",
-            createdAt: "2026-07-26T12:00:00Z",
-          },
-        ],
-      }),
-    );
+    const prompt = buildSkintextSystemPrompt();
     expect(prompt).not.toContain("img_123");
     expect(prompt).not.toContain("is this irritation improving?");
+  });
+});
+
+describe("prompt module boundaries", () => {
+  test("keeps stable shared behavior in core without main or runtime state", () => {
+    const core = buildCorePrompt();
+
+    expect(core).toContain("ROLE AND IDENTITY");
+    expect(core).toContain("SAFETY POLICY");
+    expect(core).not.toContain("ACTION AND TOOL POLICY");
+    expect(core).not.toContain("MEMORY AND PRIVACY POLICY");
+    expect(core).not.toContain("TURN CONTEXT");
+  });
+
+  test("serializes only slow-changing verified facts into account-state", () => {
+    const state = buildMainAccountState(makeContext());
+    const serialized = serializeMainAccountState(state);
+
+    expect(state).toEqual({
+      version: 1,
+      mode: "main",
+      locale: { code: "en", name: "English" },
+      localDate: "2026-07-31",
+      timezone: { value: "America/New_York", confirmed: true },
+      serviceConsent: {
+        onboardingComplete: true,
+        consented: true,
+        version: "2026-07-26",
+      },
+      photoRetention: { enabled: false, consentVersion: null },
+      adherenceStreak: 4,
+    });
+    expect(serialized).not.toContain("usr_test123");
+    expect(serialized).not.toContain("riskState");
+    expect(serialized).not.toContain("hasImage");
+    expect(serialized).not.toContain("shouldOffer");
+    expect(serialized).not.toContain("isScheduledEvent");
+  });
+
+  test("does not invalidate account-state for per-turn-only changes", () => {
+    const first = buildMainAccountState(makeContext());
+    const second = buildMainAccountState(
+      makeContext({
+        riskState: "escalation",
+        hasImage: true,
+        isScheduledEvent: true,
+        shouldOfferStyle: true,
+        shouldOfferPhotoRetention: true,
+      }),
+    );
+
+    expect(mainAccountStateCacheKey(first)).toBe(mainAccountStateCacheKey(second));
+  });
+
+  test("composes onboarding from core plus onboarding-only rules", () => {
+    expect(ONBOARDING_INSTRUCTIONS).toContain("ROLE AND IDENTITY");
+    expect(ONBOARDING_INSTRUCTIONS).toContain("ONBOARDING MODE");
+    expect(ONBOARDING_INSTRUCTIONS).not.toContain("ACTION AND TOOL POLICY");
+    expect(ONBOARDING_INSTRUCTIONS).not.toContain("MEMORY AND PRIVACY POLICY");
   });
 });
 
@@ -253,30 +267,33 @@ describe("scheduled prompts", () => {
 });
 
 describe("onboarding prompt source", () => {
-  test("completion guidance localizes done replies", async () => {
-    const source = await Bun.file(new URL("../onboarding.ts", import.meta.url)).text();
-    expect(source).toContain('localized equivalent of "done"');
-    expect(source).toContain('Do not use the English word "done" unless replying in English');
+  test("completion guidance localizes done replies", () => {
+    expect(ONBOARDING_INSTRUCTIONS).toContain('localized equivalent of "done"');
+    expect(ONBOARDING_INSTRUCTIONS).toContain(
+      'Do not use the English word "done" unless replying in English',
+    );
   });
 
-  test("setup guidance localizes consent and CTA copy", async () => {
-    const source = await Bun.file(new URL("../onboarding.ts", import.meta.url)).text();
-    expect(source).toContain('Ask the user to reply "AGREE"');
-    expect(source).toContain("https://skintext.ai/terms");
-    expect(source).toContain("https://skintext.ai/privacy");
-    expect(source).toContain("End with a localized low-friction CTA");
+  test("setup guidance localizes consent and CTA copy", () => {
+    expect(ONBOARDING_INSTRUCTIONS).toContain("Tell them to reply AGREE");
+    expect(ONBOARDING_INSTRUCTIONS).toContain("https://skintext.ai/terms");
+    expect(ONBOARDING_INSTRUCTIONS).toContain("https://skintext.ai/privacy");
+    expect(ONBOARDING_INSTRUCTIONS).toContain("localized low-friction CTA");
   });
 
-  test("onboarding matches the user's language, code-switching, and conversational voice", async () => {
-    const source = await Bun.file(new URL("../onboarding.ts", import.meta.url)).text();
-    expect(source).toContain("latest message as the voice reference");
-    expect(source).toContain("natural language mix if they code-switch");
-    expect(source).toContain("slang level");
-    expect(source).toContain("Do not force slang, caricature a dialect");
-    expect(source).toContain("Return plain text only. Never use Markdown");
-    expect(source).toContain("Do not restate or paraphrase the user's message");
-    expect(source).toContain("Never repeat the same question or recommendation");
-    expect(source).toContain("Do not introduce emoji unless the user used emoji");
-    expect(source).toContain("do not make every reply start with an acknowledgment");
+  test("onboarding matches the user's language, code-switching, and conversational voice", () => {
+    expect(ONBOARDING_INSTRUCTIONS).toContain("latest message as the primary voice reference");
+    expect(ONBOARDING_INSTRUCTIONS).toContain("naturally code-switch");
+    expect(ONBOARDING_INSTRUCTIONS).toContain("slang level");
+    expect(ONBOARDING_INSTRUCTIONS).toContain("never force or invent slang");
+    expect(ONBOARDING_INSTRUCTIONS).toContain(
+      "plain text because iMessage does not render Markdown",
+    );
+    expect(ONBOARDING_INSTRUCTIONS).toContain("Do not restate or paraphrase the user's request");
+    expect(ONBOARDING_INSTRUCTIONS).toContain("Do not repeat the same question or recommendation");
+    expect(ONBOARDING_INSTRUCTIONS).toContain("Do not introduce emoji unless the user used emoji");
+    expect(ONBOARDING_INSTRUCTIONS).toContain(
+      "Do not make every reply start with an acknowledgment",
+    );
   });
 });

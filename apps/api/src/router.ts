@@ -34,15 +34,14 @@ async function requireCurrentTerms(user: UserAccount, text: string): Promise<str
  */
 export async function routeConcurrentMessage(
   log: RequestLogger,
-  encryptedPhone: string,
-  rawPhone: string,
+  phone: string,
   text: string,
   rawImageUrl?: string,
   messageId?: string,
 ): Promise<string[] | undefined> {
   if (rawImageUrl) return;
 
-  const userId = await resolveUserId(encryptedPhone);
+  const userId = await resolveUserId(phone);
   if (!userId) return;
 
   const user = await getUser(userId);
@@ -56,7 +55,7 @@ export async function routeConcurrentMessage(
       event: "user_message_received",
       properties: { has_image: false, concurrent: true },
     });
-    return handleMessage(log, user, rawPhone, text, undefined, undefined, messageId);
+    return handleMessage(log, user, phone, text, undefined, undefined, messageId);
   });
   return reply ? [reply] : [];
 }
@@ -67,18 +66,17 @@ function withUserContext<T>(userId: string, callback: () => T): T {
 
 export async function routeMessage(
   log: RequestLogger,
-  encryptedPhone: string,
-  rawPhone: string,
+  phone: string,
   text: string,
   rawImageUrl?: string,
   messageId?: string,
 ): Promise<string[]> {
-  let userId = await resolveUserId(encryptedPhone);
+  let userId = await resolveUserId(phone);
   let region = null;
 
   if (!userId) {
-    region = detectRegion(rawPhone);
-    userId = await createPendingUserForPhone(generateId(), encryptedPhone, {
+    region = detectRegion(phone);
+    userId = await createPendingUserForPhone(generateId(), phone, {
       locale: region.locale,
       timezone: region.timezone,
       country: region.country,
@@ -91,8 +89,7 @@ export async function routeMessage(
     routeMessageForUser(
       log,
       userId,
-      encryptedPhone,
-      rawPhone,
+      phone,
       text,
       region?.locale,
       region?.timezone,
@@ -106,8 +103,7 @@ export async function routeMessage(
 async function routeMessageForUser(
   log: RequestLogger,
   userId: string,
-  encryptedPhone: string,
-  rawPhone: string,
+  phone: string,
   text: string,
   detectedLocale?: string,
   detectedTimezone?: string,
@@ -123,7 +119,7 @@ async function routeMessageForUser(
       log,
       userId,
       text,
-      encryptedPhone,
+      phone,
       detectedLocale ?? user?.locale ?? "en",
       detectedTimezone ?? user?.timezone ?? "UTC",
       detectedCountry ?? user?.country ?? "US",
@@ -164,7 +160,7 @@ async function routeMessageForUser(
   const reply = await handleMessage(
     log,
     user,
-    rawPhone,
+    phone,
     text,
     imageUrl,
     normalizedImage ?? undefined,

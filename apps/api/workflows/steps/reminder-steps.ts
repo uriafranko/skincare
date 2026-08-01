@@ -13,7 +13,7 @@ import {
   updateAdherenceStreak,
 } from "@skintext/db";
 import type { AdherenceStreak, DailyRoutineLog, UserAccount } from "@skintext/shared";
-import { decrypt, isDayOfWeek, localDateString, nextLocalTime } from "@skintext/shared";
+import { isDayOfWeek, localDateString, nextLocalTime } from "@skintext/shared";
 import { createLogger } from "evlog";
 import { runAgentMessage } from "../../src/agent-runner";
 import { sendReplyBubbles } from "../../src/replies";
@@ -87,7 +87,7 @@ export async function sendReminderToAgent(
   const user = await getUser(userId);
   if (!user?.consentedAt) return false;
 
-  const rawPhone = await decrypt(user.phone);
+  const rawPhone = user.phone;
   const log = createLogger({
     scope: "scheduled_message",
     userId,

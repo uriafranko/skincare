@@ -1,5 +1,4 @@
 import type { UserImage } from "@skintext/shared";
-import { decrypt, encryptContent } from "@skintext/shared";
 import { and, eq, lte, sql } from "drizzle-orm";
 import { getDb } from "./client";
 import { blobDeletionQueue, userImages } from "./schema";
@@ -14,12 +13,12 @@ export interface BlobDeletionJob {
   updatedAt: Date;
 }
 
-async function encodeUserImage(image: UserImage): Promise<string> {
-  return encryptContent(JSON.stringify(image));
+function encodeUserImage(image: UserImage): string {
+  return JSON.stringify(image);
 }
 
-async function decodeUserImage(raw: string): Promise<UserImage> {
-  return JSON.parse(await decrypt(raw)) as UserImage;
+function decodeUserImage(raw: string): UserImage {
+  return JSON.parse(raw) as UserImage;
 }
 
 function isActive(image: UserImage, now = new Date()): boolean {
@@ -31,7 +30,7 @@ function newestFirst(a: UserImage, b: UserImage): number {
 }
 
 export async function saveUserImage(image: UserImage): Promise<void> {
-  const value = await encodeUserImage(image);
+  const value = encodeUserImage(image);
   await getDb()
     .insert(userImages)
     .values({
@@ -61,7 +60,7 @@ export async function getUserImage(userId: string, imageId: string): Promise<Use
   });
   if (!row) return null;
 
-  const image = await decodeUserImage(row.value);
+  const image = decodeUserImage(row.value);
   return isActive(image) ? image : null;
 }
 
@@ -72,7 +71,7 @@ export async function listUserImages(userId: string, limit = 8): Promise<UserIma
 
   const images: UserImage[] = [];
   for (const row of rows) {
-    const image = await decodeUserImage(row.value);
+    const image = decodeUserImage(row.value);
     if (isActive(image)) images.push(image);
   }
 
@@ -85,7 +84,7 @@ export async function listAllUserImages(userId: string): Promise<UserImage[]> {
   });
 
   const images: UserImage[] = [];
-  for (const row of rows) images.push(await decodeUserImage(row.value));
+  for (const row of rows) images.push(decodeUserImage(row.value));
   return images.sort(newestFirst);
 }
 
@@ -95,7 +94,7 @@ export async function listExpiredUserImages(now = new Date(), limit = 100): Prom
   });
 
   const images: UserImage[] = [];
-  for (const row of rows) images.push(await decodeUserImage(row.value));
+  for (const row of rows) images.push(decodeUserImage(row.value));
   return images
     .sort((a, b) => new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime())
     .slice(0, limit);
