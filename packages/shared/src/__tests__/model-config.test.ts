@@ -1,8 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import {
   DEFAULT_AI_GATEWAY_MODEL,
+  DEFAULT_AI_GATEWAY_REASONING_EFFORT,
   resolveDefaultModelName,
   resolveMemoryModelName,
+  resolveReasoningEffort,
 } from "../model-config";
 
 describe("AI Gateway model config", () => {
@@ -39,5 +41,16 @@ describe("AI Gateway model config", () => {
         AI_GATEWAY_MEMORY_MODEL: "",
       }),
     ).toBe(DEFAULT_AI_GATEWAY_MODEL);
+  });
+
+  test("defaults reasoning effort to medium", () => {
+    expect(DEFAULT_AI_GATEWAY_REASONING_EFFORT).toBe("medium");
+    expect(resolveReasoningEffort({})).toBe("medium");
+  });
+
+  test("uses valid reasoning effort overrides", () => {
+    expect(resolveReasoningEffort({ AI_GATEWAY_REASONING_EFFORT: "high" })).toBe("high");
+    expect(resolveReasoningEffort({ AI_GATEWAY_REASONING_EFFORT: " " })).toBe("medium");
+    expect(resolveReasoningEffort({ AI_GATEWAY_REASONING_EFFORT: "invalid" })).toBe("medium");
   });
 });

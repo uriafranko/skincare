@@ -2,7 +2,7 @@ import { defineConfig } from "tsup";
 import pkg from "./package.json";
 
 export default defineConfig({
-  entry: ["src/index.ts", "src/prompts.ts", "src/risk.ts", "src/text.ts", "src/text-generator.ts"],
+  entry: ["src/index.ts", "src/prompts.ts", "src/risk.ts", "src/text.ts"],
   format: ["esm"],
   clean: true,
   external: Object.keys(pkg.dependencies),

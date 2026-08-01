@@ -8,6 +8,7 @@ export function createSharedMock(overrides: Record<string, unknown> = {}) {
     PERSONALITY_POLICY_VERSION: "personality-v1",
     DAILY_SUMMARY_HOUR: 22,
     DEFAULT_AI_GATEWAY_MODEL: defaultGatewayModel,
+    DEFAULT_AI_GATEWAY_REASONING_EFFORT: "medium",
     ROUTINE_TIMES: [
       { label: "morning", hour: 8, minute: 0, emoji: "sun" },
       { label: "evening", hour: 21, minute: 0, emoji: "moon" },
@@ -57,6 +58,8 @@ export function createSharedMock(overrides: Record<string, unknown> = {}) {
       defaultGatewayModel,
     resolveDefaultModelName: (source: { AI_GATEWAY_DEFAULT_MODEL?: string }) =>
       source.AI_GATEWAY_DEFAULT_MODEL?.trim() || defaultGatewayModel,
+    resolveReasoningEffort: (source: { AI_GATEWAY_REASONING_EFFORT?: string }) =>
+      source.AI_GATEWAY_REASONING_EFFORT?.trim() || "medium",
     sendImageFile: async () => {},
     sendImageMessage: async () => {},
     msUntil: () => 0,

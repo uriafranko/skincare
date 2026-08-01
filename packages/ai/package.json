@@ -10,11 +10,6 @@
       "types": "./src/index.ts",
       "import": "./dist/index.js"
     },
-    "./text-generator": {
-      "bun": "./src/text-generator.ts",
-      "types": "./src/text-generator.ts",
-      "import": "./dist/text-generator.js"
-    },
     "./text": {
       "bun": "./src/text.ts",
       "types": "./src/text.ts",

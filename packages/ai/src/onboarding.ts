@@ -3,7 +3,7 @@ import type { MastraModelConfig } from "@mastra/core/llm";
 import { isValidTimeZone, type OnboardingState } from "@skintext/shared";
 import { z } from "zod";
 import { toMastraModelName } from "./model-name";
-import { getDefaultModelName } from "./models";
+import { getDefaultModelName, getDefaultProviderOptions } from "./models";
 import { normalizeAssistantText } from "./text";
 
 const extractionSchema = z.object({
@@ -69,6 +69,7 @@ function createGenerator(model: MastraModelConfig): OnboardingGenerator {
     id: "skintext-onboarding",
     name: "Lily Onboarding",
     model,
+    defaultOptions: { providerOptions: getDefaultProviderOptions() },
     instructions: "Extract onboarding details and write the next concise iMessage reply.",
   });
 

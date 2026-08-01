@@ -1,5 +1,5 @@
-import { createTextGenerator } from "@skintext/ai/text-generator";
 import { resolveDefaultModelName } from "@skintext/shared/model-config";
+import { createTextGenerator } from "./text-generator";
 import type { PersonaDriver, SimulationScenario, TranscriptMessage } from "./types";
 
 function formatTranscript(transcript: TranscriptMessage[]): string {

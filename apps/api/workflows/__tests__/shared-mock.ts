@@ -6,6 +6,7 @@ export function createSharedMock(overrides: Record<string, unknown> = {}) {
     CONSENT_VERSION: "2026-07-29",
     DAILY_SUMMARY_HOUR: 22,
     DEFAULT_AI_GATEWAY_MODEL: defaultGatewayModel,
+    DEFAULT_AI_GATEWAY_REASONING_EFFORT: "medium",
     PERSONALITY_POLICY_VERSION: "personality-v1",
     PHOTO_RETENTION_CONSENT_VERSION: "2026-07-26",
     ROUTINE_TIMES: [
@@ -50,6 +51,8 @@ export function createSharedMock(overrides: Record<string, unknown> = {}) {
     nextLocalTime: () => new Date("2026-06-05T12:00:00.000Z"),
     resolveDefaultModelName: (source: { AI_GATEWAY_DEFAULT_MODEL?: string }) =>
       source.AI_GATEWAY_DEFAULT_MODEL?.trim() || defaultGatewayModel,
+    resolveReasoningEffort: (source: { AI_GATEWAY_REASONING_EFFORT?: string }) =>
+      source.AI_GATEWAY_REASONING_EFFORT?.trim() || "medium",
     resolveMemoryModelName: (source: {
       AI_GATEWAY_DEFAULT_MODEL?: string;
       AI_GATEWAY_MEMORY_MODEL?: string;

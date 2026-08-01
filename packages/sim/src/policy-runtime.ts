@@ -1,7 +1,7 @@
 import { deriveMinimumRiskState } from "@skintext/ai/risk";
-import { createTextGenerator } from "@skintext/ai/text-generator";
 import type { AgentContext, SkintextRiskState, UserAccount } from "@skintext/shared";
 import { resolveDefaultModelName } from "@skintext/shared/model-config";
+import { createTextGenerator } from "./text-generator";
 import type { RuntimeMode, SimulationRuntime, SimulationScenario } from "./types";
 
 export interface PolicyRuntimeOptions {

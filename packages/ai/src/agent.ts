@@ -4,7 +4,7 @@ import { MastraPlatformExporter, Observability, SensitiveDataFilter } from "@mas
 import { RedisStreamsPubSub } from "@mastra/redis-streams";
 import { env } from "@skintext/shared";
 import { mastraStorage, skintextMemory } from "./memory";
-import { getDefaultModelName } from "./models";
+import { getDefaultModelName, getDefaultProviderOptions } from "./models";
 import { buildSkintextSystemPrompt } from "./prompts";
 import {
   createSkintextRequestContext,
@@ -41,6 +41,7 @@ export const skintextAgent = new Agent({
   id: "skintext-agent",
   name: "Lily",
   model: getDefaultModelName(),
+  defaultOptions: { providerOptions: getDefaultProviderOptions() },
   memory: skintextMemory,
   instructions: ({ requestContext }) =>
     buildSkintextSystemPrompt(getSkintextRuntime(requestContext).agentContext),
@@ -122,6 +123,7 @@ function confirmationRun(runs: AgentRun[]): AgentRun | undefined {
 
 function streamOptions(runtime: SkintextRuntime) {
   const { hasImage, userId } = runtime.agentContext;
+  const providerOptions = getDefaultProviderOptions();
   return {
     requestContext: createSkintextRequestContext(runtime),
     memory: skintextMemoryOptions(userId, hasImage),
@@ -133,7 +135,9 @@ function streamOptions(runtime: SkintextRuntime) {
       hideOutput: true,
     },
     providerOptions: {
+      ...providerOptions,
       openai: {
+        ...providerOptions.openai,
         promptCacheKey: PROMPT_CACHE_KEY,
       },
     },

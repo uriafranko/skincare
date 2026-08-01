@@ -11,3 +11,11 @@ export function getDefaultModelName(): MastraModelConfig {
 export function getMemoryModelName(): MastraModelConfig {
   return toMastraModelName(shared.resolveMemoryModelName(shared.env));
 }
+
+export function getDefaultProviderOptions() {
+  return {
+    openai: {
+      reasoningEffort: shared.resolveReasoningEffort(shared.env),
+    },
+  };
+}

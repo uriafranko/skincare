@@ -36,6 +36,7 @@ Fill in the required keys:
 | `AI_GATEWAY_API_KEY` | [vercel.com/ai-gateway](https://vercel.com/ai-gateway) |
 | `AI_GATEWAY_DEFAULT_MODEL` | Optional override for the built-in Gateway model |
 | `AI_GATEWAY_MEMORY_MODEL` | Optional Mastra observational-memory model override |
+| `AI_GATEWAY_REASONING_EFFORT` | Optional reasoning effort (`none`, `minimal`, `low`, `medium`, `high`, `xhigh`, or `max`); defaults to `medium` |
 
 ### 3. Apply database migrations
 

@@ -17,6 +17,7 @@
     "test": "bun test --isolate"
   },
   "dependencies": {
+    "@mastra/core": "^1.52.1",
     "@skintext/ai": "*",
     "@skintext/shared": "*"
   },
