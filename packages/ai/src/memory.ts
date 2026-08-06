@@ -39,11 +39,17 @@ export const skintextMemory = new Memory({
   },
 });
 
-async function ensureThread(resourceId: string): Promise<string> {
+export async function ensureSkintextThread(resourceId: string): Promise<string> {
   const threadId = skintextThreadId(resourceId);
   const existing = await skintextMemory.getThreadById({ threadId, resourceId });
-  if (!existing) {
+  if (existing) return threadId;
+
+  try {
     await skintextMemory.createThread({ threadId, resourceId, title: "Lily" });
+  } catch (error) {
+    // Another request may have created the user's first thread between the
+    // existence check and createThread. Re-read before surfacing a real error.
+    if (!(await skintextMemory.getThreadById({ threadId, resourceId }))) throw error;
   }
   return threadId;
 }
@@ -83,7 +89,7 @@ export async function saveSanitizedImageTurn(input: {
   assistantText: string;
   retainedPhoto?: Pick<UserImage, "id" | "expiresAt">;
 }): Promise<void> {
-  const threadId = await ensureThread(input.resourceId);
+  const threadId = await ensureSkintextThread(input.resourceId);
   const createdAt = new Date();
   await skintextMemory.saveMessages({
     messages: [

@@ -10,7 +10,7 @@ import {
   type OnboardingState,
 } from "@skintext/shared";
 import { z } from "zod";
-import { skintextMemory } from "./memory";
+import { ensureSkintextThread, skintextMemory } from "./memory";
 import { toMastraModelName } from "./model-name";
 import { getDefaultModelName, getDefaultProviderOptions } from "./models";
 import { ONBOARDING_INSTRUCTIONS } from "./prompts/onboarding";
@@ -216,6 +216,7 @@ async function persistOnboardingStateSignal(
 ): Promise<void> {
   const threadId = onboardingThreadId(userId);
   const projection = buildOnboardingStateProjection(state, context);
+  await ensureSkintextThread(userId);
   const signal = await skintextOnboardingAgent.sendStateSignal(
     {
       id: ONBOARDING_STATE_SIGNAL_ID,
