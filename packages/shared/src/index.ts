@@ -1,4 +1,5 @@
 export * from "./constants";
+export { normalizePostgresConnectionString } from "./database-url";
 export { env } from "./env";
 export { generateId } from "./id";
 export * from "./locale";

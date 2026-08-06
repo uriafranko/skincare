@@ -41,6 +41,7 @@ export function createSharedMock(overrides: Record<string, unknown> = {}) {
     }),
     env: {},
     generateId: () => "test_id",
+    normalizePostgresConnectionString: (connectionString: string) => connectionString,
     getMissingFields,
     getOnboardingNextAction: (state: Record<string, unknown>) => {
       if (state.ageEligible === false) return "stop_underage";

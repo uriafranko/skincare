@@ -1,7 +1,12 @@
 import type { MastraDBMessage } from "@mastra/core/memory";
 import { Memory } from "@mastra/memory";
 import { PostgresStore } from "@mastra/pg";
-import { env, generateId, type UserImage } from "@skintext/shared";
+import {
+  env,
+  generateId,
+  normalizePostgresConnectionString,
+  type UserImage,
+} from "@skintext/shared";
 import { SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS, sanitizedImageUserText } from "./memory-policy";
 import { getMemoryModelName } from "./models";
 import { skintextThreadId } from "./runtime";
@@ -16,7 +21,7 @@ export const SKINTEXT_WORKING_MEMORY_OPTIONS = {
 
 export const mastraStorage = new PostgresStore({
   id: "skintext-postgres",
-  connectionString: env.DATABASE_URL,
+  connectionString: normalizePostgresConnectionString(env.DATABASE_URL),
   schemaName: "mastra",
   disableInit: process.env.NODE_ENV === "production" || process.env.NODE_ENV === "test",
   max: 5,

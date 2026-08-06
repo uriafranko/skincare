@@ -1,0 +1,16 @@
+.git
+.env*
+**/.env*
+.turbo
+node_modules
+**/node_modules
+dist
+**/dist
+.next
+**/.next
+.vercel
+**/.vercel
+**/.swc
+tmp
+img-samples
+food-1.jpg

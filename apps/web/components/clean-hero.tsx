@@ -1,8 +1,8 @@
 import { ArrowDown, Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { IMessageButton } from "./imessage-button";
+import { Highlighter } from "./ui/highlighter";
 import { TypingAnimation } from "./ui/typing-animation";
-import { Highlighter } from "./ui/highlighter"
 
 export function CleanHero() {
   const t = useTranslations("Hero");
@@ -18,9 +18,9 @@ export function CleanHero() {
 
       <div className="relative mx-auto w-full max-w-[1040px] text-center">
         {/*<p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#236d38] sm:text-[12px]">*/}
-          <Highlighter action="underline" color="#FF9800">
-            {t("eyebrow")}
-          </Highlighter>
+        <Highlighter action="underline" color="#FF9800">
+          {t("eyebrow")}
+        </Highlighter>
         {/*</p>*/}
         <h1 className="mx-auto mt-5 max-w-[980px] text-[3.45rem] font-bold leading-[0.9] tracking-[-0.06em] text-primary min-[480px]:text-[4.25rem] sm:text-[6.2rem] lg:text-[7.25rem]">
           {t("headline")}

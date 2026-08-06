@@ -19,6 +19,7 @@ export function createSharedMock(overrides: Record<string, unknown> = {}) {
     }),
     env: {},
     generateId: () => "test_id",
+    normalizePostgresConnectionString: (connectionString: string) => connectionString,
     getLocaleName: (locale: string) => {
       const names: Record<string, string> = { en: "English", he: "Hebrew", sv: "Swedish" };
       return names[locale] ?? "English";
