@@ -4,7 +4,7 @@ import { errorForLogging } from "@/logging";
 import { capturePostHogException } from "@/posthog";
 import { sendReplyBubbles } from "@/replies";
 import { routeConcurrentMessage, routeMessage } from "@/router";
-import { sendMessage, sendTyping } from "@/sendblue";
+import { sendMessage } from "@/sendblue";
 
 const MESSAGE_LOCK_WAIT_MS = 30_000;
 const MESSAGE_LOCK_RETRY_MS = 100;
@@ -71,7 +71,6 @@ export async function handleIncoming(
     }
 
     log.set({ input: { textLength: text.length, hasImage: !!rawImageUrl } });
-    void sendTyping(phone).catch(() => undefined);
 
     const replies = await routeMessage(log, phone, text, rawImageUrl, messageId);
     await deliverReplies(log, phone, replies);

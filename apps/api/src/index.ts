@@ -7,7 +7,7 @@ import { handleIncoming } from "@/handler";
 import { errorForLogging } from "@/logging";
 import { capturePostHogException } from "@/posthog";
 import { reminderRunManager } from "@/reminder-runs";
-import { markRead, parseInbound } from "@/sendblue";
+import { markRead, parseInbound, sendTyping } from "@/sendblue";
 import { pruneExpiredUserImageBlobs } from "@/user-images";
 
 initLogger({ env: { service: "skintext" } });
@@ -59,6 +59,10 @@ app.post("/webhooks/sendblue", async (c) => {
     // inbound delivery/read-receipt state from waiting on the assistant.
     waitUntil(
       Promise.all([
+        sendTyping(msg.phone).catch((error) => {
+          capturePostHogException(error);
+          log.error(errorForLogging(error));
+        }),
         markRead(msg.phone).catch((error) => {
           capturePostHogException(error);
           log.error(errorForLogging(error));

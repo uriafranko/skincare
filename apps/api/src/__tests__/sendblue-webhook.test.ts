@@ -1,6 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 
 const markRead = mock(async (_phone: string) => undefined);
+const sendTyping = mock(async (_phone: string) => undefined);
 const parseInbound = mock(() => ({
   phone: "+15555550123",
   text: "hello",
@@ -38,7 +39,7 @@ mock.module("@/posthog", () => ({ capturePostHogException: () => undefined }));
 mock.module("@/reminder-runs", () => ({
   reminderRunManager: { migrateStale: async () => ({}) },
 }));
-mock.module("@/sendblue", () => ({ markRead, parseInbound }));
+mock.module("@/sendblue", () => ({ markRead, parseInbound, sendTyping }));
 mock.module("@/user-images", () => ({ pruneExpiredUserImageBlobs: async () => ({}) }));
 
 const { default: app } = await import("../index");
@@ -55,6 +56,7 @@ describe("Sendblue webhook acknowledgement", () => {
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ ok: true });
+    expect(sendTyping).toHaveBeenCalledWith("+15555550123");
     expect(markRead).toHaveBeenCalledWith("+15555550123");
     expect(handleIncoming).toHaveBeenCalledWith("+15555550123", "hello", undefined, "message-1");
     expect(waitUntil).toHaveBeenCalledTimes(1);
