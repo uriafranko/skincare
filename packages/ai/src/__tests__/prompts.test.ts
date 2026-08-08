@@ -2,21 +2,9 @@ import { describe, expect, mock, test } from "bun:test";
 import type { AgentContext } from "@skintext/shared";
 import { createSharedMock } from "./shared-mock";
 
-mock.module("@skintext/shared", () =>
-  createSharedMock({
-    getLocaleName: (locale: string) => {
-      const names: Record<string, string> = { en: "English", he: "Hebrew", sv: "Swedish" };
-      return names[locale] ?? "English";
-    },
-  }),
-);
+mock.module("@skintext/shared", () => createSharedMock());
 
 const { buildSkintextSystemPrompt } = await import("../prompts/main");
-const {
-  buildDailyRoutineSummaryPrompt,
-  buildRoutineReminderPrompt,
-  buildWeeklyRoutineRecapPrompt,
-} = await import("../prompts/scheduled");
 const {
   USER_REMINDER_CLOSE_TAG,
   USER_REMINDER_OPEN_TAG,
@@ -25,6 +13,7 @@ const {
 } = await import("../user-reminder");
 const { ONBOARDING_INSTRUCTIONS } = await import("../prompts/onboarding");
 const { buildCorePrompt } = await import("../prompts/core");
+const { buildConversationPolicy, buildResponseShapePolicy } = await import("../prompts/foundation");
 const { buildMainAccountState, mainAccountStateCacheKey, serializeMainAccountState } = await import(
   "../prompts/context"
 );
@@ -169,6 +158,12 @@ describe("buildSkintextSystemPrompt", () => {
 });
 
 describe("prompt module boundaries", () => {
+  test("keeps the foundation free of skincare-domain policy", () => {
+    const foundation = [buildConversationPolicy(), buildResponseShapePolicy()].join("\n\n");
+
+    expect(foundation).not.toMatch(/skincare|dermatolog|photo|experiment/i);
+  });
+
   test("keeps stable shared behavior in core without main or runtime state", () => {
     const core = buildCorePrompt();
 
@@ -225,44 +220,50 @@ describe("prompt module boundaries", () => {
     expect(ONBOARDING_INSTRUCTIONS).not.toContain("ACTION AND TOOL POLICY");
     expect(ONBOARDING_INSTRUCTIONS).not.toContain("MEMORY AND PRIVACY POLICY");
   });
-});
 
-describe("scheduled prompts", () => {
-  test("daily summary includes locale and routine status", () => {
-    const prompt = buildDailyRoutineSummaryPrompt("sv");
-    expect(prompt).toContain("Swedish");
-    expect(prompt).toContain("morning and evening routines");
-    expect(prompt).toContain("grounded encouragement");
+  test("uses the exact same ordered shared policy prefix for main and onboarding", () => {
+    const core = buildCorePrompt();
+
+    expect(buildSkintextSystemPrompt().startsWith(`${core}\n\n`)).toBe(true);
+    expect(ONBOARDING_INSTRUCTIONS.startsWith(`${core}\n\n`)).toBe(true);
   });
 
-  test("reminder prompt asks for done/skip or photo", () => {
-    const prompt = buildRoutineReminderPrompt("en");
-    expect(prompt).toContain("English");
-    expect(prompt).toContain("done/skip");
-    expect(prompt).toContain("product/skin photo");
-    expect(prompt).toContain("one purpose");
-    expect(prompt).toContain("30-160 characters");
-    expect(prompt).toContain("never exceed 220 characters");
-  });
+  test("includes each policy section exactly once in each composed prompt", () => {
+    const sharedHeadings = [
+      "ROLE AND IDENTITY",
+      "CONVERSATION POLICY",
+      "RESPONSE SHAPE",
+      "SAFETY POLICY",
+      "BODY-IMAGE POLICY",
+    ];
+    const mainOnlyHeadings = [
+      "CONTEXT PRIORITY",
+      "RUNTIME CONTEXT",
+      "COMMERCE POLICY",
+      "MEMORY AND PRIVACY POLICY",
+      "IMAGE POLICY",
+      "ACTION AND TOOL POLICY",
+      "SCHEDULED EVENTS",
+    ];
+    const count = (prompt: string, heading: string) =>
+      prompt.split("\n").filter((line) => line === heading || line.startsWith(`${heading} (`))
+        .length;
+    const main = buildSkintextSystemPrompt();
+    const core = buildCorePrompt();
 
-  test("weekly recap is adherence focused", () => {
-    const prompt = buildWeeklyRoutineRecapPrompt("en");
-    expect(prompt).toContain("morning/evening routine slots");
-    expect(prompt).toContain("conversational");
-    expect(prompt).toContain("plain text only");
-    expect(prompt).not.toContain("unless the user asked for a checklist");
-  });
+    for (const heading of sharedHeadings) {
+      expect(count(core, heading)).toBe(1);
+    }
 
-  test("all scheduled prompts prohibit Markdown", () => {
-    expect(buildDailyRoutineSummaryPrompt("en")).toContain("Do not use any Markdown");
-    expect(buildRoutineReminderPrompt("en")).toContain("Do not use any Markdown");
-    expect(buildWeeklyRoutineRecapPrompt("en")).toContain("Do not use any Markdown");
-  });
-
-  test("scheduled prompts support Hebrew locale names", () => {
-    expect(buildDailyRoutineSummaryPrompt("he")).toContain("Hebrew");
-    expect(buildRoutineReminderPrompt("he")).toContain("Hebrew");
-    expect(buildWeeklyRoutineRecapPrompt("he")).toContain("Hebrew");
+    for (const heading of [...sharedHeadings, ...mainOnlyHeadings]) {
+      expect(count(main, heading)).toBe(1);
+    }
+    for (const heading of [...sharedHeadings, "ONBOARDING MODE"]) {
+      expect(count(ONBOARDING_INSTRUCTIONS, heading)).toBe(1);
+    }
+    for (const heading of mainOnlyHeadings) {
+      expect(count(ONBOARDING_INSTRUCTIONS, heading)).toBe(0);
+    }
   });
 });
 
@@ -279,6 +280,7 @@ describe("onboarding prompt source", () => {
     expect(ONBOARDING_INSTRUCTIONS).toContain("https://skintext.ai/terms");
     expect(ONBOARDING_INSTRUCTIONS).toContain("https://skintext.ai/privacy");
     expect(ONBOARDING_INSTRUCTIONS).toContain("localized low-friction CTA");
+    expect(ONBOARDING_INSTRUCTIONS).not.toContain("proposedNextAction");
   });
 
   test("onboarding matches the user's language, code-switching, and conversational voice", () => {

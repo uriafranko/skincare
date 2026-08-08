@@ -4,6 +4,7 @@ import pkg from "./package.json";
 export default defineConfig({
   entry: {
     index: "src/index.ts",
+    models: "src/models.ts",
     prompts: "src/prompts/index.ts",
     risk: "src/risk.ts",
     text: "src/text.ts",

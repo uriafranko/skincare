@@ -36,6 +36,14 @@ describe("reply bubble splitting", () => {
     expect(chunks.every((chunk) => chunk.length <= 40)).toBe(true);
     expect(chunks.join("")).toBe(text);
   });
+
+  test("does not split emoji grapheme clusters at a hard boundary", () => {
+    const text = "a👩‍🔬b";
+    const chunks = splitReplyIntoBubbles(text, { hardMaxChars: 1 });
+
+    expect(chunks).toEqual(["a", "👩‍🔬", "b"]);
+    expect(chunks.join("")).toBe(text);
+  });
 });
 
 describe("reply bubble delivery", () => {

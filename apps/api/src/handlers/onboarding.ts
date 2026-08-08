@@ -4,6 +4,7 @@ import {
   processOnboardingMessage,
 } from "@skintext/ai";
 import {
+  completeUserOnboarding,
   createUser,
   deleteAllUserData,
   deleteOnboardingState,
@@ -16,6 +17,7 @@ import {
   isOnboardingComplete,
   mergeOnboardingState,
   type OnboardingState,
+  sanitizeOnboardingExtraction,
 } from "@skintext/shared";
 import type { RequestLogger } from "evlog";
 import { errorForLogging } from "@/logging";
@@ -53,11 +55,8 @@ export async function handleOnboarding(
 
   const raw = await getOnboardingState(userId);
   const isFirstMessage = !raw;
-  const state: OnboardingState = raw ?? {};
-
-  if (!state.timezone && timezone) {
-    state.timezone = timezone;
-  }
+  const state: OnboardingState =
+    raw?.timezone || !timezone ? (raw ?? {}) : { ...(raw ?? {}), timezone };
 
   log.set({ onboarding: { isFirstMessage, stateFields: Object.keys(state).length } });
   if (isFirstMessage) {
@@ -74,12 +73,7 @@ export async function handleOnboarding(
     locale,
     userId,
   });
-  const extracted =
-    state.ageEligible !== true && modelExtracted.ageEligible == null
-      ? {
-          detectedLocale: modelExtracted.detectedLocale,
-        }
-      : modelExtracted;
+  const extracted = sanitizeOnboardingExtraction(state, modelExtracted);
 
   log.set({ onboarding: { extractedFields: Object.keys(extracted), nextAction } });
 
@@ -125,14 +119,9 @@ export async function handleOnboarding(
       photoRetentionConsentedAt: null,
       photoRetentionConsentVersion: null,
       photoRetentionOfferShownAt: null,
-      onboardingComplete: true,
-      consentedAt: new Date().toISOString(),
-      consentVersion: CONSENT_VERSION,
-    });
-
-    posthog?.capture({
-      event: "onboarding_completed",
-      properties: { has_reminder_times: reminderTimes.length > 0 },
+      onboardingComplete: false,
+      consentedAt: null,
+      consentVersion: null,
     });
 
     await initializeUserWorkingMemory(
@@ -151,10 +140,17 @@ export async function handleOnboarding(
       }),
     );
 
-    await Promise.all([
-      reminderTimes.length > 0 ? setCustomReminderTimes(userId, reminderTimes) : Promise.resolve(),
-      deleteOnboardingState(userId),
-    ]);
+    if (reminderTimes.length > 0) {
+      await setCustomReminderTimes(userId, reminderTimes);
+    }
+
+    await completeUserOnboarding(userId, new Date().toISOString(), CONSENT_VERSION);
+    await deleteOnboardingState(userId);
+
+    posthog?.capture({
+      event: "onboarding_completed",
+      properties: { has_reminder_times: reminderTimes.length > 0 },
+    });
 
     if (reminderTimes.length > 0) {
       try {

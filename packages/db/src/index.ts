@@ -57,6 +57,7 @@ export {
   saveUserImage,
 } from "./user-images";
 export {
+  completeUserOnboarding,
   createPendingUserForPhone,
   createUser,
   deleteAllUserData,

@@ -6,12 +6,20 @@ const sentMessages: string[] = [];
 const logErrors: unknown[] = [];
 let released = 0;
 let emitted = 0;
+let reservationError: Error | undefined;
+let lockError: Error | undefined;
 
 mock.module("@skintext/db", () => ({
-  reserveInboundMessage: async () => true,
+  reserveInboundMessage: async () => {
+    if (reservationError) throw reservationError;
+    return true;
+  },
   resolveUserId: async () => "usr_test",
-  tryAcquireMessageLock: async () => async () => {
-    released++;
+  tryAcquireMessageLock: async () => {
+    if (lockError) throw lockError;
+    return async () => {
+      released++;
+    };
   },
 }));
 
@@ -26,11 +34,8 @@ mock.module("evlog", () => ({
 }));
 
 mock.module("@/logging", () => ({
-  errorForLogging: (error: unknown) => error,
-}));
-
-mock.module("@/posthog", () => ({
-  capturePostHogException: (error: unknown, distinctId?: string) => {
+  reportError: (log: { error(error: unknown): void }, error: unknown, distinctId?: string) => {
+    log.error(error);
     capturedExceptions.push({ error, distinctId });
   },
 }));
@@ -62,6 +67,8 @@ describe("incoming message exception tracking", () => {
     logErrors.length = 0;
     released = 0;
     emitted = 0;
+    reservationError = undefined;
+    lockError = undefined;
   });
 
   test("captures a swallowed route error with the database-backed user ID", async () => {
@@ -71,6 +78,28 @@ describe("incoming message exception tracking", () => {
     expect(logErrors).toEqual([routeError]);
     expect(sentMessages).toEqual(["Oops, something went wrong. Try again in a sec! 🙏"]);
     expect(released).toBe(1);
+    expect(emitted).toBe(1);
+  });
+
+  test("handles and emits when inbound reservation fails", async () => {
+    reservationError = new Error("reservation unavailable");
+
+    await handleIncoming("+15555550123", "hello", undefined, "message_1");
+
+    expect(capturedExceptions).toEqual([{ error: reservationError, distinctId: "usr_test" }]);
+    expect(sentMessages).toEqual(["Oops, something went wrong. Try again in a sec! 🙏"]);
+    expect(released).toBe(0);
+    expect(emitted).toBe(1);
+  });
+
+  test("handles and emits when initial lock acquisition fails", async () => {
+    lockError = new Error("lock unavailable");
+
+    await handleIncoming("+15555550123", "hello", undefined, "message_1");
+
+    expect(capturedExceptions).toEqual([{ error: lockError, distinctId: "usr_test" }]);
+    expect(sentMessages).toEqual(["Oops, something went wrong. Try again in a sec! 🙏"]);
+    expect(released).toBe(0);
     expect(emitted).toBe(1);
   });
 });

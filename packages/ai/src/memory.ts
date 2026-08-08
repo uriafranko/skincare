@@ -1,14 +1,9 @@
 import type { MastraDBMessage } from "@mastra/core/memory";
 import { Memory } from "@mastra/memory";
 import { PostgresStore } from "@mastra/pg";
-import {
-  env,
-  generateId,
-  normalizePostgresConnectionString,
-  type UserImage,
-} from "@skintext/shared";
+import { env, normalizePostgresConnectionString, type UserImage } from "@skintext/shared";
 import { SKINTEXT_OBSERVATIONAL_MEMORY_OPTIONS, sanitizedImageUserText } from "./memory-policy";
-import { getMemoryModelName } from "./models";
+import { getMemoryModelName } from "./model-runtime";
 import { skintextThreadId } from "./runtime";
 import { type SkintextWorkingMemory, skintextWorkingMemorySchema } from "./working-memory";
 
@@ -62,7 +57,13 @@ function textMessage(input: {
   createdAt: Date;
 }): MastraDBMessage {
   return {
-    id: generateId("msg"),
+    id: skintextMemory.generateId({
+      idType: "message",
+      source: "memory",
+      threadId: input.threadId,
+      resourceId: input.resourceId,
+      role: input.role,
+    }),
     role: input.role,
     createdAt: input.createdAt,
     threadId: input.threadId,

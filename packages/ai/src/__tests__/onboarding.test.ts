@@ -1,17 +1,22 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
+import type { OnboardingExtraction } from "../onboarding";
 import { createSharedMock } from "./shared-mock";
 
-let nextOutput: Record<string, unknown>;
+let nextOutput: OnboardingExtraction;
 
 const generateMock = mock(async () => nextOutput);
 
 mock.module("@skintext/shared", () => createSharedMock());
 
-const { buildOnboardingStateProjection, onboardingThreadId, processOnboardingMessage } =
-  await import("../onboarding");
+const {
+  buildOnboardingStateProjection,
+  onboardingExtractionSchema,
+  onboardingThreadId,
+  processOnboardingMessage,
+} = await import("../onboarding");
 
-function output(overrides: Record<string, unknown> = {}) {
-  return {
+function output(overrides: Partial<OnboardingExtraction> = {}): OnboardingExtraction {
+  return onboardingExtractionSchema.parse({
     ageEligible: null,
     name: null,
     skinType: null,
@@ -28,7 +33,7 @@ function output(overrides: Record<string, unknown> = {}) {
     detectedLocale: null,
     reply: "placeholder",
     ...overrides,
-  };
+  });
 }
 
 const setupCompleteExceptConsent = {
@@ -58,7 +63,7 @@ describe("processOnboardingMessage", () => {
         locale: "en",
         timezone: "America/New_York",
       },
-      generateMock as never,
+      generateMock,
     );
 
     expect(result.reply).toBe(
@@ -122,7 +127,7 @@ describe("processOnboardingMessage", () => {
         locale: "he",
         timezone: "Asia/Jerusalem",
       },
-      generateMock as never,
+      generateMock,
     );
 
     expect(result.reply).toBe(hebrewConsent);
@@ -144,7 +149,7 @@ describe("processOnboardingMessage", () => {
         locale: "en",
         timezone: "America/New_York",
       },
-      generateMock as never,
+      generateMock,
     );
 
     expect(result.extracted).toEqual(
@@ -165,7 +170,7 @@ describe("processOnboardingMessage", () => {
         locale: "en",
         timezone: "UTC",
       },
-      generateMock as never,
+      generateMock,
     );
 
     expect(result.reply).toBe("Hey, I'm Lily. Before we get started, are you 16 or older?");
@@ -187,7 +192,7 @@ describe("processOnboardingMessage", () => {
         locale: "en",
         timezone: "UTC",
       },
-      generateMock as never,
+      generateMock,
     );
 
     expect(result.extracted.ageEligible).toBe(true);
@@ -211,7 +216,7 @@ describe("processOnboardingMessage", () => {
         locale: "en",
         timezone: "UTC",
       },
-      generateMock as never,
+      generateMock,
     );
 
     expect(result.extracted.ageEligible).toBe(false);

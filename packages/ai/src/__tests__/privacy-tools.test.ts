@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { RequestContext } from "@mastra/core/request-context";
 import type { UserAccount } from "@skintext/shared";
+import type { z } from "zod";
 import { updateUser } from "./db-mock";
 import { createSharedMock } from "./shared-mock";
 
@@ -56,6 +57,24 @@ function execute(tool: unknown, input: Record<string, unknown>, context: Request
 describe("photo-retention privacy tools", () => {
   beforeEach(() => {
     updateUser.mockClear();
+  });
+
+  test("validates action-specific consent fields", () => {
+    const inputSchema = managePhotoRetentionTool.inputSchema as z.ZodType;
+    expect(inputSchema.safeParse({ action: "set_future_retention" }).success).toBe(false);
+    expect(inputSchema.safeParse({ action: "save_current" }).success).toBe(false);
+    expect(
+      inputSchema.safeParse({
+        action: "set_future_retention",
+        enabled: false,
+      }).success,
+    ).toBe(true);
+    expect(
+      inputSchema.safeParse({
+        action: "save_current",
+        consentToThirtyDayRetention: true,
+      }).success,
+    ).toBe(true);
   });
 
   test("records separate consent and saves the current photo idempotently", async () => {

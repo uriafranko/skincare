@@ -19,7 +19,6 @@
     "next": "^16",
     "next-intl": "^4.9.0",
     "posthog-js": "^1.407.7",
-    "qrcode.react": "^4",
     "react": "^19",
     "react-dom": "^19",
     "rough-notation": "^0.5.1",

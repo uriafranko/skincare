@@ -1,5 +1,38 @@
 import { describe, expect, test } from "bun:test";
-import { getOnboardingNextAction } from "../onboarding";
+import { getOnboardingNextAction, sanitizeOnboardingExtraction } from "../onboarding";
+
+describe("sanitizeOnboardingExtraction", () => {
+  const profile = {
+    name: "Dana",
+    concerns: ["redness"],
+    skinType: "combination" as const,
+    morningReminder: "08:00",
+    consented: true,
+    detectedLocale: "en",
+  };
+
+  test("retains only locale before age eligibility is established", () => {
+    expect(sanitizeOnboardingExtraction({}, profile)).toEqual({ detectedLocale: "en" });
+  });
+
+  test("retains the full extraction when the same message establishes eligibility", () => {
+    expect(sanitizeOnboardingExtraction({}, { ...profile, ageEligible: true })).toEqual({
+      ...profile,
+      ageEligible: true,
+    });
+  });
+
+  test("retains only the rejection signal and locale for an underage user", () => {
+    expect(sanitizeOnboardingExtraction({}, { ...profile, ageEligible: false })).toEqual({
+      ageEligible: false,
+      detectedLocale: "en",
+    });
+  });
+
+  test("does not filter later turns after eligibility is established", () => {
+    expect(sanitizeOnboardingExtraction({ ageEligible: true }, profile)).toEqual(profile);
+  });
+});
 
 describe("getOnboardingNextAction", () => {
   test("derives one next action from the authoritative onboarding snapshot", () => {

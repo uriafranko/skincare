@@ -3,6 +3,7 @@
 import { mkdir } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
+import { parseArgs as parseNodeArgs } from "node:util";
 import { createOnboardingRuntime, resolvedRuntimeMode } from "./onboarding-runtime";
 import { createPersonaDriver } from "./personas";
 import { createPolicyRuntime } from "./policy-runtime";
@@ -25,26 +26,59 @@ interface CliOptions {
   task?: string;
 }
 
-function parseArgs(argv: string[]): CliOptions {
+export function parseArgs(argv: string[]): CliOptions {
   const first = argv[0];
   const command: Command = first === "list" || first === "play" || first === "run" ? first : "run";
   const args = command === first ? argv.slice(1) : argv;
 
-  function value(name: string): string | undefined {
-    const index = args.indexOf(name);
-    return index >= 0 ? args[index + 1] : undefined;
+  const { values, positionals } = parseNodeArgs({
+    args,
+    allowPositionals: true,
+    strict: true,
+    options: {
+      scenario: { type: "string" },
+      system: { type: "string" },
+      persona: { type: "string" },
+      model: { type: "string" },
+      "max-turns": { type: "string" },
+      json: { type: "boolean" },
+      out: { type: "string" },
+      task: { type: "string" },
+    },
+  });
+
+  if (positionals.length > 0) {
+    throw new Error(`Unexpected argument: ${positionals[0]}`);
+  }
+
+  const system = values.system ?? "auto";
+  if (system !== "auto" && system !== "live" && system !== "stub") {
+    throw new Error(`Invalid --system value: ${system}. Expected auto, live, or stub.`);
+  }
+
+  const persona = values.persona ?? "scripted";
+  if (persona !== "scripted" && persona !== "model") {
+    throw new Error(`Invalid --persona value: ${persona}. Expected scripted or model.`);
+  }
+
+  let maxTurns: number | undefined;
+  if (values["max-turns"] !== undefined) {
+    maxTurns = Number(values["max-turns"]);
+    if (!Number.isInteger(maxTurns) || maxTurns < 1) {
+      throw new Error("--max-turns must be a positive integer.");
+    }
   }
 
   return {
     command,
-    scenario: value("--scenario") ?? "onboarding-basic",
-    system: (value("--system") as RuntimeMode | undefined) ?? "auto",
-    persona: (value("--persona") as PersonaMode | undefined) ?? "scripted",
-    model: value("--model"),
-    maxTurns: value("--max-turns") ? Number(value("--max-turns")) : undefined,
-    json: args.includes("--json"),
-    out: value("--out"),
-    task: value("--task"),
+    scenario: values.scenario ?? "onboarding-basic",
+    system,
+    persona,
+    model: values.model,
+    maxTurns,
+    json: values.json ?? false,
+    out: values.out,
+    task: values.task,
   };
 }
 
@@ -87,6 +121,8 @@ async function runScenarios(options: CliOptions) {
   }
 
   if (options.out) await writeOutput(options.out, results.length === 1 ? results[0] : results);
+
+  if (results.some((result) => !result.evaluation.pass)) process.exitCode = 1;
 
   if (options.json) {
     console.log(JSON.stringify(results.length === 1 ? results[0] : results, null, 2));
@@ -163,7 +199,9 @@ async function main() {
   await runScenarios(options);
 }
 
-main().catch((err) => {
-  console.error(err instanceof Error ? err.message : String(err));
-  process.exit(1);
-});
+if (import.meta.main) {
+  main().catch((err) => {
+    console.error(err instanceof Error ? err.message : String(err));
+    process.exit(1);
+  });
+}

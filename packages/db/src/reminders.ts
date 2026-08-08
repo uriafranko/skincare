@@ -279,12 +279,7 @@ export async function listOneOffReminders(userId: string): Promise<OneOffReminde
     orderBy: asc(oneOffReminders.sendAt),
   });
 
-  const reminders: OneOffReminder[] = [];
-  for (const row of rows) {
-    reminders.push(await decodeOneOffReminder(row.value));
-  }
-
-  return reminders;
+  return rows.map((row) => decodeOneOffReminder(row.value));
 }
 
 async function updateOneOffReminder(

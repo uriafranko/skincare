@@ -19,6 +19,17 @@ export function createSharedMock(overrides: Record<string, unknown> = {}) {
     return missing;
   };
 
+  const sanitizeOnboardingExtraction = (
+    state: Record<string, unknown>,
+    extracted: Record<string, unknown>,
+  ) => {
+    if (state.ageEligible === true || extracted.ageEligible === true) return extracted;
+    return {
+      ...(extracted.ageEligible === false ? { ageEligible: false } : {}),
+      ...(extracted.detectedLocale ? { detectedLocale: extracted.detectedLocale } : {}),
+    };
+  };
+
   return {
     ADHERENCE_MILESTONES: {},
     CONSENT_VERSION: "2026-07-29",
@@ -90,6 +101,7 @@ export function createSharedMock(overrides: Record<string, unknown> = {}) {
       source.AI_GATEWAY_MEMORY_MODEL?.trim() ||
       source.AI_GATEWAY_DEFAULT_MODEL?.trim() ||
       defaultGatewayModel,
+    sanitizeOnboardingExtraction,
     sendImageFile: async () => {},
     sendImageMessage: async () => {},
     sendMessage: async () => {},

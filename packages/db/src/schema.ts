@@ -188,6 +188,7 @@ export const expiringKeys = pgTable(
   {
     key: text("key").primaryKey(),
     kind: text("kind").notNull(),
+    ownerToken: text("owner_token"),
     expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
   },

@@ -46,6 +46,40 @@ function spyAccountStateSignal() {
   })) as never);
 }
 
+function spyDeleteAccountConfirmation() {
+  spy("listSuspendedRuns", async () => ({
+    total: 1,
+    runs: [
+      {
+        runId: "run_suspended",
+        status: "suspended",
+        threadId: "skintext:usr_signals",
+        resourceId: "usr_signals",
+        suspendedAt: new Date(),
+        toolCalls: [
+          {
+            toolCallId: "call_delete",
+            toolName: "deleteAccount",
+            requiresApproval: false,
+          },
+        ],
+      },
+    ],
+  }));
+  return spy("resumeStream", (async () => ({
+    getFullOutput: async () => ({
+      text: "Confirmation handled.",
+      totalUsage: {
+        inputTokens: 8,
+        outputTokens: 2,
+        totalTokens: 10,
+      },
+      runId: "run_suspended",
+      steps: [{ text: "Confirmation handled." }],
+    }),
+  })) as never);
+}
+
 describe("Mastra thread messages", () => {
   test("delivers a concurrent user message to the active run", async () => {
     spy("listSuspendedRuns", async () => ({ runs: [], total: 0 }));
@@ -159,37 +193,7 @@ describe("Mastra thread messages", () => {
   });
 
   test("resumes native deletion confirmation instead of blocking the thread", async () => {
-    spy("listSuspendedRuns", async () => ({
-      total: 1,
-      runs: [
-        {
-          runId: "run_suspended",
-          status: "suspended",
-          threadId: "skintext:usr_signals",
-          resourceId: "usr_signals",
-          suspendedAt: new Date(),
-          toolCalls: [
-            {
-              toolCallId: "call_delete",
-              toolName: "deleteAccount",
-              requiresApproval: false,
-            },
-          ],
-        },
-      ],
-    }));
-    const resumeStream = spy("resumeStream", (async () => ({
-      getFullOutput: async () => ({
-        text: "Deleted.",
-        totalUsage: {
-          inputTokens: 8,
-          outputTokens: 2,
-          totalTokens: 10,
-        },
-        runId: "run_suspended",
-        steps: [{ text: "Deleted." }],
-      }),
-    })) as never);
+    const resumeStream = spyDeleteAccountConfirmation();
 
     const result = await runSkintextAgent({ text: "yes, delete everything" }, runtime());
 
@@ -200,6 +204,34 @@ describe("Mastra thread messages", () => {
         toolCallId: "call_delete",
       }),
     );
-    expect(result?.text).toBe("Deleted.");
+    expect(result?.text).toBe("Confirmation handled.");
+  });
+
+  test("resumes a destructive action as declined for an explicit negative reply", async () => {
+    const resumeStream = spyDeleteAccountConfirmation();
+
+    await runSkintextAgent({ text: "no, keep everything" }, runtime());
+
+    expect(resumeStream).toHaveBeenCalledWith(
+      { confirmed: false },
+      expect.objectContaining({
+        runId: "run_suspended",
+        toolCallId: "call_delete",
+      }),
+    );
+  });
+
+  test("does not infer destructive confirmation from an ambiguous reply", async () => {
+    const resumeStream = spyDeleteAccountConfirmation();
+
+    await runSkintextAgent({ text: "yesterday would be better" }, runtime());
+
+    expect(resumeStream).toHaveBeenCalledWith(
+      { confirmed: false },
+      expect.objectContaining({
+        runId: "run_suspended",
+        toolCallId: "call_delete",
+      }),
+    );
   });
 });

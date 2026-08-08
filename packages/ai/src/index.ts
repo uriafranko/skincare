@@ -14,7 +14,8 @@ export {
   saveSanitizedImageTurn,
   skintextMemory,
 } from "./memory";
-export { getDefaultModelName, getMemoryModelName, toMastraModelName } from "./models";
+export { getDefaultModelName, getMemoryModelName } from "./model-runtime";
+export { toMastraModelName } from "./models";
 export {
   buildOnboardingStateProjection,
   createOnboardingGenerator,
@@ -52,12 +53,8 @@ export {
 } from "./prompts/main";
 export { ONBOARDING_INSTRUCTIONS } from "./prompts/onboarding";
 export {
-  buildDailyRoutineSummaryPrompt,
-  buildRoutineReminderPrompt,
-  buildWeeklyRoutineRecapPrompt,
-} from "./prompts/scheduled";
-export {
   deriveMinimumRiskState,
+  type SkintextMessageSource,
   shouldOfferCommunicationStyle,
   shouldOfferPhotoRetention,
 } from "./risk";

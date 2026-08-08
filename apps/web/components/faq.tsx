@@ -1,20 +1,11 @@
-"use client";
-
 import { useTranslations } from "next-intl";
-import { useState } from "react";
 
 const FAQ_KEYS = ["1", "2", "3", "4", "5"] as const;
 
 function FaqItem({ q, a }: { q: string; a: string }) {
-  const [open, setOpen] = useState(false);
-
   return (
-    <div className="border-b border-border">
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between py-5 text-left"
-      >
+    <details className="group border-b border-border">
+      <summary className="flex w-full cursor-pointer list-none items-center justify-between py-5 text-left [&::-webkit-details-marker]:hidden">
         <span className="pr-4 text-[15px] font-medium text-primary">{q}</span>
         <svg
           width="20"
@@ -25,24 +16,15 @@ function FaqItem({ q, a }: { q: string; a: string }) {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={`shrink-0 text-muted transition-transform duration-200 ${
-            open ? "rotate-45" : ""
-          }`}
+          className="shrink-0 text-muted transition-transform duration-200 group-open:rotate-45"
+          aria-hidden="true"
         >
           <line x1="12" y1="5" x2="12" y2="19" />
           <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
-      </button>
-      <div
-        className={`grid transition-[grid-template-rows] duration-200 ${
-          open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-        }`}
-      >
-        <div className="overflow-hidden">
-          <p className="pb-5 text-sm leading-relaxed text-secondary">{a}</p>
-        </div>
-      </div>
-    </div>
+      </summary>
+      <p className="pb-5 text-sm leading-relaxed text-secondary">{a}</p>
+    </details>
   );
 }
 

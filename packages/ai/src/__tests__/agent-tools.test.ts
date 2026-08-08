@@ -26,7 +26,12 @@ describe("Skintext agent tools", () => {
   test("exposes gateway-compatible top-level object schemas", () => {
     for (const [name, tool] of Object.entries(skintextAgentTools)) {
       const schema = z.toJSONSchema(tool.inputSchema as z.ZodType);
-      expect({ name, type: schema.type }).toEqual({ name, type: "object" });
+      const objectSchemas = schema.type === "object" ? [schema] : schema.oneOf;
+      expect({ name, hasObjectSchemas: Array.isArray(objectSchemas) }).toEqual({
+        name,
+        hasObjectSchemas: true,
+      });
+      expect(objectSchemas?.every((branch) => branch.type === "object")).toBe(true);
     }
   });
 });

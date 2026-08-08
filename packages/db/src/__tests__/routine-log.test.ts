@@ -45,10 +45,35 @@ describe("routine logs", () => {
   });
 
   test("weekly logs return seven dates", async () => {
+    await saveRoutineEntry({
+      id: "routine_outside_week",
+      userId: "usr_test",
+      slot: "evening",
+      completed: true,
+      steps: [{ name: "cleanse", productName: "Old Cleanser" }],
+      source: "text",
+      timestamp: "2026-05-28T19:00:00.000Z",
+      localDate: "2026-05-28",
+    });
+    await saveRoutineEntry({
+      id: "routine_other_user",
+      userId: "usr_other",
+      slot: "evening",
+      completed: true,
+      steps: [{ name: "cleanse", productName: "Other Cleanser" }],
+      source: "text",
+      timestamp: "2026-06-03T19:00:00.000Z",
+      localDate: "2026-06-03",
+    });
+
     const logs = await getWeeklyRoutineLogs("usr_test", "2026-06-04");
     expect(logs).toHaveLength(7);
     expect(logs[0]!.date).toBe("2026-05-29");
     expect(logs[6]!.date).toBe("2026-06-04");
+    expect(logs[0]!.log.entryCount).toBe(0);
+    expect(logs[5]!.log.entryCount).toBe(0);
+    expect(logs[6]!.log.entryCount).toBe(1);
+    expect(logs.flatMap(({ log }) => log.productsUsed)).toEqual(["Barrier Cream"]);
   });
 
   test("delete removes an entry from the daily index", async () => {

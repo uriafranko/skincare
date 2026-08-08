@@ -24,6 +24,11 @@
       "bun": "./src/risk.ts",
       "types": "./src/risk.ts",
       "import": "./dist/risk.js"
+    },
+    "./models": {
+      "bun": "./src/models.ts",
+      "types": "./src/models.ts",
+      "import": "./dist/models.js"
     }
   },
   "scripts": {
@@ -40,12 +45,10 @@
     "@skintext/db": "*",
     "@skintext/message-ui": "*",
     "@skintext/shared": "*",
-    "date-fns": "^4.1.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^25",
-    "ai": "^6.0.196",
     "typescript": "^6.0.2"
   }
 }

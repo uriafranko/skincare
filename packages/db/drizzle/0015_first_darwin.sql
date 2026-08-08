@@ -1,0 +1,1 @@
+ALTER TABLE "expiring_keys" ADD COLUMN "owner_token" text;

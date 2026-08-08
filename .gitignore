@@ -6,9 +6,7 @@ dist/
 .env
 .env.local
 .vercel/
-apps/*/.vercel/
 *.tsbuildinfo
 .DS_Store
 .workflow-data/
 .swc
-.vercel

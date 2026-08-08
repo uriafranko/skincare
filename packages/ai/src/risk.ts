@@ -1,5 +1,6 @@
 import type { SkintextRiskState } from "@skintext/shared";
-import { USER_REMINDER_OPEN_TAG } from "./user-reminder";
+
+export type SkintextMessageSource = "user" | "scheduled";
 
 const escalationPatterns = [
   /\b(can'?t|cannot|difficulty|trouble)\s+(breathe|breathing)\b/i,
@@ -30,8 +31,11 @@ const styleOfferExclusions = [
   /foto|bild|spara|radera|integritet|samtycke|ful|påminn/i,
 ];
 
-export function deriveMinimumRiskState(text: string): SkintextRiskState {
-  if (text.includes(USER_REMINDER_OPEN_TAG)) return "routine";
+export function deriveMinimumRiskState(
+  text: string,
+  source: SkintextMessageSource = "user",
+): SkintextRiskState {
+  if (source === "scheduled") return "routine";
   if (escalationPatterns.some((pattern) => pattern.test(text))) return "escalation";
   if (cautionPatterns.some((pattern) => pattern.test(text))) return "caution";
   return "routine";

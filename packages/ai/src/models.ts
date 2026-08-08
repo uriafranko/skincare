@@ -1,21 +1,8 @@
 import type { MastraModelConfig } from "@mastra/core/llm";
-import * as shared from "@skintext/shared";
-import { toMastraModelName } from "./model-name";
 
-export { toMastraModelName };
-
-export function getDefaultModelName(): MastraModelConfig {
-  return toMastraModelName(shared.resolveDefaultModelName(shared.env));
-}
-
-export function getMemoryModelName(): MastraModelConfig {
-  return toMastraModelName(shared.resolveMemoryModelName(shared.env));
-}
-
-export function getDefaultProviderOptions() {
-  return {
-    openai: {
-      reasoningEffort: shared.resolveReasoningEffort(shared.env),
-    },
-  };
+export function toMastraModelName(model: string): MastraModelConfig {
+  const normalized = model.trim();
+  return (
+    normalized.startsWith("vercel/") ? normalized : `vercel/${normalized}`
+  ) as MastraModelConfig;
 }

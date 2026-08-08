@@ -1,13 +1,6 @@
 import { Agent } from "@mastra/core/agent";
-import type { MastraModelConfig } from "@mastra/core/llm";
+import { toMastraModelName } from "@skintext/ai/models";
 import { resolveReasoningEffort } from "@skintext/shared/model-config";
-
-function toMastraModelName(model: string): MastraModelConfig {
-  const normalized = model.trim();
-  return (
-    normalized.startsWith("vercel/") ? normalized : `vercel/${normalized}`
-  ) as MastraModelConfig;
-}
 
 export function createTextGenerator(options: { id: string; instructions: string; model: string }) {
   const agent = new Agent({

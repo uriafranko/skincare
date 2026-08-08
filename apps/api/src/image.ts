@@ -3,6 +3,9 @@ import convert from "heic-convert";
 import sharp from "sharp";
 
 const MAX_DIMENSION = 1024;
+const MAX_INPUT_BYTES = 10 * 1024 * 1024;
+const MAX_INPUT_PIXELS = 25_000_000;
+const FETCH_TIMEOUT_MS = 10_000;
 const OUTPUT_CONTENT_TYPE = "image/jpeg";
 
 export interface NormalizedImage {
@@ -18,7 +21,7 @@ async function heicToJpeg(buffer: Buffer): Promise<Buffer> {
 }
 
 function resizeAndEncode(input: Buffer): Promise<Buffer> {
-  return sharp(input)
+  return sharp(input, { limitInputPixels: MAX_INPUT_PIXELS })
     .resize({
       width: MAX_DIMENSION,
       height: MAX_DIMENSION,
@@ -36,10 +39,26 @@ export async function normalizeInboundImage(
   url: string,
   log?: RequestLogger,
 ): Promise<NormalizedImage | null> {
-  const res = await fetch(url);
+  const parsedUrl = new URL(url);
+  if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+    throw new TypeError("Inbound image URL must use HTTP or HTTPS.");
+  }
+
+  const res = await fetch(parsedUrl, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
   if (!res.ok) return null;
 
+  const contentLength = res.headers.get("content-length");
+  if (contentLength) {
+    const declaredBytes = Number(contentLength);
+    if (Number.isFinite(declaredBytes) && declaredBytes > MAX_INPUT_BYTES) {
+      throw new RangeError(`Inbound image exceeds the ${MAX_INPUT_BYTES}-byte limit.`);
+    }
+  }
+
   const buffer = Buffer.from(await res.arrayBuffer());
+  if (buffer.byteLength > MAX_INPUT_BYTES) {
+    throw new RangeError(`Inbound image exceeds the ${MAX_INPUT_BYTES}-byte limit.`);
+  }
   const contentType = res.headers.get("content-type") ?? "";
   const isHeic = contentType.includes("heic") || contentType.includes("heif");
 
@@ -50,7 +69,7 @@ export async function normalizeInboundImage(
     const raw = await heicToJpeg(buffer);
     jpeg = await resizeAndEncode(raw);
   } else {
-    const meta = await sharp(buffer)
+    const meta = await sharp(buffer, { limitInputPixels: MAX_INPUT_PIXELS })
       .metadata()
       .catch(() => null);
     log?.set({ image: { sourceFormat: meta?.format ?? "unknown", converted: true } });

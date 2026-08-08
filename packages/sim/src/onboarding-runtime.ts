@@ -1,28 +1,13 @@
-import type { OnboardingState } from "@skintext/shared";
+import type { OnboardingGenerator, OnboardingResult } from "@skintext/ai";
+import {
+  isOnboardingComplete,
+  mergeOnboardingState,
+  type OnboardingState,
+  sanitizeOnboardingExtraction,
+} from "@skintext/shared";
 import { resolveDefaultModelName } from "@skintext/shared/model-config";
-import { isLocalOnboardingComplete, mergeOnboardingState } from "./onboarding-state";
 import { advanceStubOnboarding } from "./stub-onboarding";
 import type { RuntimeMode, SimulationRuntime } from "./types";
-
-type ProcessLiveOnboardingMessage = (
-  text: string,
-  state: OnboardingState,
-  ctx: {
-    isFirstMessage: boolean;
-    timezone: string;
-    locale: string;
-  },
-  generate?: (input: {
-    text: string;
-    state: OnboardingState;
-    context: {
-      isFirstMessage: boolean;
-      timezone: string;
-      locale: string;
-      userId?: string;
-    };
-  }) => Promise<Record<string, unknown>>,
-) => Promise<{ extracted: Partial<OnboardingState>; reply: string; nextAction: string }>;
 
 export interface OnboardingRuntimeOptions {
   mode: RuntimeMode;
@@ -44,7 +29,6 @@ function createStubOnboardingRuntime(options: OnboardingRuntimeOptions): Simulat
     async receive(text, ctx) {
       if (!state.timezone && (options.timezone || ctx.scenario.timezone)) {
         state.timezone = options.timezone ?? ctx.scenario.timezone;
-        state.timezoneConfirmed = true;
       }
 
       const result = advanceStubOnboarding(text, state, ctx.turn === 0);
@@ -67,19 +51,10 @@ async function processLiveOnboardingMessage(
     locale: string;
   },
   modelName: string,
-) {
-  const moduleUrl = new URL("../../ai/src/onboarding.ts", import.meta.url).href;
-  const { createOnboardingGenerator, processOnboardingMessage } = (await import(moduleUrl)) as {
-    createOnboardingGenerator: (
-      modelName?: string,
-    ) => (input: {
-      text: string;
-      state: OnboardingState;
-      context: typeof ctx;
-    }) => Promise<Record<string, unknown>>;
-    processOnboardingMessage: ProcessLiveOnboardingMessage;
-  };
-  return processOnboardingMessage(text, state, ctx, createOnboardingGenerator(modelName));
+): Promise<OnboardingResult> {
+  const { createOnboardingGenerator, processOnboardingMessage } = await import("@skintext/ai");
+  const generate: OnboardingGenerator = createOnboardingGenerator(modelName);
+  return processOnboardingMessage(text, state, ctx, generate);
 }
 
 function createLiveOnboardingRuntime(options: OnboardingRuntimeOptions): SimulationRuntime {
@@ -98,7 +73,6 @@ function createLiveOnboardingRuntime(options: OnboardingRuntimeOptions): Simulat
 
       if (!state.timezone && timezone) {
         state.timezone = timezone;
-        state.timezoneConfirmed = true;
       }
 
       const { extracted, reply } = await processLiveOnboardingMessage(
@@ -112,14 +86,15 @@ function createLiveOnboardingRuntime(options: OnboardingRuntimeOptions): Simulat
         modelName,
       );
 
-      const merged = mergeOnboardingState(state, extracted);
-      const complete = isLocalOnboardingComplete(merged);
+      const sanitized = sanitizeOnboardingExtraction(state, extracted);
+      const merged = mergeOnboardingState(state, sanitized);
+      const complete = isOnboardingComplete(merged);
       state = { ...merged, lastBotReply: reply };
       return {
         messages: [reply],
         state,
         complete,
-        metadata: { extracted },
+        metadata: { extracted: sanitized },
       };
     },
   };

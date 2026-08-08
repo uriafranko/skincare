@@ -29,15 +29,25 @@ export function parseInbound(headers: Headers, body: unknown): InboundMessage | 
   const secret = SECRET_HEADERS.reduce<string | null>((v, h) => v ?? headers.get(h), null);
   if (!secret || secret !== env.SENDBLUE_WEBHOOK_SECRET) return null;
 
+  if (!body || typeof body !== "object" || Array.isArray(body)) return null;
   const b = body as Record<string, unknown>;
-  if (b.is_outbound || b.status !== "RECEIVED") return null;
+  if (b.is_outbound !== false || b.status !== "RECEIVED") return null;
 
-  const phone = b.number as string | undefined;
-  if (!phone) return null;
+  const phone = b.number;
+  const content = b.content;
+  const mediaUrl = b.media_url;
+  const messageHandle = b.message_handle;
+  if (typeof phone !== "string" || !phone) return null;
+  if (content !== undefined && content !== null && typeof content !== "string") return null;
+  if (mediaUrl !== undefined && mediaUrl !== null && typeof mediaUrl !== "string") return null;
+  if (messageHandle !== undefined && messageHandle !== null && typeof messageHandle !== "string") {
+    return null;
+  }
 
-  const text = (b.content as string) ?? "";
-  const imageUrl = (b.media_url as string) || undefined;
+  const text = content ?? "";
+  const imageUrl = mediaUrl || undefined;
+  const messageId = messageHandle || undefined;
   if (!text && !imageUrl) return null;
 
-  return { phone, text, imageUrl, messageId: b.message_handle as string | undefined };
+  return { phone, text, imageUrl, messageId };
 }

@@ -4,6 +4,7 @@ import { sendMessage as defaultSendMessage, sendTyping as defaultSendTyping } fr
 const DEFAULT_HARD_MAX_CHARS = 1400;
 const NATURAL_DELAY_MIN_MS = 800;
 const NATURAL_DELAY_MAX_MS = 2500;
+const graphemeSegmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
 
 export interface ReplySplitOptions {
   hardMaxChars?: number;
@@ -31,16 +32,21 @@ export function splitReplyIntoBubbles(
   const bubbles: string[] = [];
   let remaining = normalized;
 
-  while (remaining.length > limit) {
-    const window = remaining.slice(0, limit + 1);
-    const whitespaceIndex = Math.max(
-      window.lastIndexOf(" "),
-      window.lastIndexOf("\n"),
-      window.lastIndexOf("\t"),
-    );
+  let graphemes = Array.from(graphemeSegmenter.segment(remaining), ({ segment }) => segment);
+  while (graphemes.length > limit) {
+    const window = graphemes.slice(0, limit + 1);
+    let whitespaceIndex = -1;
+    for (let index = window.length - 1; index >= 0; index--) {
+      const segment = window[index];
+      if (segment === " " || segment === "\n" || segment === "\t") {
+        whitespaceIndex = index;
+        break;
+      }
+    }
     const splitAt = whitespaceIndex > limit * 0.45 ? whitespaceIndex : limit;
-    bubbles.push(remaining.slice(0, splitAt).trim());
-    remaining = remaining.slice(splitAt).trim();
+    bubbles.push(graphemes.slice(0, splitAt).join("").trim());
+    remaining = graphemes.slice(splitAt).join("").trim();
+    graphemes = Array.from(graphemeSegmenter.segment(remaining), ({ segment }) => segment);
   }
 
   if (remaining) bubbles.push(remaining);

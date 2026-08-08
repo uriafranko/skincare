@@ -1,4 +1,4 @@
-import { describe, expect, mock, test } from "bun:test";
+import { afterEach, describe, expect, mock, setSystemTime, test } from "bun:test";
 import { createFakeDb } from "./fake-db";
 
 const fakeDb = createFakeDb();
@@ -8,6 +8,10 @@ mock.module("../client", () => ({
 }));
 
 const { reserveInboundMessage, tryAcquireMessageLock } = await import("../message-slots");
+
+afterEach(() => {
+  setSystemTime();
+});
 
 describe("message slots", () => {
   test("reserves each inbound message id once", async () => {
@@ -28,5 +32,21 @@ describe("message slots", () => {
     expect(retryRelease).not.toBeNull();
     expect(await reserveInboundMessage("message_waiting")).toBeFalse();
     await retryRelease?.();
+  });
+
+  test("a stale owner cannot release a newer lock after its lease expires", async () => {
+    setSystemTime(new Date("2099-01-01T00:00:00.000Z"));
+    const staleRelease = await tryAcquireMessageLock("phone_expired_owner");
+    expect(staleRelease).not.toBeNull();
+
+    setSystemTime(new Date("2099-01-01T00:01:01.000Z"));
+    const currentRelease = await tryAcquireMessageLock("phone_expired_owner");
+    expect(currentRelease).not.toBeNull();
+
+    await staleRelease?.();
+    expect(await tryAcquireMessageLock("phone_expired_owner")).toBeNull();
+
+    await currentRelease?.();
+    expect(await tryAcquireMessageLock("phone_expired_owner")).not.toBeNull();
   });
 });

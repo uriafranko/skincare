@@ -4,7 +4,9 @@ type Row = Record<string, unknown>;
 type Table = (typeof schema)[keyof typeof schema];
 type SqlLike = { queryChunks?: unknown[] };
 type QueryConfig = { where?: unknown };
-type Condition = { key: string; op: "=" | "<="; value: unknown } | { key: string; op: "is null" };
+type Condition =
+  | { key: string; op: "=" | "<=" | ">="; value: unknown }
+  | { key: string; op: "is null" };
 const tableKeys = new Map<unknown, (row: Row) => string>([
   [schema.adherenceStreaks, (row) => String(row.userId)],
   [schema.blobDeletionQueue, (row) => String(row.key)],
@@ -43,6 +45,8 @@ function collectConditions(expr: unknown, out: Condition[] = []): Condition[] {
     if (param && "value" in param) {
       if (opText.includes("<="))
         out.push({ key: columnKey(chunk.name), op: "<=", value: param.value });
+      else if (opText.includes(">="))
+        out.push({ key: columnKey(chunk.name), op: ">=", value: param.value });
       else if (opText.includes("="))
         out.push({ key: columnKey(chunk.name), op: "=", value: param.value });
     }
@@ -63,6 +67,7 @@ function matches(row: Row, where?: unknown): boolean {
   return collectConditions(where).every((condition) => {
     if (condition.op === "is null") return row[condition.key] == null;
     if (condition.op === "<=") return compareValues(row[condition.key], condition.value) <= 0;
+    if (condition.op === ">=") return compareValues(row[condition.key], condition.value) >= 0;
     return row[condition.key] === condition.value;
   });
 }

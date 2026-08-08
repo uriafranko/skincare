@@ -15,8 +15,7 @@
     "proactive": "bun --cwd apps/api scripts/send-proactive-message.ts",
     "sim": "bun --cwd packages/sim src/cli.ts",
     "test": "turbo test",
-    "clean": "turbo clean",
-    "play-interactive": "PATH=\"$HOME/.bun/bin:$PATH\" \"$HOME/.bun/bin/bun\" --env-file=\"$PWD/.env\" --cwd packages/sim src/cli.ts play --system live --scenario onboarding-friction"
+    "play-interactive": "bun --env-file=\"$PWD/.env\" --cwd packages/sim src/cli.ts play --system live --scenario onboarding-friction"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.11",

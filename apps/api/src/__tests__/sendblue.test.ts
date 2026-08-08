@@ -73,4 +73,50 @@ describe("parseInbound", () => {
       messageId: "message-1",
     });
   });
+
+  test("rejects malformed webhook bodies without throwing", () => {
+    const headers = new Headers({ "sb-signing-secret": "expected-secret" });
+
+    for (const body of [null, [], "message", 123]) {
+      expect(parseInbound(headers, body)).toBeNull();
+    }
+  });
+
+  test("requires an explicitly inbound event", () => {
+    const headers = new Headers({ "sb-signing-secret": "expected-secret" });
+
+    expect(parseInbound(headers, { ...inboundBody, is_outbound: true })).toBeNull();
+    expect(parseInbound(headers, { ...inboundBody, is_outbound: undefined })).toBeNull();
+    expect(parseInbound(headers, { ...inboundBody, is_outbound: 0 })).toBeNull();
+  });
+
+  test("rejects invalid field types", () => {
+    const headers = new Headers({ "sb-signing-secret": "expected-secret" });
+
+    for (const body of [
+      { ...inboundBody, number: 15555550123 },
+      { ...inboundBody, content: { text: "hello" } },
+      { ...inboundBody, media_url: 123 },
+      { ...inboundBody, message_handle: 123 },
+    ]) {
+      expect(parseInbound(headers, body)).toBeNull();
+    }
+  });
+
+  test("accepts image-only inbound messages", () => {
+    const headers = new Headers({ "sb-signing-secret": "expected-secret" });
+
+    expect(
+      parseInbound(headers, {
+        ...inboundBody,
+        content: "",
+        media_url: "https://cdn.sendblue.test/image.jpg",
+      }),
+    ).toEqual({
+      phone: "+15555550123",
+      text: "",
+      imageUrl: "https://cdn.sendblue.test/image.jpg",
+      messageId: "message-1",
+    });
+  });
 });

@@ -7,7 +7,7 @@ describe("detectRegion", () => {
     expect(result.locale).toBe("en");
     expect(result.country).toBe("US");
     expect(result.countryName).toContain("United States");
-    expect(result.timezone).toBeDefined();
+    expect(result.timezone).toBe("UTC");
   });
 
   test("Swedish phone number", () => {
@@ -21,6 +21,7 @@ describe("detectRegion", () => {
     const result = detectRegion("+81312345678");
     expect(result.locale).toBe("ja");
     expect(result.country).toBe("JP");
+    expect(result.timezone).toBe("Asia/Tokyo");
   });
 
   test("Israeli phone number", () => {
@@ -34,6 +35,18 @@ describe("detectRegion", () => {
     const result = detectRegion("not-a-phone");
     expect(result.locale).toBe("en");
     expect(result.country).toBe("US");
+  });
+
+  test.each([
+    ["Canada", "+14165550123", "CA"],
+    ["Australia", "+61412345678", "AU"],
+    ["Brazil", "+5511987654321", "BR"],
+    ["Indonesia", "+628123456789", "ID"],
+  ])("uses UTC for multi-zone country %s", (_name, phone, country) => {
+    const result = detectRegion(phone);
+
+    expect(result.country).toBe(country);
+    expect(result.timezone).toBe("UTC");
   });
 });
 

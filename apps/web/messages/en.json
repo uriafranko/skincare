@@ -140,80 +140,10 @@
       }
     }
   },
-  "Guide": {
-    "toggleLabel": "Show another tip from Lily",
-    "tips": {
-      "start": "Start small. Keep what works.",
-      "memory": "Your routine can change. Your memory stays yours.",
-      "questions": "Questions are welcome. I’ll keep the answer clear."
-    }
-  },
   "IMessageButton": {
     "label": "Text Lily in Messages",
     "shortLabel": "Text Lily",
     "smsBody": "Hi Lily - help me decide what to use tonight."
-  },
-  "Features": {
-    "story": {
-      "eyebrow": "Skincare that fits real life",
-      "heading": "Less guessing. More calm, consistent skin days.",
-      "subtitle": "Ask a question, send a photo, or say what you used. Lily turns the mess into one clear next step.",
-      "snapOrText": {
-        "value": "Start with confidence",
-        "heading": "A routine simple enough to stick with.",
-        "body": "Focus on the few products your skin actually needs, so you can stop restarting every week and start noticing what works.",
-        "point1": "She describes visible details cautiously and avoids diagnosis.",
-        "point2": "When a product should be remembered, she asks before saving it."
-      },
-      "smartReminders": {
-        "value": "Keep going",
-        "heading": "Gentle support when life gets busy.",
-        "body": "Get a helpful nudge when you want one. Miss a night and simply pick up where you left off-no streaks, pressure, or guilt.",
-        "point1": "No invented morning or evening reminder defaults.",
-        "point2": "One-off follow-ups and recurring reminders stay separate."
-      },
-      "dailySummaries": {
-        "value": "Stop second-guessing",
-        "heading": "Try new products with a clear plan.",
-        "body": "Send a product or skin photo and learn where it fits, what to watch for, and whether now is the right time to add it.",
-        "point1": "Routine status comes from verified logs, not guesses from chat.",
-        "point2": "Export and delete paths are part of the same data story."
-      }
-    },
-    "snapOrText": {
-      "title": "Photo or Text"
-    },
-    "dailySummaries": {
-      "title": "Routine Summaries"
-    },
-    "smartReminders": {
-      "title": "Smart Reminders"
-    },
-    "chat": {
-      "snapOrText": {
-        "bot0": {
-          "morning": "Good morning. Send your AM lineup or a product label and I'll help place it in your routine.",
-          "midday": "Send a product label or skin photo whenever you want a quick routine check.",
-          "evening": "Evening check-in. Send what you're using tonight and I'll help keep it simple."
-        },
-        "user1": "Can I use this serum with my moisturizer?",
-        "bot1": "Image type: product label\nVisible: hydrating serum label, ingredient text partly readable\nFit: likely after cleansing and before moisturizer\nWatchouts: patch test first if your skin is sensitive\nNext: use it a few nights a week before increasing.",
-        "bot2": "I’ll remember it as one of your current products and log it in your evening routine.",
-        "bot3": "✅ Evening logged\nSerum · Moisturizer\nReaction: none noted"
-      },
-      "dailySummaries": {
-        "bot1": "Today\nAM: done\nPM: not logged\nProducts: gentle cleanser, barrier cream\nNotes: mild dryness\n\nKeep the routine steady and avoid adding another new active tonight."
-      },
-      "smartReminders": {
-        "bot1": {
-          "morning": "Morning routine check. Reply done when cleanser, moisturizer, and sunscreen are handled.",
-          "midday": "Quick skin check. Send a product label if you want help placing it.",
-          "evening": "Evening routine check. Reply done, skip, or send what you're using tonight."
-        },
-        "user1": "Done. Cleanser and barrier cream.",
-        "bot2": "✅ Evening logged\nCleanser · Barrier cream\nReaction: none noted"
-      }
-    }
   },
   "Landing": {
     "quick": {
@@ -423,29 +353,6 @@
     "a4": "No. Lily is an AI skincare routine and education assistant-not a doctor, dermatologist, medical device, or emergency service. She does not diagnose conditions or replace qualified professional care.",
     "q5": "What does Lily remember-and can I delete it?",
     "a5": "After you consent, Lily can remember your routine, goals, products, and reactions so future replies fit you better. Ask what Lily remembers, correct or forget current routine details, delete saved photos, or delete your account."
-  },
-  "BottomCta": {
-    "heading": "Start your routine today",
-    "subtitle": "Open iMessage and text Lily. She’ll help you set up your routine in one short chat.",
-    "buttonHint": "Opens iMessage on your Mac or iPhone",
-    "qrLabel": "Scan with your phone"
-  },
-  "PhoneMockup": {
-    "header": "Lily",
-    "inputPlaceholder": "iMessage",
-    "lockTitle": "Lily",
-    "lockBody": "Evening routine logged.",
-    "lockBodyLogging": "Got your photo. Let me check the routine fit.",
-    "lockBodySummary": "Here's today's routine wrap-up.",
-    "lockBodyReminder": {
-      "morning": "☀️ Morning routine check. Reply done when you're finished.",
-      "midday": "🧴 Send a product label if you want help placing it.",
-      "evening": "🌙 Evening routine check. Reply done or send what you're using."
-    },
-    "msg1": "Done tonight: cleanser and barrier cream",
-    "msg2": "✅ Evening logged\nCleanser · Barrier cream\nReaction: none noted",
-    "msg3": "Can I add a new serum?",
-    "msg4": "Yes, but introduce it slowly. Patch test first, use it a few nights a week, and pause if irritation shows up."
   },
   "Privacy": {
     "heading": "Privacy Policy",

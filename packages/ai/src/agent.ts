@@ -4,7 +4,7 @@ import { MastraPlatformExporter, Observability, SensitiveDataFilter } from "@mas
 import { RedisStreamsPubSub } from "@mastra/redis-streams";
 import { env } from "@skintext/shared";
 import { mastraStorage, skintextMemory } from "./memory";
-import { getDefaultModelName, getDefaultProviderOptions } from "./models";
+import { getDefaultModelName, getDefaultProviderOptions } from "./model-runtime";
 import { skintextOnboardingAgent } from "./onboarding";
 import {
   buildMainAccountState,
@@ -179,7 +179,6 @@ function streamOptions(runtime: SkintextRuntime) {
     requestContext: createSkintextRequestContext(runtime),
     memory: skintextMemoryOptions(userId, hasImage),
     maxSteps: 15,
-    autoResumeSuspendedTools: true,
     toolCallConcurrency: 1,
     tracingOptions: {
       hideInput: true,

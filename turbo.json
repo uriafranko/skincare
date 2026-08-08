@@ -4,7 +4,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".output/**", ".next/**", ".vercel/output/**"],
+      "outputs": ["dist/**", ".output/**", ".next/**", "!.next/cache/**", ".vercel/output/**"],
       "env": [
         "DATABASE_URL",
         "AI_GATEWAY_API_KEY",
@@ -17,7 +17,10 @@
         "SENDBLUE_WEBHOOK_SECRET",
         "NEXT_PUBLIC_PHONE_NUMBER",
         "NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN",
-        "NEXT_PUBLIC_POSTHOG_HOST"
+        "NEXT_PUBLIC_POSTHOG_HOST",
+        "POSTHOG_PROJECT_TOKEN",
+        "POSTHOG_HOST",
+        "VERCEL_DEPLOYMENT_ID"
       ]
     },
     "dev": {
@@ -31,9 +34,6 @@
       "persistent": true
     },
     "typecheck": {},
-    "test": {},
-    "clean": {
-      "cache": false
-    }
+    "test": {}
   }
 }

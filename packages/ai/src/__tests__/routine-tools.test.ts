@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, test } from "bun:test";
 import { RequestContext } from "@mastra/core/request-context";
+import type { z } from "zod";
 import {
   deleteRoutineEntry,
   getRoutineEntry,
@@ -34,6 +35,20 @@ describe("routineTool", () => {
     getRoutineLogForDate.mockClear();
     getWeeklyRoutineLogs.mockClear();
     saveRoutineEntry.mockClear();
+  });
+
+  test("validates action-specific required fields", () => {
+    const inputSchema = routineTool.inputSchema as z.ZodType;
+    expect(inputSchema.safeParse({ action: "log" }).success).toBe(false);
+    expect(inputSchema.safeParse({ action: "delete" }).success).toBe(false);
+    expect(
+      inputSchema.safeParse({
+        action: "log",
+        slot: "morning",
+        status: "completed",
+      }).success,
+    ).toBe(true);
+    expect(inputSchema.safeParse({ action: "delete", entryId: "routine_1" }).success).toBe(true);
   });
 
   test("reads today's entries", async () => {

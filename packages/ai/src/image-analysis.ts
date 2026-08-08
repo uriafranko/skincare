@@ -1,5 +1,5 @@
 import { Agent } from "@mastra/core/agent";
-import { getDefaultModelName, getDefaultProviderOptions } from "./models";
+import { getDefaultModelName, getDefaultProviderOptions } from "./model-runtime";
 
 const retainedImageReader = new Agent({
   id: "retained-image-reader",

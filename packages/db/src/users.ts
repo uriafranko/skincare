@@ -134,6 +134,21 @@ export async function createUser(
     });
 }
 
+/**
+ * Marks a fully initialized pending account as ready for normal message routing.
+ * Keep this narrow so onboarding can use it as its final, retry-safe commit marker.
+ */
+export async function completeUserOnboarding(
+  userId: string,
+  consentedAt: string,
+  consentVersion: string,
+): Promise<void> {
+  await getDb()
+    .update(users)
+    .set({ onboardingComplete: true, consentedAt, consentVersion })
+    .where(eq(users.id, userId));
+}
+
 export async function updateUser(
   userId: string,
   fields: Partial<Record<string, string>>,

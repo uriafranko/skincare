@@ -8,11 +8,16 @@ export const managePhotoRetentionTool = createTool({
   id: "manage-photo-retention",
   description:
     "Manage separate 30-day photo-retention consent. Use set_future_retention to enable or disable future photo storage without saving the current attachment. Use save_current only after explicit consent to save the attached current photo; it also enables future retention when needed.",
-  inputSchema: z.object({
-    action: z.enum(["set_future_retention", "save_current"]),
-    enabled: z.boolean().optional().describe("Required for set_future_retention."),
-    consentToThirtyDayRetention: z.literal(true).optional().describe("Required for save_current."),
-  }),
+  inputSchema: z.discriminatedUnion("action", [
+    z.object({
+      action: z.literal("set_future_retention"),
+      enabled: z.boolean(),
+    }),
+    z.object({
+      action: z.literal("save_current"),
+      consentToThirtyDayRetention: z.literal(true),
+    }),
+  ]),
   execute: async (input, context) => {
     const runtime = getSkintextRuntime(context.requestContext);
     const account = runtime.agentContext.userAccount;
@@ -20,9 +25,6 @@ export const managePhotoRetentionTool = createTool({
     if (!account) return { updated: false, message: "User not found." };
 
     if (input.action === "set_future_retention") {
-      if (input.enabled === undefined) {
-        return { updated: false, message: "A retention setting is required." };
-      }
       const now = input.enabled ? new Date().toISOString() : "";
       await updateUser(userId, {
         photoRetentionConsentedAt: now,
@@ -48,9 +50,6 @@ export const managePhotoRetentionTool = createTool({
       };
     }
 
-    if (input.consentToThirtyDayRetention !== true) {
-      return { saved: false, message: "Explicit 30-day retention consent is required." };
-    }
     if (!hasImage || !runtime.saveCurrentPhoto) {
       return { saved: false, message: "There is no current photo available to save." };
     }

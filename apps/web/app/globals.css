@@ -7,7 +7,6 @@
 @theme {
   --font-heading: var(--font-bricolage);
   --font-body: var(--font-inter);
-  --font-logo: var(--font-jakarta);
 
   --color-bg: #fbf8f1;
   --color-card: #fffdf8;
@@ -33,23 +32,6 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-@keyframes guide-hop {
-  0%,
-  100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  42% {
-    transform: translateY(-9px) rotate(-2deg);
-  }
-  72% {
-    transform: translateY(-2px) rotate(1deg);
-  }
-}
-
-.animate-guide-hop {
-  animation: guide-hop 0.52s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 html {
@@ -135,13 +117,6 @@ html {
     }
   50%, 100% {
     opacity: 0;
-    }
-  }
-  --animate-gradient: gradient 8s linear infinite
-;
-  @keyframes gradient {
-  to {
-    background-position: var(--bg-size, 300%) 0;
     }
   }
   @keyframes canopy-x {

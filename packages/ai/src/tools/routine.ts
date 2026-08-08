@@ -25,25 +25,30 @@ function toolEntries(entries: RoutineLogEntry[]) {
 export const routineTool = createTool({
   id: "routine",
   description: "Log, read, or delete verified skincare routine entries.",
-  inputSchema: z.object({
-    action: z.enum(["log", "get", "delete"]),
-    slot: routineSlotSchema.optional().describe("Required for log."),
-    status: z.enum(["completed", "skipped"]).optional().describe("Required for log."),
-    steps: z.array(routineStepSchema).max(20).optional().describe("Used for log."),
-    reaction: z.string().max(500).optional().describe("Used for log."),
-    notes: z.string().max(500).optional().describe("Used for log."),
-    range: z.enum(["today", "seven_days"]).optional().describe("Used for get; defaults to today."),
-    endDate: calendarDateSchema.optional().describe("Optional end date for a seven-day get."),
-    entryId: z.string().optional().describe("Required for delete."),
-  }),
+  inputSchema: z.discriminatedUnion("action", [
+    z.object({
+      action: z.literal("log"),
+      slot: routineSlotSchema,
+      status: z.enum(["completed", "skipped"]),
+      steps: z.array(routineStepSchema).max(20).optional(),
+      reaction: z.string().max(500).optional(),
+      notes: z.string().max(500).optional(),
+    }),
+    z.object({
+      action: z.literal("get"),
+      range: z.enum(["today", "seven_days"]).optional().describe("Defaults to today."),
+      endDate: calendarDateSchema.optional().describe("Optional end date for a seven-day get."),
+    }),
+    z.object({
+      action: z.literal("delete"),
+      entryId: z.string().min(1).describe("Routine entry ID to delete."),
+    }),
+  ]),
   execute: async (input, context) => {
     const runtime = getSkintextRuntime(context.requestContext);
     const { hasImage, localDate, timezone, userId } = runtime.agentContext;
 
     if (input.action === "log") {
-      if (!input.slot || !input.status) {
-        return { logged: false, message: "A routine slot and status are required to log." };
-      }
       const entryId = generateId("routine");
       await saveRoutineEntry({
         id: entryId,
@@ -61,9 +66,6 @@ export const routineTool = createTool({
     }
 
     if (input.action === "delete") {
-      if (!input.entryId) {
-        return { deleted: false, message: "A routine entry ID is required to delete." };
-      }
       const entry = await getRoutineEntry(input.entryId);
       if (!entry || entry.userId !== userId) {
         return { deleted: false, message: "Routine entry not found." };

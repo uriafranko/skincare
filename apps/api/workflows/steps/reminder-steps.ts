@@ -95,7 +95,9 @@ export async function sendReminderToAgent(
 
   try {
     log.set({ input: { reminder: text.slice(0, 120) } });
-    const reply = await runAgentMessage(log, user, wrapUserReminder(text));
+    const reply = await runAgentMessage(log, user, wrapUserReminder(text), {
+      source: "scheduled",
+    });
     if (!reply) {
       log.set({ output: { replies: 0, bubbles: 0 } });
       return false;

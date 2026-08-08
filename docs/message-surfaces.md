@@ -20,10 +20,9 @@ Lily uses separate onboarding and main agent prompts on the same Mastra memory a
 |--------|------|
 | Onboarding prompt | `packages/ai/src/prompts/onboarding.ts` |
 | Onboarding runtime | `packages/ai/src/onboarding.ts` |
-| Scheduled prompt templates | `packages/ai/src/prompts/scheduled.ts` |
-| Routine reminders | `buildRoutineReminderEvent` -> `sendReminderToAgent` |
-| Daily summary | `buildDailySummaryReminder` -> `sendReminderToAgent` |
-| Weekly recap | `buildWeeklyRecapReminder` -> `sendReminderToAgent` |
+| Routine reminders | `buildRoutineReminderEvent` in `apps/api/workflows/reminder-events.ts` -> `sendReminderToAgent` in `apps/api/workflows/steps/reminder-steps.ts` |
+| Daily summary | `buildDailySummaryReminder` -> `sendReminderToAgent` in `apps/api/workflows/steps/reminder-steps.ts` |
+| Weekly recap | `buildWeeklyRecapReminder` -> `sendReminderToAgent` in `apps/api/workflows/steps/reminder-steps.ts` |
 
 **Goal:** Gentle routine nudges and wrap-ups. Reminders are warm, optional, and short; summaries are data-first and never use guilt or streak pressure.
 

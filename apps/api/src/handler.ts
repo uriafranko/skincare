@@ -1,7 +1,6 @@
 import { reserveInboundMessage, resolveUserId, tryAcquireMessageLock } from "@skintext/db";
 import { createLogger, type RequestLogger } from "evlog";
-import { errorForLogging } from "@/logging";
-import { capturePostHogException } from "@/posthog";
+import { reportError } from "@/logging";
 import { sendReplyBubbles } from "@/replies";
 import { routeConcurrentMessage, routeMessage } from "@/router";
 import { sendMessage } from "@/sendblue";
@@ -45,15 +44,15 @@ export async function handleIncoming(
     scope: "message",
     phone: phone.slice(-4),
   });
-
-  if (!(await reserveInboundMessage(messageId))) {
-    log.set({ skipped: "duplicate" });
-    log.emit();
-    return;
-  }
-  let releaseLock = await tryAcquireMessageLock(phone);
+  let releaseLock: Awaited<ReturnType<typeof tryAcquireMessageLock>> | undefined;
 
   try {
+    if (!(await reserveInboundMessage(messageId))) {
+      log.set({ skipped: "duplicate" });
+      return;
+    }
+
+    releaseLock = await tryAcquireMessageLock(phone);
     if (!releaseLock) {
       const concurrentReplies = await routeConcurrentMessage(
         log,
@@ -76,15 +75,17 @@ export async function handleIncoming(
     await deliverReplies(log, phone, replies);
   } catch (error) {
     const userId = await resolveUserId(phone).catch(() => undefined);
-    capturePostHogException(error, userId ?? undefined);
-    log.error(errorForLogging(error));
+    reportError(log, error, userId ?? undefined);
     try {
       await sendMessage(phone, "Oops, something went wrong. Try again in a sec! 🙏");
     } catch {
       // swallow send failure for error message
     }
   } finally {
-    await releaseLock?.();
-    log.emit();
+    try {
+      await releaseLock?.();
+    } finally {
+      log.emit();
+    }
   }
 }

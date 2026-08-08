@@ -80,10 +80,12 @@ export function detectRegion(phone: string): PhoneRegionInfo {
     const parsed = parsePhoneNumber(phone);
     const countryCode = parsed?.country ?? "US";
     const country = getCountry(countryCode);
-    const timezones = country?.timezones ?? ["UTC"];
+    const timezones = country?.timezones ?? [];
     return {
       locale: COUNTRY_LOCALE[countryCode] ?? "en",
-      timezone: timezones[0] ?? "UTC",
+      // A phone country code cannot identify a timezone within a multi-zone country.
+      // Only use country metadata when it has one unambiguous timezone.
+      timezone: timezones.length === 1 ? timezones[0]! : "UTC",
       country: countryCode,
       countryName: country?.name ?? "Unknown",
     };

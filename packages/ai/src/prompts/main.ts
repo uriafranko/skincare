@@ -1,12 +1,6 @@
 import { PHOTO_RETENTION_CONSENT_VERSION } from "@skintext/shared";
 import { USER_REMINDER_OPEN_TAG, USER_REMINDER_TAG_EXAMPLE } from "../user-reminder";
-import {
-  buildBodyImagePolicy,
-  buildConversationPolicy,
-  buildIdentityPolicy,
-  buildResponseShapePolicy,
-  buildSafetyPolicy,
-} from "./core";
+import { buildCorePrompt } from "./core";
 
 export function buildContextPriorityPolicy(): string {
   return `CONTEXT PRIORITY
@@ -107,13 +101,9 @@ export function buildScheduledEventPolicy(): string {
 
 export function buildSkintextSystemPrompt(): string {
   return [
-    buildIdentityPolicy(),
-    buildConversationPolicy(),
-    buildResponseShapePolicy(),
+    buildCorePrompt(),
     buildContextPriorityPolicy(),
     buildRuntimeContextPolicy(),
-    buildSafetyPolicy(),
-    buildBodyImagePolicy(),
     buildCommercePolicy(),
     buildMemoryPolicy(),
     buildImagePolicy(),

@@ -5,10 +5,11 @@ import type {
   SkinType,
 } from "@skintext/shared";
 import {
-  getMissingOnboardingFields,
-  isLocalOnboardingComplete,
+  getMissingFields,
+  isOnboardingComplete,
   mergeOnboardingState,
-} from "./onboarding-state";
+  sanitizeOnboardingExtraction,
+} from "@skintext/shared";
 
 const GREETING_SETUP_REPLY =
   "Hey, I'm Lily. I can help you build a simple routine that fits. Send your name, skin goal, skin type/sensitivity if known, avoids, products, and if you want reminders, best times. Unsure is fine. Reply AGREE if I can save your skincare data and you accept the Terms: https://skintext.ai/terms. Privacy: https://skintext.ai/privacy.";
@@ -236,6 +237,14 @@ function extractConsent(lower: string, previousBotReply?: string): boolean | und
   return undefined;
 }
 
+function explicitlyConfirmsTimezone(text: string, state: OnboardingState): boolean {
+  if (!state.timezone) return false;
+  const lower = text.toLowerCase();
+  const timezone = state.timezone.toLowerCase();
+  const city = timezone.split("/").at(-1)?.replaceAll("_", " ");
+  return lower.includes(timezone) || (!!city && lower.includes(city));
+}
+
 function buildCompleteReply(state: OnboardingState): string {
   if (state.detectedLocale === "he") {
     const name = state.name ? `, ${state.name}` : "";
@@ -294,6 +303,10 @@ export function extractStubOnboarding(
 
   Object.assign(extracted, extractReminderTimes(text));
 
+  if (!state.timezoneConfirmed && explicitlyConfirmsTimezone(text, state)) {
+    extracted.timezoneConfirmed = true;
+  }
+
   const consented = extractConsent(lower, state.lastBotReply);
   if (consented) extracted.consented = true;
 
@@ -302,11 +315,11 @@ export function extractStubOnboarding(
 
 export function buildStubReply(state: OnboardingState, isFirstMessage: boolean): string {
   if (state.ageEligible === false) return UNDER_16_REPLY;
-  if (isLocalOnboardingComplete(state)) {
+  if (isOnboardingComplete(state)) {
     return buildCompleteReply(state);
   }
 
-  const missing = getMissingOnboardingFields(state);
+  const missing = getMissingFields(state);
   if (missing.includes("age_eligibility")) return AGE_GATE_REPLY;
   if (isFirstMessage && missing.length > 1) {
     return GREETING_SETUP_REPLY;
@@ -318,6 +331,9 @@ export function buildStubReply(state: OnboardingState, isFirstMessage: boolean):
   }
   if (missing.includes("skin_profile")) {
     return "Good to know. What's your skin type or sensitivity like? Unsure is completely fine.";
+  }
+  if (missing.includes("timezone")) {
+    return "What city or timezone are you in? I need that to send reminders at the right time.";
   }
   if (missing.includes("consent")) {
     return CONSENT_ONLY_REPLY;
@@ -332,20 +348,12 @@ export function advanceStubOnboarding(
   isFirstMessage: boolean,
 ): { state: OnboardingState; reply: string; complete: boolean } {
   const rawExtracted = extractStubOnboarding(text, state);
-  const extracted =
-    rawExtracted.ageEligible === false
-      ? {
-          ageEligible: false,
-          detectedLocale: rawExtracted.detectedLocale,
-        }
-      : state.ageEligible !== true && rawExtracted.ageEligible !== true
-        ? { detectedLocale: rawExtracted.detectedLocale }
-        : rawExtracted;
+  const extracted = sanitizeOnboardingExtraction(state, rawExtracted);
   const merged = mergeOnboardingState(state, extracted);
   const reply = buildStubReply(merged, isFirstMessage);
   return {
     state: { ...merged, lastBotReply: reply },
     reply,
-    complete: isLocalOnboardingComplete(merged),
+    complete: isOnboardingComplete(merged),
   };
 }

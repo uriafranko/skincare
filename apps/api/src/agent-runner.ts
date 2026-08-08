@@ -1,11 +1,10 @@
-import type { SkintextRuntime } from "@skintext/ai";
+import type { SkintextMessageSource, SkintextRuntime } from "@skintext/ai";
 import {
   deriveMinimumRiskState,
   runSkintextAgent,
   saveSanitizedImageTurn,
   shouldOfferCommunicationStyle,
   shouldOfferPhotoRetention,
-  USER_REMINDER_OPEN_TAG,
 } from "@skintext/ai";
 import { getAdherenceStreak, updateUser } from "@skintext/db";
 import type { AgentContext, UserAccount } from "@skintext/shared";
@@ -26,6 +25,7 @@ type RuntimeService =
 
 export type RunAgentMessageOptions = Pick<SkintextRuntime, RuntimeService> & {
   imageUrl?: string;
+  source?: SkintextMessageSource;
 };
 
 function photoSaveFailureReply(locale: string): string {
@@ -64,8 +64,9 @@ export async function runAgentMessage(
   const localDate = localDateString(user.timezone);
   const streak = await getAdherenceStreak(user.id);
   const hasImage = !!options.imageUrl;
-  const isScheduledEvent = text.includes(USER_REMINDER_OPEN_TAG);
-  const riskState = deriveMinimumRiskState(text);
+  const source = options.source ?? "user";
+  const isScheduledEvent = source === "scheduled";
+  const riskState = deriveMinimumRiskState(text, source);
   const shouldOfferStyle = shouldOfferCommunicationStyle({
     text,
     hasImage,

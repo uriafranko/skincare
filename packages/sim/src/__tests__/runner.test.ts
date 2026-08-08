@@ -126,6 +126,51 @@ describe("local simulator", () => {
     expect(result.transcript[3]?.content).not.toMatch(/16-17|18\+/);
   });
 
+  test("does not treat a scenario timezone as user-confirmed", async () => {
+    const scenario = getScenario("onboarding-friction");
+    const runtime = createOnboardingRuntime({
+      mode: "stub",
+      locale: scenario.locale,
+      timezone: scenario.timezone,
+    });
+
+    const result = await runSimulation(
+      scenario,
+      runtime,
+      createScriptedPersona([
+        "I'm 17. My name is Leo. Dry skin and breakouts. Remind me at 07:30.",
+      ]),
+      { maxTurns: 1 },
+    );
+
+    expect(result.finalState?.timezone).toBe("Europe/Stockholm");
+    expect(result.finalState?.timezoneConfirmed).not.toBe(true);
+    expect(result.transcript.at(-1)?.content).toContain("city or timezone");
+    expect(result.complete).toBe(false);
+  });
+
+  test("confirms a prefilled timezone only when the user explicitly names its city", async () => {
+    const scenario = getScenario("onboarding-friction");
+    const runtime = createOnboardingRuntime({
+      mode: "stub",
+      locale: scenario.locale,
+      timezone: scenario.timezone,
+    });
+
+    const result = await runSimulation(
+      scenario,
+      runtime,
+      createScriptedPersona([
+        "I'm 17. My name is Leo. Dry skin and breakouts. Remind me at 07:30.",
+        "I'm in Stockholm.",
+      ]),
+      { maxTurns: 2 },
+    );
+
+    expect(result.finalState?.timezoneConfirmed).toBe(true);
+    expect(result.transcript.at(-1)?.content).toContain("AGREE");
+  });
+
   test("flags assistant boundary leaks", async () => {
     const scenario = getScenario("onboarding-basic");
     const runtime: SimulationRuntime = {

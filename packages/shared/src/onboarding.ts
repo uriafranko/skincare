@@ -8,6 +8,23 @@ export type OnboardingNextAction =
   | "complete"
   | "stop_underage";
 
+/**
+ * Do not retain skincare profile data until the user has established that they
+ * are eligible for onboarding. Locale is safe to retain so the age gate can be
+ * answered in the user's language.
+ */
+export function sanitizeOnboardingExtraction(
+  state: OnboardingState,
+  extracted: Partial<OnboardingState>,
+): Partial<OnboardingState> {
+  if (state.ageEligible === true || extracted.ageEligible === true) return extracted;
+
+  return {
+    ...(extracted.ageEligible === false ? { ageEligible: false } : {}),
+    ...(extracted.detectedLocale ? { detectedLocale: extracted.detectedLocale } : {}),
+  };
+}
+
 export function getMissingFields(state: OnboardingState): OnboardingFieldKey[] {
   const missing: OnboardingFieldKey[] = [];
   if (state.ageEligible !== true) missing.push("age_eligibility");

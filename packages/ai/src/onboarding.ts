@@ -11,8 +11,8 @@ import {
 } from "@skintext/shared";
 import { z } from "zod";
 import { ensureSkintextThread, skintextMemory } from "./memory";
-import { toMastraModelName } from "./model-name";
-import { getDefaultModelName, getDefaultProviderOptions } from "./models";
+import { getDefaultModelName, getDefaultProviderOptions } from "./model-runtime";
+import { toMastraModelName } from "./models";
 import { ONBOARDING_INSTRUCTIONS } from "./prompts/onboarding";
 import { skintextThreadId } from "./runtime";
 import { normalizeAssistantText } from "./text";
@@ -22,16 +22,7 @@ export { ONBOARDING_INSTRUCTIONS } from "./prompts/onboarding";
 const ONBOARDING_PROMPT_CACHE_KEY = "lily-onboarding-v2";
 const ONBOARDING_STATE_SIGNAL_ID = "onboarding";
 
-const nextActionSchema = z.enum([
-  "ask_age",
-  "collect_profile",
-  "ask_timezone",
-  "ask_consent",
-  "complete",
-  "stop_underage",
-]);
-
-const extractionSchema = z.object({
+export const onboardingExtractionSchema = z.object({
   ageEligible: z
     .boolean()
     .nullable()
@@ -78,13 +69,10 @@ const extractionSchema = z.object({
     .string()
     .nullable()
     .describe("BCP-47 language code of the user's latest message."),
-  proposedNextAction: nextActionSchema.describe(
-    "The next onboarding action after applying the fields extracted from this message.",
-  ),
   reply: z.string().describe("The concise plain-text iMessage reply for that next action."),
 });
 
-type OnboardingExtraction = z.infer<typeof extractionSchema>;
+export type OnboardingExtraction = z.infer<typeof onboardingExtractionSchema>;
 
 const CONSENT_ONLY_REPLY =
   "Reply AGREE if I can save your skincare data for reminders/logs and you accept the Terms of Use: https://skintext.ai/terms. Privacy: https://skintext.ai/privacy. You can delete your data anytime.";
@@ -255,7 +243,7 @@ function createStatelessGenerator(model: MastraModelConfig): OnboardingGenerator
     const projection = buildOnboardingStateProjection(input.state, input.context);
     const result = await agent.generate(
       `<onboarding-state>${JSON.stringify(projection)}</onboarding-state>\n\nUSER MESSAGE:\n${input.text}`,
-      { structuredOutput: { schema: extractionSchema } },
+      { structuredOutput: { schema: onboardingExtractionSchema } },
     );
     return result.object;
   };
@@ -292,7 +280,7 @@ async function generateThreadedOnboarding(
         observationalMemory: false,
       },
     },
-    structuredOutput: { schema: extractionSchema },
+    structuredOutput: { schema: onboardingExtractionSchema },
     providerOptions: onboardingProviderOptions(),
     maxSteps: 1,
     tracingOptions: { hideInput: true, hideOutput: true },
