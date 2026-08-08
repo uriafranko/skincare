@@ -123,6 +123,7 @@ async function routeMessageForUser(
       detectedLocale ?? user?.locale ?? "en",
       detectedTimezone ?? user?.timezone ?? "UTC",
       detectedCountry ?? user?.country ?? "US",
+      rawImageUrl,
     );
   }
 

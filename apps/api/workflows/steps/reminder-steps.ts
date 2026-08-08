@@ -115,15 +115,12 @@ export async function sendReminderToAgent(
 }
 
 export async function buildRoutineReminder(
-  userId: string,
   routineLabel: string,
   routineEmoji: string,
   locale: string,
   log: DailyRoutineLog,
 ): Promise<string> {
   "use step";
-  const streak = await getAdherenceStreak(userId);
-
   return buildRoutineReminderEvent({
     routineLabel,
     routineEmoji,
@@ -131,7 +128,6 @@ export async function buildRoutineReminder(
     completedSlots: log.completedSlots,
     entryCount: log.entryCount,
     productsUsed: log.productsUsed,
-    streakDays: streak.current,
   });
 }
 
@@ -155,7 +151,7 @@ export async function buildDailySummaryReminder(
   const pm = log.completedSlots.includes("evening") ? "done" : "not logged";
 
   return {
-    text: `Generate an end-of-day skincare routine summary.
+    text: `Write one short, warm end-of-day skincare message from Lily.
 User locale: ${locale}
 AM: ${am}
 PM: ${pm}
@@ -165,7 +161,7 @@ Entries:
 ${log.entries
   .map((e) => `- ${e.slot}: ${e.steps.map((s) => s.productName ?? s.name).join(", ")}`)
   .join("\n")}
-Streak: ${updatedStreak.current} days`,
+Use the verified facts above without reading them back like a report. Mention one genuinely useful detail or ask one natural question about how the routine felt. Do not mention a score, streak, missing-log failure, command word, or response menu. If there is little to add, a brief human acknowledgment is better than a summary. Never infer that the user's skin improved because a routine was logged.`,
     streak: updatedStreak,
     streakUpdated,
   };
@@ -199,6 +195,7 @@ export async function buildWeeklyRecapReminder(
       Number(log.completedSlots.includes("evening")),
     0,
   );
+  const loggedEntries = weeklyLogs.reduce((sum, { log }) => sum + log.entryCount, 0);
   const productCounts = new Map<string, number>();
   const reactions = new Set<string>();
   for (const { log } of weeklyLogs) {
@@ -215,11 +212,14 @@ export async function buildWeeklyRecapReminder(
     .map(([name]) => name)
     .join(", ");
 
-  return `Generate a weekly skincare routine recap.
+  if (loggedEntries === 0) return null;
+
+  return `Write one concise weekly skincare reflection from Lily.
 User locale: ${locale}
 Daily breakdown:
 ${dayLines}
 Done slots: ${doneSlots}/14
 Products used: ${topProducts || "none logged"}
-Reactions: ${Array.from(reactions).join("; ") || "none"}`;
+Reactions: ${Array.from(reactions).join("; ") || "none"}
+Use one logged fact, be honest about missing information, and offer at most one gentle next step or question. This is not a scorecard. Do not mention streaks, praise perfection, infer product efficacy, or turn missing logs into failure. Do not ask for a command word or present a response menu. The user should be able to answer naturally.`;
 }

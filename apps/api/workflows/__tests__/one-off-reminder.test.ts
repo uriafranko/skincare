@@ -16,7 +16,7 @@ type MockRoutineLog = {
 const sleep = mock(() => Promise.resolve());
 const buildDailySummaryReminder = mock(() => Promise.resolve(null));
 const buildRoutineReminder = mock(() => Promise.resolve("Routine reminder event."));
-const buildWeeklyRecapReminder = mock(() => Promise.resolve(null));
+const buildWeeklyRecapReminder = mock((): Promise<string | null> => Promise.resolve(null));
 const clearReminderRunId = mock(() => Promise.resolve());
 const loadOneOffReminder = mock(() => Promise.resolve(reminderQueue.shift() ?? null));
 const loadReminderTimes = mock(
@@ -212,13 +212,7 @@ describe("reminderLoop", () => {
     await reminderLoop("usr_test", "generation_1");
 
     expect(buildRoutineReminder).toHaveBeenCalledTimes(1);
-    expect(buildRoutineReminder).toHaveBeenCalledWith(
-      "usr_test",
-      "morning",
-      "☀️",
-      "en",
-      expect.any(Object),
-    );
+    expect(buildRoutineReminder).toHaveBeenCalledWith("morning", "☀️", "en", expect.any(Object));
     expect(buildDailySummaryReminder).toHaveBeenCalledWith("usr_test", "en");
     expect(sendReminderToAgent).toHaveBeenCalledWith(
       "usr_test",
@@ -227,6 +221,24 @@ describe("reminderLoop", () => {
     );
     expect(resolveNextLocalTimestamp).toHaveBeenNthCalledWith(1, 9, 30, "Asia/Jerusalem");
     expect(resolveNextLocalTimestamp).toHaveBeenNthCalledWith(2, 22, 0, "Asia/Jerusalem");
+  });
+
+  test("uses the weekly reflection instead of stacking a Sunday daily summary", async () => {
+    loadUser.mockResolvedValueOnce(user).mockResolvedValueOnce(null);
+    loadReminderTimes.mockResolvedValueOnce([{ label: "morning", hour: 9, minute: 30 }]);
+    isLocalDayOfWeek.mockResolvedValueOnce(true);
+    buildWeeklyRecapReminder.mockResolvedValueOnce("Weekly reflection event.");
+
+    await reminderLoop("usr_test", "generation_1");
+
+    expect(buildDailySummaryReminder).not.toHaveBeenCalled();
+    expect(buildWeeklyRecapReminder).toHaveBeenCalledWith("usr_test", "en");
+    expect(sendReminderToAgent).toHaveBeenCalledWith(
+      "usr_test",
+      "Weekly reflection event.",
+      "generation_1",
+    );
+    expect(resolveNextLocalTimestamp).toHaveBeenNthCalledWith(2, 20, 0, "Asia/Jerusalem");
   });
 
   test("does not send a routine reminder for an already completed slot", async () => {

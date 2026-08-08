@@ -25,30 +25,43 @@ function toolEntries(entries: RoutineLogEntry[]) {
 export const routineTool = createTool({
   id: "routine",
   description: "Log, read, or delete verified skincare routine entries.",
-  inputSchema: z.discriminatedUnion("action", [
-    z.object({
-      action: z.literal("log"),
-      slot: routineSlotSchema,
-      status: z.enum(["completed", "skipped"]),
+  // AI Gateway function tools require a top-level JSON Schema object. A Zod
+  // discriminated union serializes as a top-level oneOf, which the gateway
+  // rejects before the model can answer. Keep the object root and enforce the
+  // action-specific requirements during validation instead.
+  inputSchema: z
+    .object({
+      action: z.enum(["log", "get", "delete"]),
+      slot: routineSlotSchema.optional().describe("Required when action is log."),
+      status: z.enum(["completed", "skipped"]).optional().describe("Required when action is log."),
       steps: z.array(routineStepSchema).max(20).optional(),
       reaction: z.string().max(500).optional(),
       notes: z.string().max(500).optional(),
+      range: z.enum(["today", "seven_days"]).optional().describe("Used by get; defaults to today."),
+      endDate: calendarDateSchema.optional().describe("Optional end date when getting seven days."),
+      entryId: z.string().min(1).optional().describe("Required when action is delete."),
+    })
+    .superRefine((input, ctx) => {
+      if (input.action === "log") {
+        if (!input.slot) {
+          ctx.addIssue({ code: "custom", path: ["slot"], message: "Required for log." });
+        }
+        if (!input.status) {
+          ctx.addIssue({ code: "custom", path: ["status"], message: "Required for log." });
+        }
+      }
+      if (input.action === "delete" && !input.entryId) {
+        ctx.addIssue({ code: "custom", path: ["entryId"], message: "Required for delete." });
+      }
     }),
-    z.object({
-      action: z.literal("get"),
-      range: z.enum(["today", "seven_days"]).optional().describe("Defaults to today."),
-      endDate: calendarDateSchema.optional().describe("Optional end date for a seven-day get."),
-    }),
-    z.object({
-      action: z.literal("delete"),
-      entryId: z.string().min(1).describe("Routine entry ID to delete."),
-    }),
-  ]),
   execute: async (input, context) => {
     const runtime = getSkintextRuntime(context.requestContext);
     const { hasImage, localDate, timezone, userId } = runtime.agentContext;
 
     if (input.action === "log") {
+      if (!input.slot || !input.status) {
+        throw new Error("Validated routine log input is missing slot or status.");
+      }
       const entryId = generateId("routine");
       await saveRoutineEntry({
         id: entryId,
@@ -66,6 +79,9 @@ export const routineTool = createTool({
     }
 
     if (input.action === "delete") {
+      if (!input.entryId) {
+        throw new Error("Validated routine delete input is missing entryId.");
+      }
       const entry = await getRoutineEntry(input.entryId);
       if (!entry || entry.userId !== userId) {
         return { deleted: false, message: "Routine entry not found." };

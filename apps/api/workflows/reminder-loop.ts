@@ -1,9 +1,4 @@
-import {
-  ADHERENCE_MILESTONES,
-  DAILY_SUMMARY_HOUR,
-  WEEKLY_RECAP_DAY,
-  WEEKLY_RECAP_HOUR,
-} from "@skintext/shared";
+import { DAILY_SUMMARY_HOUR, WEEKLY_RECAP_DAY, WEEKLY_RECAP_HOUR } from "@skintext/shared";
 import { sleep } from "workflow";
 import {
   buildDailySummaryReminder,
@@ -70,53 +65,34 @@ export async function reminderLoop(userId: string, generation: string) {
       );
 
       if (!alreadyCompleted) {
-        const reminder = await buildRoutineReminder(
-          userId,
-          routine.label,
-          routine.emoji,
-          locale,
-          log,
-        );
+        const reminder = await buildRoutineReminder(routine.label, routine.emoji, locale, log);
         await sendReminderToAgent(userId, reminder, generation);
       }
     }
 
-    const summaryTargetAt = await resolveNextLocalTimestamp(DAILY_SUMMARY_HOUR, 0, tz);
-    const summaryWait = Math.max(0, summaryTargetAt - Date.now());
-    if (summaryWait > 0) {
-      await sleep(`${summaryWait}ms`);
+    // Send one reflection surface per day. Sunday gets the more useful weekly
+    // view instead of stacking a daily summary, milestone, and recap.
+    const weeklyRecapDay = await isLocalDayOfWeek(tz, WEEKLY_RECAP_DAY);
+    const reflectionHour = weeklyRecapDay ? WEEKLY_RECAP_HOUR : DAILY_SUMMARY_HOUR;
+    const reflectionTargetAt = await resolveNextLocalTimestamp(reflectionHour, 0, tz);
+    const reflectionWait = Math.max(0, reflectionTargetAt - Date.now());
+    if (reflectionWait > 0) {
+      await sleep(`${reflectionWait}ms`);
     }
     if (!(await ownsReminderRun(userId, generation))) break;
-    if (Date.now() < summaryTargetAt - EARLY_WAKE_TOLERANCE_MS) {
+    if (Date.now() < reflectionTargetAt - EARLY_WAKE_TOLERANCE_MS) {
       continue;
     }
 
-    const summaryResult = await buildDailySummaryReminder(userId, locale);
-    if (summaryResult) {
-      await sendReminderToAgent(userId, summaryResult.text, generation);
-
-      const milestoneMsg = summaryResult.streakUpdated
-        ? ADHERENCE_MILESTONES[summaryResult.streak.current]
-        : undefined;
-      if (milestoneMsg) {
-        await sendReminderToAgent(userId, milestoneMsg, generation);
-      }
-    }
-
-    if (await isLocalDayOfWeek(tz, WEEKLY_RECAP_DAY)) {
-      const recapTargetAt = await resolveNextLocalTimestamp(WEEKLY_RECAP_HOUR, 0, tz);
-      const recapWait = Math.max(0, recapTargetAt - Date.now());
-      if (recapWait > 0) {
-        await sleep(`${recapWait}ms`);
-      }
-      if (!(await ownsReminderRun(userId, generation))) break;
-      if (Date.now() < recapTargetAt - EARLY_WAKE_TOLERANCE_MS) {
-        continue;
-      }
-
+    if (weeklyRecapDay) {
       const recap = await buildWeeklyRecapReminder(userId, locale);
       if (recap) {
         await sendReminderToAgent(userId, recap, generation);
+      }
+    } else {
+      const summaryResult = await buildDailySummaryReminder(userId, locale);
+      if (summaryResult) {
+        await sendReminderToAgent(userId, summaryResult.text, generation);
       }
     }
   }

@@ -69,6 +69,7 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("COMMERCE POLICY");
     expect(prompt).toContain("MEMORY AND PRIVACY POLICY");
     expect(prompt).toContain("IMAGE POLICY");
+    expect(prompt).toContain("PRODUCT AND ROUTINE GUIDANCE");
     expect(prompt).toContain("ACTION AND TOOL POLICY");
     expect(prompt).toContain("SCHEDULED EVENTS");
   });
@@ -112,6 +113,22 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("Promise a future message only after");
     expect(prompt).toContain("save it with the feedback action");
     expect(prompt).toContain("one clear purpose and one obvious response");
+    expect(prompt).toContain("Invite replies in ordinary language");
+    expect(prompt).toContain("not system receipts");
+    expect(prompt).toContain("These are internal writing instructions");
+  });
+
+  test("turns product guidance into a natural, bounded conversation", () => {
+    const prompt = buildSkintextSystemPrompt();
+
+    expect(prompt).toContain('Treat "Can I use this?"');
+    expect(prompt).toContain("Lead with a clear bottom line in natural language");
+    expect(prompt).toContain("no more than four short sentences");
+    expect(prompt).toContain("Do not print mechanical KEEP/MOVE/PAUSE labels");
+    expect(prompt).toContain('Prefer a small "tonight" routine');
+    expect(prompt).toContain("A photo does not add a product");
+    expect(prompt).toContain("never require category codes");
+    expect(prompt).toContain("never proof that one product caused the result");
   });
 
   test("defines response shape and type-specific context precedence", () => {
@@ -144,6 +161,8 @@ describe("buildSkintextSystemPrompt", () => {
     expect(prompt).toContain("use judgment rather than a fixed count");
     expect(prompt).toContain("first tell the user you are considering pausing");
     expect(prompt).toContain("if there is still no user reply after that notice");
+    expect(prompt).toContain("continuation of the relationship");
+    expect(prompt).toContain("Never present a command menu");
     expect(prompt).toContain(`Never mention ${USER_REMINDER_OPEN_TAG}`);
     expect(wrapUserReminder("Check whether irritation improved.")).toBe(
       `${USER_REMINDER_OPEN_TAG}\nCheck whether irritation improved.\n${USER_REMINDER_CLOSE_TAG}`,
@@ -242,6 +261,7 @@ describe("prompt module boundaries", () => {
       "COMMERCE POLICY",
       "MEMORY AND PRIVACY POLICY",
       "IMAGE POLICY",
+      "PRODUCT AND ROUTINE GUIDANCE",
       "ACTION AND TOOL POLICY",
       "SCHEDULED EVENTS",
     ];
@@ -268,11 +288,12 @@ describe("prompt module boundaries", () => {
 });
 
 describe("onboarding prompt source", () => {
-  test("completion guidance localizes done replies", () => {
-    expect(ONBOARDING_INSTRUCTIONS).toContain('localized equivalent of "done"');
-    expect(ONBOARDING_INSTRUCTIONS).toContain(
-      'Do not use the English word "done" unless replying in English',
-    );
+  test("completion guidance gives immediate value without command syntax", () => {
+    expect(ONBOARDING_INSTRUCTIONS).toContain("give immediate value");
+    expect(ONBOARDING_INSTRUCTIONS).toContain("two- or three-step starting routine");
+    expect(ONBOARDING_INSTRUCTIONS).toContain("do not invent a generic");
+    expect(ONBOARDING_INSTRUCTIONS).toContain("tell you how the routine went");
+    expect(ONBOARDING_INSTRUCTIONS).toContain("Invite ordinary-language replies");
   });
 
   test("setup guidance localizes consent and CTA copy", () => {
@@ -297,5 +318,8 @@ describe("onboarding prompt source", () => {
     expect(ONBOARDING_INSTRUCTIONS).toContain(
       "Do not make every reply start with an acknowledgment",
     );
+    expect(ONBOARDING_INSTRUCTIONS).toContain("Keep image guidance transient");
+    expect(ONBOARDING_INSTRUCTIONS).toContain("Never expose an IANA timezone");
+    expect(ONBOARDING_INSTRUCTIONS).toContain("Do not restate skin type");
   });
 });

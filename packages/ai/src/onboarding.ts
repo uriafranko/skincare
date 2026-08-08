@@ -19,7 +19,7 @@ import { normalizeAssistantText } from "./text";
 
 export { ONBOARDING_INSTRUCTIONS } from "./prompts/onboarding";
 
-const ONBOARDING_PROMPT_CACHE_KEY = "lily-onboarding-v2";
+const ONBOARDING_PROMPT_CACHE_KEY = "lily-onboarding-v6";
 const ONBOARDING_STATE_SIGNAL_ID = "onboarding";
 
 export const onboardingExtractionSchema = z.object({
@@ -75,12 +75,12 @@ export const onboardingExtractionSchema = z.object({
 export type OnboardingExtraction = z.infer<typeof onboardingExtractionSchema>;
 
 const CONSENT_ONLY_REPLY =
-  "Reply AGREE if I can save your skincare data for reminders/logs and you accept the Terms of Use: https://skintext.ai/terms. Privacy: https://skintext.ai/privacy. You can delete your data anytime.";
+  "One last thing: reply AGREE if I can save your skincare data for reminders and logs and you accept the Terms of Use: https://skintext.ai/terms. Privacy Policy: https://skintext.ai/privacy. You can delete your data anytime.";
 const ENGLISH_AGE_GATE_REPLY = "Hey, I'm Lily. Before we get started, are you 16 or older?";
 const ENGLISH_UNDER_16_REPLY =
   "I can only help people who are 16 or older, so I can't continue setup.";
-const ENGLISH_COMPLETION_REPLY =
-  "All set. Text done after your routine, or send a skin/product photo anytime you want help placing something.";
+const ENGLISH_COMPLETION_FALLBACK =
+  "You're all set. Next time you do your routine, tell me what you used and how it felt. And if you're ever staring at a product wondering where it fits, send me a photo.";
 
 function onboardingProviderOptions() {
   const providerOptions = getDefaultProviderOptions();
@@ -107,10 +107,12 @@ export interface OnboardingContext {
   timezone: string;
   locale: string;
   userId?: string;
+  imageUrl?: string;
 }
 
 export interface OnboardingTurnInput {
   text: string;
+  imageUrl?: string;
   state: OnboardingState;
   context: OnboardingContext;
 }
@@ -241,10 +243,21 @@ function createStatelessGenerator(model: MastraModelConfig): OnboardingGenerator
 
   return async (input) => {
     const projection = buildOnboardingStateProjection(input.state, input.context);
-    const result = await agent.generate(
-      `<onboarding-state>${JSON.stringify(projection)}</onboarding-state>\n\nUSER MESSAGE:\n${input.text}`,
-      { structuredOutput: { schema: onboardingExtractionSchema } },
-    );
+    const prompt = `<onboarding-state>${JSON.stringify(projection)}</onboarding-state>\n\nUSER MESSAGE:\n${input.text || "[User sent a skincare or product photo without text]"}`;
+    const message = input.imageUrl
+      ? [
+          {
+            role: "user" as const,
+            content: [
+              { type: "text" as const, text: prompt },
+              { type: "image" as const, image: input.imageUrl },
+            ],
+          },
+        ]
+      : prompt;
+    const result = await agent.generate(message, {
+      structuredOutput: { schema: onboardingExtractionSchema },
+    });
     return result.object;
   };
 }
@@ -265,6 +278,10 @@ export function createOnboardingGenerator(modelName?: string): OnboardingGenerat
 async function generateThreadedOnboarding(
   input: OnboardingTurnInput,
 ): Promise<OnboardingExtraction> {
+  // Keep raw pixels out of onboarding history before service consent. The
+  // authoritative text/profile state is still supplied in the projection.
+  if (input.imageUrl) return createOnboardingGenerator()(input);
+
   const userId = input.context.userId;
   if (!userId) return createOnboardingGenerator()(input);
 
@@ -295,6 +312,17 @@ function isEnglishGreetingOnly(text: string, locale: string): boolean {
 
 function isEnglishLocale(locale?: string | null): boolean {
   return !locale || locale.toLowerCase().startsWith("en");
+}
+
+function hasCompleteEnglishConsentNotice(reply: string): boolean {
+  return (
+    /\bAGREE\b/.test(reply) &&
+    /\b(?:save|store)\b/i.test(reply) &&
+    /Terms/i.test(reply) &&
+    reply.includes("https://skintext.ai/terms") &&
+    reply.includes("https://skintext.ai/privacy") &&
+    /delete/i.test(reply)
+  );
 }
 
 function extractedState(output: OnboardingExtraction, state: OnboardingState) {
@@ -330,8 +358,13 @@ function protectedEnglishReply(
   if (!isEnglishLocale(outputLocale)) return normalizeAssistantText(modelReply);
   if (nextAction === "ask_age") return ENGLISH_AGE_GATE_REPLY;
   if (nextAction === "stop_underage") return ENGLISH_UNDER_16_REPLY;
-  if (nextAction === "ask_consent") return CONSENT_ONLY_REPLY;
-  if (nextAction === "complete") return ENGLISH_COMPLETION_REPLY;
+  if (nextAction === "ask_consent") {
+    const normalized = normalizeAssistantText(modelReply);
+    return hasCompleteEnglishConsentNotice(normalized) ? normalized : CONSENT_ONLY_REPLY;
+  }
+  if (nextAction === "complete") {
+    return normalizeAssistantText(modelReply) || ENGLISH_COMPLETION_FALLBACK;
+  }
   return normalizeAssistantText(modelReply);
 }
 
@@ -349,12 +382,12 @@ export async function processOnboardingMessage(
     };
   }
 
-  const output = await generate({ text, state, context });
+  const output = await generate({ text, imageUrl: context.imageUrl, state, context });
   if (!output) {
     return {
       extracted: {},
       nextAction: getOnboardingNextAction(state),
-      reply: "Hey, something went wrong - try again?",
+      reply: "I lost the thread for a second. Could you send that again?",
     };
   }
 

@@ -77,7 +77,7 @@ export async function handleIncoming(
     const userId = await resolveUserId(phone).catch(() => undefined);
     reportError(log, error, userId ?? undefined);
     try {
-      await sendMessage(phone, "Oops, something went wrong. Try again in a sec! 🙏");
+      await sendMessage(phone, "I hit a snag with that. Could you send it once more?");
     } catch {
       // swallow send failure for error message
     }

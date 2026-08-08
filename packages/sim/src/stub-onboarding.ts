@@ -15,7 +15,7 @@ const GREETING_SETUP_REPLY =
   "Hey, I'm Lily. I can help you build a simple routine that fits. Send your name, skin goal, skin type/sensitivity if known, avoids, products, and if you want reminders, best times. Unsure is fine. Reply AGREE if I can save your skincare data and you accept the Terms: https://skintext.ai/terms. Privacy: https://skintext.ai/privacy.";
 
 const CONSENT_ONLY_REPLY =
-  "Reply AGREE if I can save your skincare data for reminders/logs and you accept the Terms of Use: https://skintext.ai/terms. Privacy: https://skintext.ai/privacy. You can delete your data anytime.";
+  "One last thing: reply AGREE if I can save your skincare data for reminders and logs and you accept the Terms of Use: https://skintext.ai/terms. Privacy Policy: https://skintext.ai/privacy. You can delete your data anytime.";
 const AGE_GATE_REPLY = "Hey, I'm Lily. Before we get started, are you 16 or older?";
 const UNDER_16_REPLY = "I can only help people who are 16 or older, so I can't continue setup.";
 
@@ -248,17 +248,17 @@ function explicitlyConfirmsTimezone(text: string, state: OnboardingState): boole
 function buildCompleteReply(state: OnboardingState): string {
   if (state.detectedLocale === "he") {
     const name = state.name ? `, ${state.name}` : "";
-    return `הכל מוכן${name}. התחלה ברורה. אחרי השגרה אפשר לכתוב סיימתי, או לשלוח תמונת עור/מוצר כשאת רוצה עזרה למקם משהו.`;
+    return `הכל מוכן${name}. בפעם הבאה פשוט ספרי לי מה השתמשת ואיך העור הרגיש. ואם יש מוצר שלא ברור איפה הוא נכנס, אפשר לשלוח לי תמונה.`;
   }
   if (state.detectedLocale === "sv") {
     const name = state.name ? `, ${state.name}` : "";
-    return `Klart${name}. Bra att hålla det enkelt. Skriv klar efter rutinen, eller skicka en hud- eller produktbild när du vill ha hjälp att placera något.`;
+    return `Klart${name}. Bra att hålla det enkelt. Berätta bara hur rutinen kändes nästa gång, och skicka gärna en produktbild om något är svårt att placera.`;
   }
 
   const name = state.name ? `, ${state.name}` : "";
   const compliment =
     state.routinePreference === "simple" ? "Good call keeping it simple." : "Nice clear setup.";
-  return `All set${name}. ${compliment} Text done after your routine, or send a skin/product photo anytime you want help placing something.`;
+  return `You're all set${name}. ${compliment} Next time you do your routine, just tell me what you used and how it felt. If you're staring at a product wondering where it belongs, send me a photo.`;
 }
 
 export function extractStubOnboarding(

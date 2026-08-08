@@ -20,6 +20,7 @@ import {
   sanitizeOnboardingExtraction,
 } from "@skintext/shared";
 import type { RequestLogger } from "evlog";
+import { normalizeInboundImage } from "@/image";
 import { errorForLogging } from "@/logging";
 import { rejectUnder16PendingOnboarding } from "@/onboarding-eligibility";
 import { posthog } from "@/posthog";
@@ -50,13 +51,19 @@ export async function handleOnboarding(
   locale: string,
   timezone: string,
   country: string,
+  rawImageUrl?: string,
 ): Promise<string[]> {
-  if (!text.trim()) return [];
+  if (!text.trim() && !rawImageUrl) return [];
 
   const raw = await getOnboardingState(userId);
   const isFirstMessage = !raw;
   const state: OnboardingState =
     raw?.timezone || !timezone ? (raw ?? {}) : { ...(raw ?? {}), timezone };
+  const normalizedImage =
+    rawImageUrl && state.ageEligible === true
+      ? await normalizeInboundImage(rawImageUrl, log)
+      : null;
+  const imageUrl = normalizedImage?.dataUrl;
 
   log.set({ onboarding: { isFirstMessage, stateFields: Object.keys(state).length } });
   if (isFirstMessage) {
@@ -72,6 +79,7 @@ export async function handleOnboarding(
     timezone,
     locale,
     userId,
+    imageUrl,
   });
   const extracted = sanitizeOnboardingExtraction(state, modelExtracted);
 

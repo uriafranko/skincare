@@ -36,7 +36,7 @@ export function createSharedMock(overrides: Record<string, unknown> = {}) {
     DAILY_SUMMARY_HOUR: 22,
     DEFAULT_AI_GATEWAY_MODEL: defaultGatewayModel,
     DEFAULT_AI_GATEWAY_REASONING_EFFORT: "max",
-    PERSONALITY_POLICY_VERSION: "personality-v1",
+    PERSONALITY_POLICY_VERSION: "personality-v2",
     PHOTO_RETENTION_CONSENT_VERSION: "2026-07-26",
     ROUTINE_TIMES: [
       { label: "morning", hour: 8, minute: 0, emoji: "sun" },

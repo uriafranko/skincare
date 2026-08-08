@@ -67,8 +67,31 @@ describe("processOnboardingMessage", () => {
     );
 
     expect(result.reply).toBe(
-      "Reply AGREE if I can save your skincare data for reminders/logs and you accept the Terms of Use: https://skintext.ai/terms. Privacy: https://skintext.ai/privacy. You can delete your data anytime.",
+      "One last thing: reply AGREE if I can save your skincare data for reminders and logs and you accept the Terms of Use: https://skintext.ai/terms. Privacy Policy: https://skintext.ai/privacy. You can delete your data anytime.",
     );
+    expect(result.nextAction).toBe("ask_consent");
+  });
+
+  test("preserves a warmer English consent request when every legal element is present", async () => {
+    const warmConsent =
+      "Got it - simple and fragrance-free. One last thing: reply AGREE if I can save your skincare data for reminders and logs and you accept the Terms of Use: https://skintext.ai/terms. Privacy Policy: https://skintext.ai/privacy. You can delete your data anytime.";
+    nextOutput = output({
+      detectedLocale: "en",
+      reply: warmConsent,
+    });
+
+    const result = await processOnboardingMessage(
+      "Keep it simple and fragrance-free",
+      setupCompleteExceptConsent,
+      {
+        isFirstMessage: false,
+        locale: "en",
+        timezone: "America/New_York",
+      },
+      generateMock,
+    );
+
+    expect(result.reply).toBe(warmConsent);
     expect(result.nextAction).toBe("ask_consent");
   });
 
@@ -197,7 +220,58 @@ describe("processOnboardingMessage", () => {
 
     expect(result.extracted.ageEligible).toBe(true);
     expect(result.reply).toBe(
-      "Reply AGREE if I can save your skincare data for reminders/logs and you accept the Terms of Use: https://skintext.ai/terms. Privacy: https://skintext.ai/privacy. You can delete your data anytime.",
+      "One last thing: reply AGREE if I can save your skincare data for reminders and logs and you accept the Terms of Use: https://skintext.ai/terms. Privacy Policy: https://skintext.ai/privacy. You can delete your data anytime.",
+    );
+  });
+
+  test("keeps a warm model-written starting point when setup completes", async () => {
+    nextOutput = output({
+      consented: true,
+      detectedLocale: "en",
+      reply:
+        "You're set, Dana. Tonight, keep it easy with your cleanser and moisturizer, then tell me how your skin felt.",
+    });
+
+    const result = await processOnboardingMessage(
+      "AGREE",
+      setupCompleteExceptConsent,
+      {
+        isFirstMessage: false,
+        locale: "en",
+        timezone: "America/New_York",
+      },
+      generateMock,
+    );
+
+    expect(result.nextAction).toBe("complete");
+    expect(result.reply).toBe(
+      "You're set, Dana. Tonight, keep it easy with your cleanser and moisturizer, then tell me how your skin felt.",
+    );
+    expect(result.reply).not.toContain("Text done");
+  });
+
+  test("forwards an eligible onboarding photo for transient stateless guidance", async () => {
+    nextOutput = output({
+      detectedLocale: "en",
+      reply: "That looks like a leave-on serum. What is the main thing you want it to help with?",
+    });
+
+    await processOnboardingMessage(
+      "Where would this go?",
+      { ageEligible: true },
+      {
+        isFirstMessage: false,
+        locale: "en",
+        timezone: "UTC",
+        imageUrl: "data:image/jpeg;base64,aGVsbG8=",
+      },
+      generateMock,
+    );
+
+    expect(generateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        imageUrl: "data:image/jpeg;base64,aGVsbG8=",
+      }),
     );
   });
 

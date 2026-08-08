@@ -15,6 +15,12 @@ const setCustomReminderTimes = mock(async () => {
 const initializeUserWorkingMemory = mock(async () => {
   if (failWorkingMemory) throw new Error("working memory unavailable");
 });
+const normalizeInboundImage = mock(async () => ({
+  dataUrl: "data:image/jpeg;base64,dGVzdA==",
+  buffer: Buffer.from("test"),
+  contentType: "image/jpeg" as const,
+  size: 4,
+}));
 
 mock.module("@skintext/shared", () =>
   createSharedMock({
@@ -50,6 +56,7 @@ mock.module("@skintext/ai", () => ({
   processOnboardingMessage,
 }));
 
+mock.module("@/image", () => ({ normalizeInboundImage }));
 mock.module("../posthog", () => ({ capturePostHogException: () => {}, posthog: null }));
 mock.module("../reminder-runs", () => ({ reminderRunManager: { start: async () => {} } }));
 
@@ -113,5 +120,57 @@ describe("onboarding persistence", () => {
 
     expect(storedState?.timezone).toBe("America/New_York");
     expect(completeUserOnboarding).toHaveBeenCalledTimes(1);
+  });
+
+  test("processes an eligible onboarding photo transiently", async () => {
+    storedState = { ageEligible: true, name: "Ari" };
+    extracted = { detectedLocale: "en" };
+    normalizeInboundImage.mockClear();
+    processOnboardingMessage.mockClear();
+
+    await handleOnboarding(
+      log,
+      "usr_photo",
+      "Where does this go?",
+      "+15555550125",
+      "en",
+      "America/New_York",
+      "US",
+      "https://cdn.example.test/product.jpg",
+    );
+
+    expect(normalizeInboundImage).toHaveBeenCalledWith("https://cdn.example.test/product.jpg", log);
+    expect(processOnboardingMessage).toHaveBeenCalledWith(
+      "Where does this go?",
+      expect.objectContaining({ ageEligible: true }),
+      expect.objectContaining({
+        imageUrl: "data:image/jpeg;base64,dGVzdA==",
+      }),
+    );
+  });
+
+  test("does not inspect a photo before age eligibility is established", async () => {
+    storedState = null;
+    extracted = { detectedLocale: "en" };
+    normalizeInboundImage.mockClear();
+    processOnboardingMessage.mockClear();
+
+    await handleOnboarding(
+      log,
+      "usr_age_gate",
+      "Can you check this?",
+      "+15555550126",
+      "en",
+      "UTC",
+      "US",
+      "https://cdn.example.test/face.jpg",
+    );
+
+    expect(normalizeInboundImage).not.toHaveBeenCalled();
+    expect(processOnboardingMessage).toHaveBeenCalledWith(
+      "Can you check this?",
+      expect.any(Object),
+      expect.not.objectContaining({ imageUrl: expect.any(String) }),
+    );
   });
 });

@@ -16,7 +16,7 @@ const { deriveMinimumRiskState, shouldOfferCommunicationStyle, shouldOfferPhotoR
   await import("../risk");
 const { buildSkintextSystemPrompt } = await import("../prompts/main");
 
-describe("personality v1 policies", () => {
+describe("personality v2 policies", () => {
   test("uses escalation precedence over caution keywords", () => {
     expect(deriveMinimumRiskState("It is burning and my eyelid is swelling")).toBe("escalation");
     expect(deriveMinimumRiskState("This stings and I am pregnant")).toBe("caution");

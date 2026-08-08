@@ -19,7 +19,7 @@ import {
 } from "./runtime";
 import { skintextAgentTools } from "./tools/agent-tools";
 
-const PROMPT_CACHE_KEY = "lily-agent-v2";
+const PROMPT_CACHE_KEY = "lily-agent-v4";
 const MAIN_ACCOUNT_STATE_SIGNAL_ID = "account";
 const CONFIRMATION_TOOL_NAMES = new Set([
   "deleteAccount",

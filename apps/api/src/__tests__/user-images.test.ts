@@ -61,7 +61,7 @@ mock.module("files-sdk/vercel-blob", () => ({
 }));
 
 mock.module("@skintext/shared", () => ({
-  PERSONALITY_POLICY_VERSION: "personality-v1",
+  PERSONALITY_POLICY_VERSION: "personality-v2",
   PHOTO_RETENTION_CONSENT_VERSION: "2026-07-26",
   generateId: () => "img_test",
   isValidTimeZone: () => true,

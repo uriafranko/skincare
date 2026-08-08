@@ -8,16 +8,33 @@ export const managePhotoRetentionTool = createTool({
   id: "manage-photo-retention",
   description:
     "Manage separate 30-day photo-retention consent. Use set_future_retention to enable or disable future photo storage without saving the current attachment. Use save_current only after explicit consent to save the attached current photo; it also enables future retention when needed.",
-  inputSchema: z.discriminatedUnion("action", [
-    z.object({
-      action: z.literal("set_future_retention"),
-      enabled: z.boolean(),
+  // Keep the root schema object-shaped for AI Gateway function tools. The
+  // refinement preserves the action-specific consent requirements.
+  inputSchema: z
+    .object({
+      action: z.enum(["set_future_retention", "save_current"]),
+      enabled: z.boolean().optional().describe("Required when setting future photo retention."),
+      consentToThirtyDayRetention: z
+        .literal(true)
+        .optional()
+        .describe("Required when saving the current photo."),
+    })
+    .superRefine((input, ctx) => {
+      if (input.action === "set_future_retention" && input.enabled === undefined) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["enabled"],
+          message: "Required when setting future retention.",
+        });
+      }
+      if (input.action === "save_current" && input.consentToThirtyDayRetention !== true) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["consentToThirtyDayRetention"],
+          message: "Explicit consent is required to save the current photo.",
+        });
+      }
     }),
-    z.object({
-      action: z.literal("save_current"),
-      consentToThirtyDayRetention: z.literal(true),
-    }),
-  ]),
   execute: async (input, context) => {
     const runtime = getSkintextRuntime(context.requestContext);
     const account = runtime.agentContext.userAccount;
@@ -25,6 +42,9 @@ export const managePhotoRetentionTool = createTool({
     if (!account) return { updated: false, message: "User not found." };
 
     if (input.action === "set_future_retention") {
+      if (input.enabled === undefined) {
+        throw new Error("Validated photo-retention input is missing enabled.");
+      }
       const now = input.enabled ? new Date().toISOString() : "";
       await updateUser(userId, {
         photoRetentionConsentedAt: now,

@@ -47,6 +47,7 @@ export {
   buildContextPriorityPolicy,
   buildImagePolicy,
   buildMemoryPolicy,
+  buildProductAndRoutinePolicy,
   buildRuntimeContextPolicy,
   buildScheduledEventPolicy,
   buildSkintextSystemPrompt,

@@ -76,7 +76,7 @@ describe("incoming message exception tracking", () => {
 
     expect(capturedExceptions).toEqual([{ error: routeError, distinctId: "usr_test" }]);
     expect(logErrors).toEqual([routeError]);
-    expect(sentMessages).toEqual(["Oops, something went wrong. Try again in a sec! 🙏"]);
+    expect(sentMessages).toEqual(["I hit a snag with that. Could you send it once more?"]);
     expect(released).toBe(1);
     expect(emitted).toBe(1);
   });
@@ -87,7 +87,7 @@ describe("incoming message exception tracking", () => {
     await handleIncoming("+15555550123", "hello", undefined, "message_1");
 
     expect(capturedExceptions).toEqual([{ error: reservationError, distinctId: "usr_test" }]);
-    expect(sentMessages).toEqual(["Oops, something went wrong. Try again in a sec! 🙏"]);
+    expect(sentMessages).toEqual(["I hit a snag with that. Could you send it once more?"]);
     expect(released).toBe(0);
     expect(emitted).toBe(1);
   });
@@ -98,7 +98,7 @@ describe("incoming message exception tracking", () => {
     await handleIncoming("+15555550123", "hello", undefined, "message_1");
 
     expect(capturedExceptions).toEqual([{ error: lockError, distinctId: "usr_test" }]);
-    expect(sentMessages).toEqual(["Oops, something went wrong. Try again in a sec! 🙏"]);
+    expect(sentMessages).toEqual(["I hit a snag with that. Could you send it once more?"]);
     expect(released).toBe(0);
     expect(emitted).toBe(1);
   });

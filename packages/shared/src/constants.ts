@@ -10,7 +10,7 @@ export const WEEKLY_RECAP_HOUR = 20;
 export const WEEKLY_RECAP_DAY = "Sunday";
 export const CONSENT_VERSION = "2026-07-29";
 export const PHOTO_RETENTION_CONSENT_VERSION = "2026-07-26";
-export const PERSONALITY_POLICY_VERSION = "personality-v1";
+export const PERSONALITY_POLICY_VERSION = "personality-v2";
 
 export const ADHERENCE_MILESTONES: Record<number, string> = {
   3: "3 routine days in a row. Skin changes take time, so consistency matters.",

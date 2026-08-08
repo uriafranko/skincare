@@ -10,12 +10,14 @@ describe("buildRoutineReminderEvent", () => {
       completedSlots: ["morning"],
       entryCount: 1,
       productsUsed: ["Gentle Cleanser"],
-      streakDays: 3,
     });
 
-    expect(event).toContain("Generate a skincare routine reminder for the evening routine.");
+    expect(event).toContain("one short, natural iMessage");
     expect(event).not.toContain("a evening");
     expect(event).toContain("User locale: en");
     expect(event).toContain("Use working memory and retained history");
+    expect(event).toContain("not like an automated notification");
+    expect(event).toContain("Do not give a menu or ask for a command word");
+    expect(event).not.toContain("Adherence streak");
   });
 });
